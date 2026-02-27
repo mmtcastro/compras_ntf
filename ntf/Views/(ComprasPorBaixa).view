@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='5f2' unid='DEAFADD2264AA8EC032568A900619CBB' sequence='6'>
+<created><datetime>20000321T144611,15-03</datetime></created>
+<modified><datetime>20230919T123115,23-03</datetime></modified>
+<revised><datetime dst='true'>20141129T102327,75-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,22-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,22-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Rodrigo Trida/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name><name
+>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name='$TITLE' sign='true'><text>(ComprasPorBaixa)</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+WAAFACoAJQAEAAUABwAJAAQAQmFpeGFQcm9kdXRvJENvbmZsaWN0JFJFRgAEAAQAAAAaAAUABABG
+b3JtAQAGAENvbXByYQoCAwAHAA4ACAAJTDFTMlMzUw==
+</formula></item>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+EgABAABEAGYAAAAFAEJhaXhh
+</rawitemdata></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQACAAgAiQAAAFZDAQAFAAAAAAAAAFcABQAKCIAAAAAAAAAAAAIAAAAgVkMAAAcACQAAAAAANAEF
+AAoIgAAAAAAAAAAAAgIAACBCYWl4YVByb2R1dG9EZXNjcmljYW8mAAEAAAABAQAJAQAACgEBCAoA
+ABkArSsBAC8AAQAAAAAAAAAAAFdDBQAACAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAABXQwUAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQgAA
+AAAAAQD39/cAAQDg4P8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAA
+</rawitemdata></item>
+<item name='$Fonts'><textlist><text>5</text><text>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$DesignerVersion' sign='true'><text>5</text></item>
+<item name='$Flags'><text/></item></note>
+

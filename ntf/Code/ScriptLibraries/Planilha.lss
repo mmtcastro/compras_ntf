@@ -1,0 +1,4048 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+Use "GeraJavaId"
+Use "Negocios"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub ImportaListaCPS(cotacao As NotesUIDocument)
+Declare Function GeraCotacao(doc As NotesDocument, tipo As String, fase As String) As Boolean
+Declare Sub AtualizaStatus(planilha As NotesDocument)
+Declare Function CheckCST(uidoc As NotesUIDocument) As Boolean
+Declare Function CKCatalogo(partN As String) As Variant
+Declare Sub CalcControle(Source As NotesUIDocument)
+Declare Sub AtualizaProjeto(doc As NotesDocument)
+Declare Sub LinkCotacao( planilha As NotesDocument )
+Declare Sub PopulaListaMateriaisDoc(doc As NotesDocument)
+Declare Sub LinkControle(planilha As NotesDocument)
+Declare Sub CalcCotacaoDoc(doc As NotesDocument)
+Declare Sub GeraRequisicaoAlmoxarifado(uidoc As NotesUIDocument)
+Declare Sub AprovaCotacao(doc As NotesDocument)
+Declare Function PopulaMoeda As Variant
+Declare Function CheckCompra(codigo As String, item As String) As Boolean
+Declare Sub PopulaMargemConfig(doc As NotesDocument)
+Declare Function RetiraSinaisCST ( texto As String) As String
+Declare Function CkClassificacao(uidoc As NotesUIDocument) As Boolean
+Declare Sub SolicitaAprovacaoCotacao(uidoc As NotesUIDocument)
+Declare Function CkTipo(uidoc As NotesUIDocument) As Boolean
+Declare Function CKICMS(origem As String, destino As String) As Variant
+Declare Function ConsisteValores(uidoc As NotesUIDocument) As Boolean
+Declare Sub GetExcecaoTributaria(uidoc As NotesUIDocument)
+Declare Sub PopulaListaMateriaisUidoc(uidoc As NotesUIDocument)
+Declare Function CheckItensListaUidoc(ui As NotesUIDocument)
+Declare Sub GeraControle(doc As NotesDocument, tipo As String)
+Declare Function CKCustoHora(area As String) As Double
+Declare Sub AtualizaPlanilhaFinanceira(doc As NotesDocument)
+Declare Function CkCampos (uidoc As NotesuiDocument, CodPed As String) As Boolean
+Declare Function GetCodRequisicao(uidoc As NotesUIDocument) As String
+Declare Function GeraCodigoPedidoFornecedor(fornecedor As String)
+Declare Sub ReprovaCotacao(doc As NotesDocument)
+Declare Sub SolicitaAprovacaoControle(uidoc As NotesUIDocument)
+Declare Function ConsisteValoresControle(uidoc As NotesUIDocument) As Boolean
+Declare Function ConsisteSaldosControle(uidoc As NotesUIDocument) As Boolean
+Declare Sub CalcTotaisPedidoDoc(doc As NotesDocument)
+Declare Sub AvisoSolicitaAprovacaoControle(doc As NotesDocument)
+Declare Sub ReprovaControle(doc As NotesDocument)
+Declare Sub LinkPedidos(cotacao As NotesDocument)
+Declare Sub GravaPedido(uidoc As NotesUiDocument)
+Declare Function GetImpostos(ncm As String) As Variant
+Declare Sub EnviaEmailPedido(doc As NotesDocument)
+Declare Function GeraPedidoImportacao( uidoc As NotesUIDocument, CodPed As String ) As Boolean
+Declare Function GeraPedido( uidoc As NotesUIDocument, CodPed As String ) As Boolean
+Declare Function ConsisteDadosEmpresa (empresa As NotesDocument) As Variant
+Declare Sub AvisoControle(doc As NotesDocument)
+Declare Sub AtualizaSaldosControle(controle As NotesUIDocument)
+Declare Sub GeraDocID(uidoc As NotesUIDocument)
+Declare Sub CalcCotacao(uidoc As NotesUIDocument)
+Declare Sub AprovaControle(doc As NotesDocument)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Dim tributos(10) As String, tipos(10) As String, suframa(10) As String, ncm(10) As String, tipoReducao(10) As String, reducao(10) As Double
+
+
+
+'++LotusScript Development Environment:2:2:ImportaListaCPS:5:8
+%REM
+	Sub ImportaListaCPS
+	Description: Comments for Sub
+%END REM
+Sub ImportaListaCPS(cotacao As NotesUIDocument)
+	
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim answer As Integer, scan As Integer, scan2 As Integer, array As Variant
+	Set db = session.CurrentDatabase
+	Set view = db.GetView("(ProjetosCodigo)")
+	Set doc = view.GetDocumentByKey(cotacao.Document.Codigo(0), True)
+	If Not doc Is Nothing Then
+		If doc.HasItem("TotMateriais") Then
+			If doc.TotMateriais(0) > 0 Then
+				answer = MessageBox("Deseja importar a Lista CPS do Projeto para a Cotação Financeira?", 4+32+0+4096, "Cotação Financeira")
+			End If
+		End If
+	End If
+	If answer = 6  Then
+		For scan = 0 To 49
+			array = doc.GetItemValue("Produto_" & scan)
+			If array(0) <> "" Then
+				array = doc.GetItemValue("Q_" & scan)
+				Call cotacao.Document.ReplaceItemValue("Q_" & scan2, CDbl(array(0)))
+				array = doc.GetItemValue("PartNo_" & scan)
+				Call cotacao.Document.ReplaceItemValue("PartNo_" & scan2, array(0))
+				array = doc.GetItemValue("Produto_" & scan)
+				Call cotacao.Document.ReplaceItemValue("Produto_" & scan2, array(0))
+				array = doc.GetItemValue("t_" & scan)
+				Call cotacao.Document.ReplaceItemValue("t_" & scan2, array(0))
+				array = doc.GetItemValue("Un_" & scan)
+				Call cotacao.Document.ReplaceItemValue("Un_" & scan2, array(0))
+				array = doc.GetItemValue("ST_" & scan)
+				Call cotacao.Document.ReplaceItemValue("ST_" & scan2, array(0))
+				array = doc.GetItemValue("Fabricante_" & scan)
+				Call cotacao.Document.ReplaceItemValue("Fabricante_" & scan2, array(0))
+				array = doc.GetItemValue("UFCompra_" & scan)
+				Call cotacao.Document.ReplaceItemValue("UFCompra_" & scan2, array(0))
+				array = doc.GetItemValue("Us_" & scan)
+				Call cotacao.Document.ReplaceItemValue("Us_" & scan2, array(0))
+				array = doc.GetItemValue("CustoFOB_" & scan)
+				If CStr(array(0)) <> "" Then
+					Call cotacao.Document.ReplaceItemValue("CustoFOB_" & scan2, CDbl(array(0)))
+				End If
+				array = doc.GetItemValue("FI_" & scan)
+				If CStr(array(0)) <> "" Then
+					Call cotacao.Document.ReplaceItemValue("FI_" & scan2, CDbl(array(0)))
+				End If
+				array = doc.GetItemValue("Custo_" & scan)
+				Call cotacao.Document.ReplaceItemValue("Custo_" & scan2, CDbl(array(0)))
+				array = doc.GetItemValue("ICMSSTC_" & scan)
+				If CStr(array(0)) <> "" Then
+					Call cotacao.Document.ReplaceItemValue("ICMSSTC_" & scan2, CDbl(array(0)))
+				End If
+				array = doc.GetItemValue("CusTot_" & scan)
+				Call cotacao.Document.ReplaceItemValue("CusTot_" & scan2, CDbl(array(0)))
+				array = doc.GetItemValue("CF_" & scan)
+				Call cotacao.Document.ReplaceItemValue("CF_" & scan2, array(0))
+				array = doc.GetItemValue("ICC_" & scan)
+				Call cotacao.Document.ReplaceItemValue("ICC_" & scan2, CDbl(array(0)))
+				array = doc.GetItemValue("IP_" & scan)
+				Call cotacao.Document.ReplaceItemValue("IP_" & scan2, CDbl(array(0)))
+				array = doc.GetItemValue("II_" & scan)
+				Call cotacao.Document.ReplaceItemValue("II_" & scan2, CDbl(array(0)))
+				scan2 = scan2 + 1
+			End If
+		Next
+	End If
+	Call cotacao.Refresh
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:GeraCotacao:5:8
+%REM
+	Sub GeraCotacao
+	Description: Comments for Sub
+%END REM
+Function GeraCotacao(doc As NotesDocument, tipo As String, fase As String) As Boolean
+	
+	GeraCotacao = True
+	Dim saldo As Double, descricao As String
+	'%REM
+	'Pré-Venda - LMO 03/10/19
+	If fase = "Pré-Venda" Then
+		Select Case tipo
+		Case "Passagens de Projetos"
+			saldo = doc.PassPVS(0)
+			descricao = "Passagens de Pré-Venda"
+		Case "Hospedagem de Projetos"
+			saldo = doc.HospPVS(0)
+			descricao = "Hospedagens de Pré-Venda"
+		Case "Alugueis de Projetos"
+			saldo = doc.AlugPVS(0)
+			descricao = "Aluguéis de Pré-Venda"
+		Case "CPS"
+			saldo = doc.MatPVS(0)
+			descricao = "Compras para Prestação de Serviços de Pré-Venda"
+		Case "Ativo"
+			saldo = doc.AtivoPVS(0)
+			descricao = "Ativos para Prestação de Serviços de Pré-Venda"
+		Case "Terceiros"
+			saldo = doc.ServPVS(0)
+			descricao = "Contratação de Terceiros não Faturáveis de Pré-Venda"
+		Case "Transporte de Projetos"
+			saldo = doc.TransportePVS(0)
+			descricao = "Transporte de Projetos de Pré-Venda"
+		Case "Frete de Projetos"
+			saldo = doc.FreteMPVS(0)
+			descricao = "Frete de Projetos de Pré-Venda"
+		End Select
+	'POC - LMO 03/10/19
+	ElseIf fase = "POC" Then
+		Select Case tipo
+		Case "Passagens de Projetos"
+			saldo = doc.PassPOCS(0)
+			descricao = "Passagens de POC"
+		Case "Hospedagem de Projetos"
+			saldo = doc.HospPOCS(0)
+			descricao = "Hospedagens de POC"
+		Case "Alugueis de Projetos"
+			saldo = doc.AlugPOCS(0)
+			descricao = "Aluguéis de POC"
+		Case "CPS"
+			saldo = doc.MatPOCS(0)
+			descricao = "Compras para Prestação de Serviços de POC"
+		Case "Ativo"
+			saldo = doc.AtivoPOCS(0)
+			descricao = "Ativos para Prestação de Serviços de POC"
+		Case "Terceiros"
+			saldo = doc.ServPOCS(0)
+			descricao = "Contratação de Terceiros não Faturáveis de POC"
+		Case "Transporte de Projetos"
+			saldo = doc.TransportePOCS(0)
+			descricao = "Transporte de Projetos de POC"
+		Case "Frete de Projetos"
+			saldo = doc.FreteMPOCS(0)
+			descricao = "Frete de Projetos de POC"
+		End Select
+	ElseIf fase = "Execução" Then
+	'%END REM
+		Select Case tipo
+		Case "Frete de Revenda"
+			saldo = doc.FreteS(0)
+			descricao = "Frete de Revenda"
+		Case "CMV"
+			saldo = doc.IntermediacaoS(0)
+			descricao = "Intermediação de Vendas"
+		Case "CSV"
+			saldo = doc.TerceirosS(0)
+			descricao = "Terceiros Faturáveis"
+		Case "Passagens de Projetos"
+			saldo = doc.PassS(0)
+			descricao = "Passagens"
+		Case "Hospedagem de Projetos"
+			saldo = doc.HospS(0)
+			descricao = "Hospedagens"
+		Case "Alugueis de Projetos"
+			saldo = doc.AlugS(0)
+			descricao = "Aluguéis"
+		Case "CPS"
+			saldo = doc.MatS(0)
+			descricao = "Compras para Prestação de Serviços"
+		Case "Ativo"
+			saldo = doc.AtivoS(0)
+			descricao = "Ativos para Prestação de Serviços"
+		Case "Terceiros"
+			saldo = doc.ServS(0)
+			descricao = "Contratação de Terceiros não Faturáveis"
+		Case "Transporte de Projetos"
+			saldo = doc.TransporteS(0)
+			descricao = "Transporte de Projetos"
+		Case "Frete de Projetos"
+			saldo = doc.FreteMS(0)
+			descricao = "Frete de Projetos"
+		End Select
+	End If
+	'Verifica Saldo Disponível
+	If saldo <= 0 Then
+		Msgbox "Saldo de " & descricao & " insuficiente." & Chr(10) & "Não é possível gerar a Cotação de Planilha Financeira.", 16, "Erro"
+		GeraCotacao = False
+		Exit Function
+	End If
+	'Cotação da Moeda
+	Dim array As Variant
+	array = PopulaMoeda
+	'Gera Cotação de Planilha Financeira	
+	Dim ws As New NotesUIWorkspace
+	Dim session As New NotesSession
+	Dim cotacao As NotesUIDocument 
+	Set cotacao = ws.ComposeDocument("", "", "CotacaoFinanceira")
+	cotacao.Document.Autor = session.Commonusername
+	cotacao.Document.Criacao = Now
+	cotacao.Document.Fase = fase
+	cotacao.Document.Sit = "Pendente"
+	cotacao.Document.Codigo = doc.Codigo
+	cotacao.Document.Tipo = tipo
+	cotacao.Document.Saldo = saldo
+	cotacao.Document.GerenteConta = doc.GerenteConta
+	cotacao.Document.Inside = doc.Inside
+	cotacao.Document.CodCliente = doc.CodCliente
+	cotacao.Document.CodClienteFaturamento = doc.CodClienteFaturamento
+	cotacao.Document.CodEmpresa = doc.CodEmpresa
+	cotacao.Document.Area = doc.Area(0)
+	cotacao.Document.AreaVendas = doc.AreaVendas(0)
+	'Despesas de Vendas
+	If tipo = "Frete de Revenda" Or tipo = "CMV" Then
+		cotacao.Document.AreaDespesa = doc.AreaVendas(0)
+		cotacao.Document.ResponsavelDespesa = doc.AreaVendas(0)
+		cotacao.Document.Areas = doc.AreaVendas(0)
+	Else
+		cotacao.Document.AreaDespesa = doc.Area(0)
+		cotacao.Document.ResponsavelDespesa = doc.Area(0)
+		cotacao.Document.Areas = doc.Area(0)
+	End If
+	cotacao.Document.DataCotacaoUS = Today
+	cotacao.Document.USC = array(0)
+	cotacao.Document.UST = array(1)
+	
+End Function
+
+'++LotusScript Development Environment:2:2:AtualizaStatus:1:8
+Sub AtualizaStatus(planilha As NotesDocument)
+	
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	'*** Projeto ***
+	Set db = New NotesDatabase(planilha.ParentDatabase.Server, "servicos.nsf")
+	Set view = db.Getview("(ProjetosCodigo)")
+	Set doc = view.Getdocumentbykey(planilha.Codigo(0), True)
+	If Not doc Is Nothing Then
+		planilha.Sit = doc.Sit(0)
+		planilha.SitNumero = doc.SitNumero(0)
+	End If
+	'*** Negócio ***
+	Set db = New NotesDatabase(planilha.ParentDatabase.Server, "sales.nsf")
+	Set view = db.Getview("(NegociosCodigo)")
+	Set doc = view.Getdocumentbykey(planilha.Codigo(0), True)
+	If Not doc Is Nothing Then
+		planilha.StatusNegocio = doc.Sit(0)
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:CheckCST:1:8
+Function CheckCST(uidoc As NotesUIDocument) As Boolean
+	
+	'Consiste Classificação Fiscal e Código da Situação Tributária - LMO 10/08/09
+	Dim scan As Integer
+	For scan = 0 To 49
+		If uidoc.FieldGetText("Produto_" & scan) <> "" Then
+			'*** Classificação Fiscal
+			If uidoc.FieldGetText("CF_" & scan) = "" Then
+				MsgBox "É necessário informar o NCM (Classificação Fiscal), se SW ou SV informar 8 zeros", 16, "Erro"
+				Call uidoc.GotoField("CF_" & scan)
+				Exit Function
+			End If
+			'Retira Sinais da Classificação Fiscal
+			Call uidoc.FieldSetText("CF_" & scan, RetiraSinaisCST(uidoc.FieldGetText("CF_" & scan)))
+			'Consiste Tamanho
+			If Len(uidoc.FieldGetText("CF_" & scan)) <> 8 Then
+				MsgBox "NCM precisa ter 8 caracteres", 16, "Erro"
+				Call uidoc.GotoField("CF_" & scan)
+				Exit Function
+			End If
+			'Consiste Valor
+			If uidoc.FieldGetText("CF_" & scan) = "00000000" And uidoc.FieldGetText("T_" & scan) = "HW" Then
+				MsgBox "NCM de HW não pode ser zero", 16, "Erro"
+				Call uidoc.GotoField("CF_" & scan)
+				Exit Function
+			End If
+			'*** Código da Situação Tributária
+			If uidoc.FieldGetText("ST_" & scan) = "" Then
+				MsgBox "É necessário informar o Código da Situação Tributária de Compra, se SW ou SV informar 3 zeros", 16, "Erro"
+				Call uidoc.GotoField("ST_" & scan)
+				Exit Function
+			End If
+			'Consiste Tamanho
+			If Len(uidoc.FieldGetText("ST_" & scan)) <> 3 Then
+				MsgBox "CST precisa ter 3 caracteres", 16, "Erro"
+				Call uidoc.GotoField("ST_" & scan)
+				Exit Function
+			'Consiste Origem
+			ElseIf Left(uidoc.FieldGetText("ST_" & scan), 1) <> "0" And Left(uidoc.FieldGetText("ST_" & scan), 1) <> "1" _
+			And Left(uidoc.FieldGetText("ST_" & scan), 1) <> "2" And Left(uidoc.FieldGetText("ST_" & scan), 1) <> "3" _
+			And Left(uidoc.FieldGetText("ST_" & scan), 1) <> "4" And Left(uidoc.FieldGetText("ST_" & scan), 1) <> "5" _
+			And Left(uidoc.FieldGetText("ST_" & scan), 1) <> "6" And Left(uidoc.FieldGetText("ST_" & scan), 1) <> "7" Then
+				MsgBox "O primeiro caracter do CST se refere a Origem e só pode ser 0, 1, 2, 3, 4, 5, 6 ou 7", 16, "Erro"
+				Call uidoc.GotoField("ST_" & scan)
+				Exit Function
+			'Consiste Siuação Tributária
+			ElseIf Right(uidoc.FieldGetText("ST_" & scan), 2) <> "00" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "10" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "20" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "30" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "40" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "41" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "50" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "51" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "60" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "70" And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "90" Then
+				MsgBox "Os dois últimos caracteres do CST só podem ser 00, 10, 20, 30, 40, 41, 50, 51, 60, 70 ou 90", 16, "Erro"
+				Call uidoc.GotoField("ST_" & scan)
+				Exit Function
+			End If
+		End If
+	Next
+	CheckCST = True
+	
+End Function
+
+'++LotusScript Development Environment:2:1:CKCatalogo:5:8
+%REM
+	Function BuscaICMSCatalogo
+	Description: Comments for Function
+%END REM
+Function CKCatalogo(partN As String) As Variant
+	
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase(session.Currentdatabase.Server, "EstoqueMain.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim array(3) As Variant
+	Set view = db.GetView("(Catalogo/PartNumber)")
+	Set doc = view.GetDocumentByKey(partN, True)
+	If Not doc Is Nothing Then
+		array(0) = doc.ClassificacaoFiscal(0)
+		array(1) = doc.UnidadeMedida(0)
+	End If
+	CKCatalogo = array
+	
+End Function
+
+'++LotusScript Development Environment:2:2:CalcControle:1:8
+Sub CalcControle(Source As NotesUIDocument)
+	
+	On Error Resume Next
+	Dim total As Double, custoServicos As Double, totalTerceiros As Double, totalVendas As Double
+	'*** Despesas de Vendas ***
+	Dim freteQtd As Long, frete As Double, freteP As Double
+	Dim intermediacaoQtd As Long, intermediacao As Double, intermediacaoP As Double
+	If Source.FieldGetText("FreteQtd") <> "" Then freteQtd = CLng(Source.FieldGetText("FreteQtd"))
+	Call Source.FieldSetText("FreteQtd", CStr(freteQtd))
+	If Source.FieldGetText("Frete") <> "" Then frete = Round(CDbl(Source.FieldGetText("Frete")), 2)
+	Call Source.FieldSetText("Frete", Format(frete, "Standard"))
+	freteP = freteQtd * frete 
+	Call Source.FieldSetText("FreteP", Format(freteP, "Standard"))
+	If Source.FieldGetText("IntermediacaoQtd") <> "" Then intermediacaoQtd = CLng(Source.FieldGetText("IntermediacaoQtd"))
+	Call Source.FieldSetText("IntermediacaoQtd", CStr(intermediacaoQtd))
+	If Source.FieldGetText("Intermediacao") <> "" Then intermediacao = Round(CDbl(Source.FieldGetText("Intermediacao")), 2)
+	Call Source.FieldSetText("Intermediacao", Format(intermediacao, "Standard"))
+	intermediacaoP = intermediacaoQtd * intermediacao 
+	Call Source.FieldSetText("IntermediacaoP", Format(intermediacaoP, "Standard"))
+	Call Source.FieldSetText("VendasP", Format(freteP + intermediacaoP, "Standard"))
+	Call Source.FieldSetText("TotalVendas", Format(freteP + intermediacaoP, "Standard"))
+	totalVendas = freteP + intermediacaoP
+	'*** Terceiros Faturáveis ***
+	Dim terceirosQtd As Long, terceiros As Double, terceirosP As Double
+	If Source.FieldGetText("TerceirosQtd") <> "" Then terceirosQtd = CLng(Source.FieldGetText("TerceirosQtd"))
+	Call Source.FieldSetText("TerceirosQtd", CStr(terceirosQtd))
+	If Source.FieldGetText("Terceiros") <> "" Then terceiros = Round(CDbl(Source.FieldGetText("Terceiros")), 2)
+	Call Source.FieldSetText("Terceiros", Format(terceiros, "Standard"))
+	terceirosP = terceirosQtd * terceiros 
+	Call Source.FieldSetText("TerceirosP", Format(terceirosP, "Standard"))
+	Call Source.FieldSetText("TotalTerceiros", Format(terceirosP, "Standard"))
+	totalTerceiros = terceirosP
+	'*** Custos ***
+	Dim passQtd As Long, passQtd_1 As Long, hospQtd As Long, hospQtd_1 As Long, transporteQtd As Double, alugQtd As Long, alugQtd_1 As Long, matQtd As Long, matQtd_1 As Long, matQtd_2 As Long, ativoQtd As Long, ativoQtd_1 As Long, servQtd As Long, servQtd_1 As Long, freteMQtd As Long
+	If Source.FieldGetText("PassQtd") <> "" Then passQtd = CLng(Source.FieldGetText("PassQtd"))
+	If Source.FieldGetText("PassQtd_1") <> "" Then passQtd_1 = CLng(Source.FieldGetText("PassQtd_1"))
+	If Source.FieldGetText("HospQtd") <> "" Then hospQtd = CLng(Source.FieldGetText("HospQtd"))
+	If Source.FieldGetText("HospQtd_1") <> "" Then hospQtd_1 = CLng(Source.FieldGetText("HospQtd_1"))
+	If Source.FieldGetText("TransporteQtd") <> "" Then transporteQtd = CLng(Source.FieldGetText("TransporteQtd"))
+	If Source.FieldGetText("AlugQtd") <> "" Then alugQtd = CLng(Source.FieldGetText("AlugQtd"))
+	If Source.FieldGetText("AlugQtd_1") <> "" Then alugQtd_1 = CLng(Source.FieldGetText("AlugQtd_1"))
+	If Source.FieldGetText("MatQtd") <> "" Then matQtd = CLng(Source.FieldGetText("MatQtd"))
+	If Source.FieldGetText("MatQtd_1") <> "" Then matQtd_1 = CLng(Source.FieldGetText("MatQtd_1"))
+	If Source.FieldGetText("MatQtd_2") <> "" Then matQtd_2 = CLng(Source.FieldGetText("MatQtd_2"))
+	If Source.FieldGetText("AtivoQtd") <> "" Then ativoQtd = CLng(Source.FieldGetText("AtivoQtd"))
+	If Source.FieldGetText("AtivoQtd_1") <> "" Then ativoQtd_1 = CLng(Source.FieldGetText("AtivoQtd_1"))
+	If Source.FieldGetText("ServQtd") <> "" Then servQtd = CLng(Source.FieldGetText("ServQtd"))
+	If Source.FieldGetText("ServQtd_1") <> "" Then servQtd_1 = CLng(Source.FieldGetText("ServQtd_1"))
+	If Source.FieldGetText("FreteMQtd") <> "" Then freteMQtd = CLng(Source.FieldGetText("FreteMQtd"))
+	Call Source.FieldSetText("PassQtd", CStr(passQtd))
+	Call Source.FieldSetText("PassQtd_1", CStr(passQtd_1))
+	Call Source.FieldSetText("HospQtd", CStr(hospQtd))
+	Call Source.FieldSetText("HospQtd_1", CStr(hospQtd_1))
+	Call Source.FieldSetText("TransporteQtd", CStr(transporteQtd))
+	Call Source.FieldSetText("AlugQtd", CStr(alugQtd))
+	Call Source.FieldSetText("AlugQtd_1", CStr(alugQtd_1))
+	Call Source.FieldSetText("MatQtd", CStr(matQtd))
+	Call Source.FieldSetText("MatQtd_1", CStr(matQtd_1))
+	Call Source.FieldSetText("MatQtd_2", CStr(matQtd_2))
+	Call Source.FieldSetText("AtivoQtd", CStr(ativoQtd))
+	Call Source.FieldSetText("AtivoQtd_1", CStr(ativoQtd_1))
+	Call Source.FieldSetText("ServQtd", CStr(servQtd))
+	Call Source.FieldSetText("ServQtd_1", CStr(servQtd_1))
+	Call Source.FieldSetText("FreteMQtd", CStr(freteMQtd))
+	'
+	Dim pass As Double, pass_1 As Double, hosp As Double, hosp_1 As Double, transporte As Double, alug As Double, alug_1 As Double, mat As Double, mat_1 As Double, mat_2 As Double, ativo As Double, ativo_1 As Double, serv As Double, serv_1 As Double, freteM As Double
+	If Source.FieldGetText("Pass") <> "" Then pass = Round(CDbl(Source.FieldGetText("Pass")), 2)
+	If Source.FieldGetText("Pass_1") <> "" Then pass_1 = Round(CDbl(Source.FieldGetText("Pass_1")), 2)
+	If Source.FieldGetText("Hosp") <> "" Then hosp = Round(CDbl(Source.FieldGetText("Hosp")), 2)
+	If Source.FieldGetText("Hosp_1") <> "" Then hosp_1 = Round(CDbl(Source.FieldGetText("Hosp_1")), 2)
+	If Source.FieldGetText("Transporte") <> "" Then transporte = Round(CDbl(Source.FieldGetText("Transporte")), 2)
+	If Source.FieldGetText("Alug") <> "" Then alug = Round(CDbl(Source.FieldGetText("Alug")), 2)
+	If Source.FieldGetText("Alug_1") <> "" Then alug_1 = Round(CDbl(Source.FieldGetText("Alug_1")), 2)
+	If Source.FieldGetText("Mat") <> "" Then mat = Round(CDbl(Source.FieldGetText("Mat")), 2)
+	If Source.FieldGetText("Mat_1") <> "" Then mat_1 = Round(CDbl(Source.FieldGetText("Mat_1")), 2)
+	If Source.FieldGetText("Mat_2") <> "" Then mat_2 = Round(CDbl(Source.FieldGetText("Mat_2")), 2)
+	If Source.FieldGetText("Ativo") <> "" Then ativo = Round(CDbl(Source.FieldGetText("Ativo")), 2)
+	If Source.FieldGetText("Ativo_1") <> "" Then ativo_1 = Round(CDbl(Source.FieldGetText("Ativo_1")), 2)
+	If Source.FieldGetText("Serv") <> "" Then serv = Round(CDbl(Source.FieldGetText("Serv")), 2)
+	If Source.FieldGetText("Serv_1") <> "" Then serv_1 = Round(CDbl(Source.FieldGetText("Serv_1")), 2)
+	If Source.FieldGetText("FreteM") <> "" Then freteM = Round(CDbl(Source.FieldGetText("FreteM")), 2)
+	Call Source.FieldSetText("Pass", Format(pass, "Standard"))
+	Call Source.FieldSetText("Pass_1", Format(pass_1, "Standard"))
+	Call Source.FieldSetText("Hosp", Format(hosp, "Standard"))
+	Call Source.FieldSetText("Hosp_1", Format(hosp_1, "Standard"))
+	Call Source.FieldSetText("Transporte", Format(transporte, "Standard"))
+	Call Source.FieldSetText("Alug", Format(alug, "Standard"))
+	Call Source.FieldSetText("Alug_1", Format(alug_1, "Standard"))
+	Call Source.FieldSetText("Mat", Format(mat, "Standard"))
+	Call Source.FieldSetText("Mat_1", Format(mat_1, "Standard"))
+	Call Source.FieldSetText("Mat_2", Format(mat_2, "Standard"))
+	Call Source.FieldSetText("Ativo", Format(ativo, "Standard"))
+	Call Source.FieldSetText("Ativo_1", Format(ativo_1, "Standard"))
+	Call Source.FieldSetText("Serv", Format(serv, "Standard"))
+	Call Source.FieldSetText("Serv_1", Format(serv_1, "Standard"))
+	Call Source.FieldSetText("FreteM", Format(freteM, "Standard"))
+	'
+	Dim passP As Double, passP_1 As Double, hospP As Double, hospP_1 As Double, transporteP As Double, alugP As Double, alugP_1 As Double, matP As Double, matP_1 As Double, matP_2 As Double, ativoP As Double, ativoP_1 As Double, servP As Double, servP_1 As Double, freteMP As Double
+	passP = passQtd * pass 
+	passP_1 = passQtd_1 * pass_1
+	hospP = hospQtd * hosp
+	hospP_1 = hospQtd_1 * hosp_1
+	transporteP = transporteQtd * transporte
+	alugP = alugQtd * alug
+	alugP_1 = alugQtd_1 * alug_1
+	matP = matQtd * mat
+	matP_1 = matQtd_1 * mat_1
+	matP_2 = matQtd_2 * mat_2
+	ativoP = ativoQtd * ativo
+	ativoP_1 = ativoQtd_1 * ativo_1
+	servP = servQtd * serv
+	servP_1 = servQtd_1 * serv_1
+	freteMP = freteMQtd * freteM
+	Call Source.FieldSetText("PassP", Format(passP, "Standard"))
+	Call Source.FieldSetText("PassP_1", Format(passP_1, "Standard"))
+	Call Source.FieldSetText("HospP", Format(hospP, "Standard"))
+	Call Source.FieldSetText("HospP_1", Format(hospP_1, "Standard"))
+	Call Source.FieldSetText("TransporteP", Format(transporteP, "Standard"))
+	Call Source.FieldSetText("AlugP", Format(alugP, "Standard"))
+	Call Source.FieldSetText("AlugP_1", Format(alugP_1, "Standard"))
+	Call Source.FieldSetText("MatP", Format(matP, "Standard"))
+	Call Source.FieldSetText("MatP_1", Format(matP_1, "Standard"))
+	Call Source.FieldSetText("MatP_2", Format(matP_2, "Standard"))
+	Call Source.FieldSetText("AtivoP", Format(ativoP, "Standard"))
+	Call Source.FieldSetText("AtivoP_1", Format(ativoP_1, "Standard"))
+	Call Source.FieldSetText("ServP", Format(servP, "Standard"))
+	Call Source.FieldSetText("ServP_1", Format(servP_1, "Standard"))
+	Call Source.FieldSetText("FreteMP", Format(freteMP, "Standard"))
+	Call Source.FieldSetText("CustoP", Format(passP + passP_1 + hospP + hospP_1 + transporteP + alugP + alugP_1 + matP + matP_1 + matP_2 + ativoP + ativoP_1 + servP + servP_1 + freteMP, "Standard"))
+	
+	'*** Despesas ***
+	Dim kmQtd As Long, kmQtd_1 As Long, transQtd As Long, transQtd_1 As Long, transQtd_2 As Long, transQtd_3 As Long, transQtd_4 As Long, transQtd_5 As Long, transQtd_6 As Long, alimQtd As Long, alimQtd_1 As Long, teleQtd As Long
+	If Source.FieldGetText("KmQtd") <> "" Then kmQtd = CLng(Source.FieldGetText("KmQtd"))
+	If Source.FieldGetText("KmQtd_1") <> "" Then kmQtd_1 = CLng(Source.FieldGetText("KmQtd_1"))
+	If Source.FieldGetText("TransQtd") <> "" Then transQtd = CLng(Source.FieldGetText("TransQtd"))
+	If Source.FieldGetText("TransQtd_1") <> "" Then transQtd_1 = CLng(Source.FieldGetText("TransQtd_1"))
+	If Source.FieldGetText("TransQtd_2") <> "" Then transQtd_2 = CLng(Source.FieldGetText("TransQtd_2"))
+	If Source.FieldGetText("TransQtd_3") <> "" Then transQtd_3 = CLng(Source.FieldGetText("TransQtd_3"))
+	If Source.FieldGetText("TransQtd_4") <> "" Then transQtd_4 = CLng(Source.FieldGetText("TransQtd_4"))
+	If Source.FieldGetText("TransQtd_5") <> "" Then transQtd_5 = CLng(Source.FieldGetText("TransQtd_5"))
+	If Source.FieldGetText("TransQtd_6") <> "" Then transQtd_6 = CLng(Source.FieldGetText("TransQtd_6"))
+	If Source.FieldGetText("AlimQtd") <> "" Then alimQtd = CLng(Source.FieldGetText("AlimQtd"))
+	If Source.FieldGetText("AlimQtd_1") <> "" Then alimQtd_1 = CLng(Source.FieldGetText("AlimQtd_1"))
+	If Source.FieldGetText("TeleQtd") <> "" Then teleQtd = CLng(Source.FieldGetText("TeleQtd"))
+	Call Source.FieldSetText("KmQtd", CStr(kmQtd))
+	Call Source.FieldSetText("KmQtd_1", CStr(kmQtd_1))
+	Call Source.FieldSetText("TransQtd", CStr(transQtd))
+	Call Source.FieldSetText("TransQtd_1", CStr(transQtd_1))
+	Call Source.FieldSetText("TransQtd_2", CStr(transQtd_2))
+	Call Source.FieldSetText("TransQtd_3", CStr(transQtd_3))
+	Call Source.FieldSetText("TransQtd_4", CStr(transQtd_4))
+	Call Source.FieldSetText("TransQtd_5", CStr(transQtd_5))
+	Call Source.FieldSetText("TransQtd_6", CStr(transQtd_6))
+	Call Source.FieldSetText("AlimQtd", CStr(alimQtd))
+	Call Source.FieldSetText("AlimQtd_1", CStr(alimQtd_1))
+	Call Source.FieldSetText("TeleQtd", CStr(teleQtd))
+	'
+	Dim km As Double, km_1 As Double, trans As Double, trans_1 As Double, trans_2 As Double, trans_3 As Double, trans_4 As Double, trans_5 As Double, trans_6 As Double, alim As Double, alim_1 As Double, tele As Double
+	If Source.FieldGetText("Km") <> "" Then km = Round(CDbl(Source.FieldGetText("Km")), 2)
+	If Source.FieldGetText("Km_1") <> "" Then km_1 = Round(CDbl(Source.FieldGetText("Km_1")), 2)
+	If Source.FieldGetText("Trans") <> "" Then trans = Round(CDbl(Source.FieldGetText("Trans")), 2)
+	If Source.FieldGetText("Trans_1") <> "" Then trans_1 = Round(CDbl(Source.FieldGetText("Trans_1")), 2)
+	If Source.FieldGetText("Trans_2") <> "" Then trans_2 = Round(CDbl(Source.FieldGetText("Trans_2")), 2)
+	If Source.FieldGetText("Trans_3") <> "" Then trans_3 = Round(CDbl(Source.FieldGetText("Trans_3")), 2)
+	If Source.FieldGetText("Trans_4") <> "" Then trans_4 = Round(CDbl(Source.FieldGetText("Trans_4")), 2)
+	If Source.FieldGetText("Trans_5") <> "" Then trans_5 = Round(CDbl(Source.FieldGetText("Trans_5")), 2)
+	If Source.FieldGetText("Trans_6") <> "" Then trans_6 = Round(CDbl(Source.FieldGetText("Trans_6")), 2)
+	If Source.FieldGetText("Alim") <> "" Then alim = Round(CDbl(Source.FieldGetText("Alim")), 2)
+	If Source.FieldGetText("Alim_1") <> "" Then alim_1 = Round(CDbl(Source.FieldGetText("Alim_1")), 2)
+	If Source.FieldGetText("Tele") <> "" Then tele = Round(CDbl(Source.FieldGetText("Tele")), 2)
+	Call Source.FieldSetText("Km", Format(km, "Standard"))
+	Call Source.FieldSetText("Km_1", Format(km_1, "Standard"))
+	Call Source.FieldSetText("Trans", Format(trans, "Standard"))
+	Call Source.FieldSetText("Trans_1", Format(trans_1, "Standard"))
+	Call Source.FieldSetText("Trans_2", Format(trans_2, "Standard"))
+	Call Source.FieldSetText("Trans_3", Format(trans_3, "Standard"))
+	Call Source.FieldSetText("Trans_4", Format(trans_4, "Standard"))
+	Call Source.FieldSetText("Trans_5", Format(trans_5, "Standard"))
+	Call Source.FieldSetText("Trans_6", Format(trans_6, "Standard"))
+	Call Source.FieldSetText("Alim", Format(alim, "Standard"))
+	Call Source.FieldSetText("Alim_1", Format(alim_1, "Standard"))
+	Call Source.FieldSetText("Tele", Format(tele, "Standard"))
+	'
+	Dim kmP As Double, kmP_1 As Double, transP As Double, transP_1 As Double, transP_2 As Double, transP_3 As Double, transP_4 As Double, transP_5 As Double, transP_6 As Double, alimP As Double, alimP_1 As Double, teleP As Double
+	kmP = kmQtd * km
+	kmP_1 = kmQtd_1 * km_1
+	transP = transQtd * trans
+	transP_1 = transQtd_1 * trans_1
+	transP_2 = transQtd_2 * trans_2
+	transP_3 = transQtd_3 * trans_3
+	transP_4 = transQtd_4 * trans_4
+	transP_5 = transQtd_5 * trans_5
+	transP_6 = transQtd_6 * trans_6
+	alimP = alimQtd * alim
+	alimP_1 = alimQtd_1 * alim_1
+	teleP = teleQtd * tele
+	total = passP + passP_1 + hospP + hospP_1 + transporteP + alugP + alugP_1 + matP + matP_1 + matP_2 + ativoP + ativoP_1 + servP + servP_1 + freteMP + kmP + kmP_1 + transP + transP_1 + transP_2 + transP_3 + transP_4 + transP_5 + transP_6 + alimP + alimP_1 + teleP
+	Call Source.FieldSetText("KmP", Format(kmP, "Standard"))
+	Call Source.FieldSetText("KmP_1", Format(kmP_1, "Standard"))
+	Call Source.FieldSetText("TransP", Format(transP, "Standard"))
+	Call Source.FieldSetText("TransP_1", Format(transP_1, "Standard"))
+	Call Source.FieldSetText("TransP_2", Format(transP_2, "Standard"))
+	Call Source.FieldSetText("TransP_3", Format(transP_3, "Standard"))
+	Call Source.FieldSetText("TransP_4", Format(transP_4, "Standard"))
+	Call Source.FieldSetText("TransP_5", Format(transP_5, "Standard"))
+	Call Source.FieldSetText("TransP_6", Format(transP_6, "Standard"))
+	Call Source.FieldSetText("AlimP", Format(alimP, "Standard"))
+	Call Source.FieldSetText("AlimP_1", Format(alimP_1, "Standard"))
+	Call Source.FieldSetText("TeleP", Format(teleP, "Standard"))
+	Call Source.FieldSetText("DespP", Format(kmP + kmP_1 + transP + transP_1 + transP_2 + transP_3 + transP_4 + transP_5 + transP_6 + alimP + alimP_1 + teleP, "Standard"))
+	Call Source.FieldSetText("Total", Format(total, "Standard"))
+	
+	'*** Horas ***
+	'Normais
+	Dim horasPlan As Double, horasGer As Double, horasExec As Double, horasDeslocamento As Double, horasDoc As Double
+	If Source.FieldGetText("HorasPlan") <> "" Then horasPlan = Round(CDbl(Source.FieldGetText("HorasPlan")), 2)
+	If Source.FieldGetText("HorasGer") <> "" Then horasGer = Round(CDbl(Source.FieldGetText("HorasGer")), 2)
+	If Source.FieldGetText("HorasExec") <> "" Then horasExec = Round(CDbl(Source.FieldGetText("HorasExec")), 2)
+	If Source.FieldGetText("HorasDeslocamento") <> "" Then horasDeslocamento = Round(CDbl(Source.FieldGetText("HorasDeslocamento")), 2)
+	If Source.FieldGetText("HorasDoc") <> "" Then horasDoc = Round(CDbl(Source.FieldGetText("HorasDoc")), 2)
+	Call Source.FieldSetText("HorasPlan", Format(horasPlan, "Standard"))
+	Call Source.FieldSetText("HorasGer", Format(horasGer, "Standard"))
+	Call Source.FieldSetText("HorasExec", Format(horasExec, "Standard"))
+	Call Source.FieldSetText("HorasDeslocamento", Format(horasDeslocamento, "Standard"))
+	Call Source.FieldSetText("HorasDoc", Format(horasDoc, "Standard"))
+	Call Source.FieldSetText("HorasTot", Format(horasPlan + horasGer + horasExec + horasDeslocamento + horasDoc, "Standard"))
+	'Fora do Expediente
+	Dim horasPlanFE As Double, horasGerFE As Double, horasExecFE As Double, horasDeslocamentoFE As Double, horasDocFE As Double
+	If Source.FieldGetText("HorasPlanFE") <> "" Then horasPlanFE = Round(CDbl(Source.FieldGetText("HorasPlanFE")), 2)
+	If Source.FieldGetText("HorasGerFE") <> "" Then horasGerFE = Round(CDbl(Source.FieldGetText("HorasGerFE")), 2)
+	If Source.FieldGetText("HorasExecFE") <> "" Then horasExecFE = Round(CDbl(Source.FieldGetText("HorasExecFE")), 2)
+	If Source.FieldGetText("HorasDeslocamentoFE") <> "" Then horasDeslocamentoFE = Round(CDbl(Source.FieldGetText("HorasDeslocamentoFE")), 2)
+	If Source.FieldGetText("HorasDocFE") <> "" Then horasDocFE = Round(CDbl(Source.FieldGetText("HorasDocFE")), 2)
+	Call Source.FieldSetText("HorasPlanFE", Format(horasPlanFE, "Standard"))
+	Call Source.FieldSetText("HorasGerFE", Format(horasGerFE, "Standard"))
+	Call Source.FieldSetText("HorasExecFE", Format(horasExecFE, "Standard"))
+	Call Source.FieldSetText("HorasDeslocamentoFE", Format(horasDeslocamentoFE, "Standard"))
+	Call Source.FieldSetText("HorasDocFE", Format(horasDocFE, "Standard"))
+	Call Source.FieldSetText("HorasTotFE", Format(horasPlanFE + horasGerFE + horasExecFE + horasDeslocamentoFE + horasDocFE, "Standard"))
+	'Total de Horas
+	Dim planP As Double, gerP As Double, execP As Double, deslocamentoP As Double, docP As Double
+	planP = horasPlan + (horasPlanFE * 2)
+	gerP = horasGer + (horasGerFE * 2)
+	execP = horasExec + (horasExecFE * 2)
+	deslocamentoP = horasDeslocamento + (horasDeslocamentoFE * 2)
+	docP = horasDoc + (horasDocFE * 2)
+	Call Source.FieldSetText("PlanP", Format(planP, "Standard"))
+	Call Source.FieldSetText("GerP", Format(gerP, "Standard"))
+	Call Source.FieldSetText("ExecP", Format(execP, "Standard"))
+	Call Source.FieldSetText("DeslocamentoP", Format(deslocamentoP, "Standard"))
+	Call Source.FieldSetText("DocP", Format(docP, "Standard"))
+	Call Source.FieldSetText("HHP", Format(planP + gerP + execP + docP, "Standard"))
+	Call Source.FieldSetText("TotalHH", Format(planP + gerP + execP + deslocamentoP + docP, "Standard"))
+	'Custo das Horas
+	Dim custo As Double, desc As Double
+	custo = CKCustoHora(Source.FieldGetText("Area"))
+	If Source.FieldGetText("Desconto") <> "" Then desc = Round(CDbl(Source.FieldGetText("Desconto")), 2)
+	Call Source.FieldSetText("CustoHora", Format(custo, "Standard"))
+	Call Source.FieldSetText("CustoPlan", Format(planP * custo, "Standard"))
+	Call Source.FieldSetText("CustoGer", Format(gerP * custo, "Standard"))
+	Call Source.FieldSetText("CustoExec", Format(execP * custo, "Standard"))
+	Call Source.FieldSetText("CustoDeslocamento", Format(deslocamentoP * custo, "Standard"))
+	Call Source.FieldSetText("CustoDoc", Format(docP * custo, "Standard"))
+	Call Source.FieldSetText("CustoHoras", Format((planP + gerP + execP + deslocamentoP + docP) * custo, "Standard"))
+	'Custo das Horas com Desconto - LMO 12/02/16
+	Call Source.FieldSetText("CustoHorasTot", Format((planP + gerP + execP + deslocamentoP + docP) * custo, "Standard"))
+	Call Source.FieldSetText("ValorDesconto", Format((planP + gerP + execP + deslocamentoP + docP) * custo * desc, "Standard"))
+	Call Source.FieldSetText("CustoServicos", Format((planP + gerP + execP + deslocamentoP + docP) * custo * (1 - desc), "Standard"))
+	custoServicos = (planP + gerP + execP + deslocamentoP + docP) * custo * (1 - desc)
+	'Total Controle
+	Call Source.FieldSetText("TotalControle", Format(total + custoServicos + totalTerceiros + totalVendas, "Standard"))
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:AtualizaProjeto:5:8
+%REM
+	Sub AtualizaProjeto
+	Description: Comments for Sub
+%END REM
+Sub AtualizaProjeto(doc As NotesDocument)
+	
+	Dim db As New NotesDatabase(doc.ParentDatabase.Server, "servicos.nsf")
+	Dim view As NotesView
+	Dim projeto As NotesDocument
+	Set view = db.GetView("(ProjetosCodigo)")
+	Set projeto = view.GetDocumentByKey(doc.Codigo(0), True)
+	If Not projeto Is Nothing Then
+		projeto.CkPlanilha = "OK"
+		If InStr(projeto.Sit(0), "Pré-Venda") <> 0 Then
+			projeto.SaldoHorasHomem = doc.HPVS(0)
+		ElseIf InStr(projeto.Sit(0), "POC") <> 0 Then
+			projeto.SaldoHorasHomem = doc.HPOCS(0)
+		Else
+			projeto.SaldoHorasHomem = doc.HHS(0)
+		End If
+		Call projeto.Save(False, False)
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:LinkCotacao:1:8
+Sub LinkCotacao( planilha As NotesDocument )
+	
+	If planilha.HasItem("LinkCotacao") Then planilha.RemoveItem( "LinkCotacao" )
+	If planilha.HasItem("LinkCotacaoPV") Then planilha.RemoveItem( "LinkCotacaoPV" )
+	If planilha.HasItem("LinkCotacaoPOC") Then planilha.RemoveItem( "LinkCotacaoPOC" )
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim dc As NotesDocumentCollection
+	Dim rtitem As NotesRichTextItem, rtitemPV As NotesRichTextItem, rtitemPOC As NotesRichTextItem
+	Dim richstyle As NotesRichTextStyle
+	Dim tipo As String
+	Set db = session.Currentdatabase
+	Set view = db.GetView( "(Cotacao/Codigo)" )
+	Set dc = view.GetAllDocumentsByKey( planilha.Codigo(0), True )
+	If dc.Count = 0 Then
+		Exit Sub
+	End If
+	Set rtitem = planilha.CreateRichTextItem( "LinkCotacao" )
+	Set rtitemPV = planilha.CreateRichTextItem( "LinkCotacaoPV" )
+	Set rtitemPOC = planilha.CreateRichTextItem( "LinkCotacaoPOC" )
+	Set richStyle = session.CreateRichTextStyle
+	richStyle.NotesFont = FONT_ROMAN
+	richStyle.FontSize = 8
+	richStyle.NotesColor = COLOR_BLUE
+	Call rtitem.AppendStyle(richStyle)
+	Call rtitemPV.AppendStyle(richStyle)
+	Call rtitemPOC.AppendStyle(richStyle)
+	Set doc = dc.GetFirstDocument
+	While Not ( doc Is Nothing )
+		Select Case doc.Tipo(0)
+			Case "Frete de Projetos" : tipo = "Frete"
+			Case "CMV" : tipo = "Intermediação de Vendas"
+			Case "CSV" : tipo = "Terceiros Faturáveis"
+			Case "Passagens de Projetos" : tipo = "Passagens"
+			Case "Hospedagem de Projetos" : tipo = "Hospedagens"
+			Case "Alugueis de Projetos" : tipo = "Aluguéis"
+			Case "CPS" : tipo = "Compras para Prestação de Serviços"
+			Case "Terceiros" : tipo = "Contratação de Terceiros não Faturáveis"
+			Case Else
+				tipo =  doc.Tipo(0)
+		End Select
+		'Pré-Venda
+		If doc.Fase(0) = "Pré-Venda" Then
+			Call rtitemPV.AppendDocLink( doc, "Link para a Cotação" )
+			Call rtitemPV.AppendText( "Cotação de " & tipo & " " )
+			If doc.Sit(0) = "Pedir Aprovação" Then
+				Call rtitemPV.AppendText( "Pendente" )
+				Call rtitemPV.AppendText( " " & Format(doc.Criacao(0), "dd/mm/yyyy") )
+				Call rtitemPV.AppendText( " - Total: R$ "  & Format(doc.Saldo(0), "Standard") )
+			Else
+				Call rtitemPV.AppendText( " " & Format(doc.Criacao(0), "dd/mm/yyyy") )
+				Call rtitemPV.AppendText( doc.Sit(0) )
+				Call rtitemPV.AppendText( " - Total: R$ "  & Format(doc.TotMateriais(0), "Standard") )
+			End If
+			Call rtitemPV.AppendText( " Fase: " & doc.Fase(0) )
+			Call rtitemPV.AppendText( " Descrição: " & doc.DescricaoA(0) )
+			Call rtitemPV.AddNewLine( 1 )
+		'POC
+		ElseIf doc.Fase(0) = "POC" Then
+			Call rtitemPOC.AppendDocLink( doc, "Link para a Cotação" )
+			Call rtitemPOC.AppendText( "Cotação de " & tipo & " " )
+			If doc.Sit(0) = "Pedir Aprovação" Then
+				Call rtitemPOC.AppendText( "Pendente" )
+				Call rtitemPOC.AppendText( " " & Format(doc.Criacao(0), "dd/mm/yyyy") )
+				Call rtitemPOC.AppendText( " - Total: R$ "  & Format(doc.Saldo(0), "Standard") )
+			Else
+				Call rtitemPOC.AppendText( doc.Sit(0) )
+				Call rtitemPOC.AppendText( " " & Format(doc.Criacao(0), "dd/mm/yyyy") )
+				Call rtitemPOC.AppendText( " - Total: R$ "  & Format(doc.TotMateriais(0), "Standard") )
+			End If
+			Call rtitemPOC.AppendText( " Fase: " & doc.Fase(0) )
+			Call rtitemPOC.AppendText( " Descrição: " & doc.DescricaoA(0) )
+			Call rtitemPOC.AddNewLine( 1 )
+		'Execução
+		Else
+			Call rtitem.AppendDocLink( doc, "Link para a Cotação" )
+			Call rtitem.AppendText( "Cotação de " & tipo & " " )
+			If doc.Sit(0) = "Pedir Aprovação" Then
+				Call rtitem.AppendText( "Pendente" )
+				Call rtitem.AppendText( " " & Format(doc.Criacao(0), "dd/mm/yyyy") )
+				Call rtitem.AppendText( " - Total: R$ "  & Format(doc.Saldo(0), "Standard") )
+			Else
+				Call rtitem.AppendText( doc.Sit(0) )
+				Call rtitem.AppendText( " " & Format(doc.Criacao(0), "dd/mm/yyyy") )
+				Call rtitem.AppendText( " - Total: R$ "  & Format(doc.TotMateriais(0), "Standard") )
+			End If
+			If doc.Fase(0) <> "" Then
+				Call rtitem.AppendText( " Fase: " & doc.Fase(0) )
+			Else
+				Call rtitem.AppendText( " Fase: Execução" )
+			End If		
+			Call rtitem.AppendText( " Descrição: " & doc.DescricaoA(0) )
+			Call rtitem.AddNewLine( 1 )
+		End If
+		Set doc = dc.GetNextDocument( doc )
+	Wend
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:PopulaListaMateriaisDoc:5:8
+%REM
+	Sub PopulaListaMateriais
+	Description: Comments for Sub
+%END REM
+Sub PopulaListaMateriaisDoc(doc As NotesDocument)
+	
+	On Error Resume Next
+	Dim scan As Integer
+	Dim aliqICMSCompra As Variant, array As Variant, catalogo As Variant, impostos As Variant, fabricante As Variant, ip As Variant, custo As Variant, indice As Variant
+	Dim icc As Double, ic As Double, fob As Double, fi As Double, icmsOP As Double, icmsST As Double, qtd As Long
+	Dim ufCompra As String
+	'Verifica se o Fornecedor tem Exceção Tributária - LMO 30/10/15
+	If doc.Form(0) = "CotacaoFinanceira" Then	'Projeto não tem o Fornecedor - LMO 11/01/18
+		Call GetExcecaoTributaria(doc.FornecedorA(0))
+	End If
+	'
+	For scan = 0 To 49
+		qtd = Val(doc.Getitemvalue("Q_" & scan)(0))
+		If doc.Getitemvalue("Produto_" & scan)(0) <> "" And qtd > 0 Then
+			catalogo = CKCatalogo(doc.Getitemvalue("PartNo_" & scan)(0))
+			Call doc.Replaceitemvalue("CF_" & scan, catalogo(0))
+			'Atualiza Alíquotas dos Impostos apenas se o Item não foi Comprado
+			If CheckCompra(doc.Codigo(0), CStr(scan + 1)) Then
+				array = doc.Getitemvalue("CustoFOB_" & scan)
+				If CStr(array(0)) <> "" Then fob = array(0) Else fob = 0
+				array = doc.Getitemvalue("FI_" & scan)
+				If CStr(array(0)) <> "" Then fi = array(0) Else fi = 0
+				'Popula UF de Compra Default na Importação
+				If fob > 0 Or fi > 0 Then
+					Call doc.Replaceitemvalue("UFCompra_" & scan, "EX")
+				Else
+					If doc.Getitemvalue("UFCompra_" & scan)(0) = "EX" Then
+						Call doc.Replaceitemvalue("UFCompra_" & scan, "")
+					End If
+				End If
+				'Limpa ICMSST de Compra
+				array = doc.Getitemvalue("T_" & scan)
+				If array(0) <> "HW" Or doc.TipoCompra(0) = "Remessa" Then
+					Call doc.Replaceitemvalue("ICMSSTC_" & scan, "")
+				Else
+					array = doc.Getitemvalue("ST_" & scan)
+					If Right(array(0), 2) <> "10" Then
+						Call doc.Replaceitemvalue("ICMSSTC_" & scan, "")
+					End If
+				End If
+				'Popula CST 100 para Importação TDec
+				If fob > 0 Or fi > 0 Then
+					Call doc.Replaceitemvalue("ST_" & scan, "100")
+				End If
+				'Popula campo Fabricante/Importador?
+				array = doc.Getitemvalue("ST_" & scan)
+				If (Left(array(0), 1) = "1" Or Left(array(0), 1) = "6") And Right(array(0), 2) <> "41" Then
+					Call doc.Replaceitemvalue("Fabricante_" & scan, "S")
+				ElseIf Left(array(0), 1) = "2" Or Left(array(0), 1) = "7" Then
+					Call doc.Replaceitemvalue("Fabricante_" & scan, "N")
+				End If
+				'
+				'array = doc.Getitemvalue("PartNo_" & scan)
+				'catalogo = CKCatalogo(array(0))
+				'Call doc.Replaceitemvalue("CF_" & scan, catalogo(0))
+				Call doc.Replaceitemvalue("Un_" & scan, catalogo(1))
+				'Popula Impostos - LMO 31/10/2016
+				array = doc.Getitemvalue("CF_" & scan)
+				impostos = GetImpostos(array(0))
+				array = doc.Getitemvalue("T_" & scan)
+				'SW/SV
+				If array(0) <> "HW" Then
+					Call doc.Replaceitemvalue("ICC_" & scan, 0)
+					Call doc.Replaceitemvalue("II_" & scan, 0)
+					Call doc.Replaceitemvalue("IPC_" & scan, 0)
+				'HW
+				Else
+					'ICC
+					array = doc.Getitemvalue("UFCompra_" & scan)
+					If array(0) = "" Then Exit Sub
+					aliqICMSCompra = CKICMS(array(0), "SP")
+					array = doc.Getitemvalue("ST_" & scan)
+					If Left(array(0), 1) = "1" Or Left(array(0), 1) = "2" Or Left(array(0), 1) = "3" Or Left(array(0), 1) = "8" Then icc = aliqICMSCompra(1) Else icc = aliqICMSCompra(0)
+					'Compra de SP
+					If array(0) = "SP" Then
+						Call doc.Replaceitemvalue("ICC_" & scan, 0)
+					'Importação
+					ElseIf array(0) = "EX" Then
+						Call doc.Replaceitemvalue("ICC_" & scan, impostos(0))
+					'Compra de Fora de SP
+					Else
+						array = doc.Getitemvalue("ST_" & scan)
+						If Right(array(0), 2) <> "10" Then
+							Call doc.Replaceitemvalue("ICC_" & scan, 0)
+						Else
+							'Regime Normal
+							If doc.RegimeTributario(0) = "Normal" Or doc.Form(0) = "Projeto" Then	'Projeto não tem o Fornecedor - LMO 11/01/18
+								Call doc.Replaceitemvalue("ICC_" & scan, icc)
+							End If
+						End If
+					End If
+					'IPI
+					fabricante = doc.Getitemvalue("Fabricante_" & scan)
+					If fabricante(0) = "S" Then
+						'Exceção Tributária - LMO 30/10/15
+						indice = ArrayGetIndex(tributos, "IPI")
+						If Not IsNull(indice) Then
+							If tipos(indice) = "Isenção" Then
+								Call doc.Replaceitemvalue("IPC_" & scan, 0)
+							Else
+								If tipoReducao(indice) = "Alíquota" Then
+									Call doc.Replaceitemvalue("IPC_" & scan, reducao(indice))
+								End If
+							End If
+						Else
+							Call doc.Replaceitemvalue("IPC_" & scan, impostos(1))
+						End If
+					Else
+						Call doc.Replaceitemvalue("IPC_" & scan, 0)
+					End If
+					'II
+					If fob > 0 Or fi > 0 Then
+						'Importação TDec
+						Call doc.Replaceitemvalue("II_" & scan, impostos(2))
+					Else
+						Call doc.Replaceitemvalue("II_" & scan, 0)
+					End If
+					'ICMS-ST Outros Estados
+					array = doc.Getitemvalue("UFCompra_" & scan)
+					If array(0) <> "SP" And array(0) <> "EX" Then
+						ufCompra = array(0) 
+						array = doc.Getitemvalue("ST_" & scan)
+						If Right(array(0), 2) <> "10" Then
+							'Valor calculado pelo sistema
+							ip = doc.Getitemvalue("IPC_" & scan)
+							custo = doc.Getitemvalue("Custo_" & scan)
+							icmsOP = custo(0) / (1 + ip(0)) * icc
+							icmsST = (custo(0) - icmsOP) / (1 - impostos(0)) * impostos(0)
+							Call doc.Replaceitemvalue("ICMSSTC_" & scan, Round(icmsST - icmsOP, 4))
+						End If
+					End If
+				End If
+			End If
+		Else
+			Call doc.Replaceitemvalue("Q_" & scan, "")
+			Call doc.Replaceitemvalue("PartNo_" & scan, "")
+			Call doc.Replaceitemvalue("Produto_" & scan, "")
+			Call doc.Replaceitemvalue("t_" & scan, "HW")
+			Call doc.Replaceitemvalue("Un_" & scan, "")
+			Call doc.Replaceitemvalue("CF_" & scan, "")
+			Call doc.Replaceitemvalue("ST_" & scan, "")
+			Call doc.Replaceitemvalue("UFCompra_" & scan, "")
+			Call doc.Replaceitemvalue("ICC_" & scan, "")
+			Call doc.Replaceitemvalue("us_" & scan, "R$")
+			Call doc.Replaceitemvalue("CustoFOB_" & scan, "")
+			Call doc.Replaceitemvalue("FI_" & scan, "")
+			Call doc.Replaceitemvalue("Custo_" & scan, "")
+			Call doc.Replaceitemvalue("ICMSSTC_" & scan, "")
+			Call doc.Replaceitemvalue("Mg_" & scan, "")
+			Call doc.Replaceitemvalue("CustoUnit_" & scan, "")
+			Call doc.Replaceitemvalue("CusTot_" & scan, 0)
+			Call doc.Replaceitemvalue("ICMSST_" & scan, 0)
+			Call doc.Replaceitemvalue("VendaTot_" & scan, 0)
+			Call doc.Replaceitemvalue("IC_" & scan, "")
+			Call doc.Replaceitemvalue("ICD_" & scan, "")
+			Call doc.Replaceitemvalue("IPC_" & scan, "")
+			Call doc.Replaceitemvalue("II_" & scan, "")
+		End If
+	Next
+		
+End Sub
+
+'++LotusScript Development Environment:2:2:LinkControle:5:8
+%REM
+	Sub LinkControle
+	Description: Comments for Sub
+%END REM
+Sub LinkControle(planilha As NotesDocument)
+	
+	If planilha.HasItem("LinkControle") Then planilha.RemoveItem( "LinkControle" )
+	If planilha.HasItem("LinkControlePV") Then planilha.RemoveItem( "LinkControlePV" )
+	If planilha.HasItem("LinkControlePOC") Then planilha.RemoveItem( "LinkControlePOC" )
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Set db = session.Currentdatabase
+	Set view = db.GetView( "(Controle/Codigo)" )
+	Dim dc As NotesDocumentCollection
+	Dim doc As NotesDocument
+	Dim vendasP As Double, terceirosP As Double
+	Dim rtitem As NotesRichTextItem, rtitemPV As NotesRichTextItem, rtitemPOC As NotesRichTextItem
+	Dim richstyle As NotesRichTextStyle
+	Set dc = view.GetAllDocumentsByKey( planilha.Codigo(0), True )
+	If dc.Count = 0 Then
+		Exit Sub
+	End If
+	Set rtitem = planilha.CreateRichTextItem( "LinkControle" )
+	Set rtitemPV = planilha.CreateRichTextItem( "LinkControlePV" )
+	Set rtitemPOC = planilha.CreateRichTextItem( "LinkControlePOC" )
+	Set richStyle = session.CreateRichTextStyle
+	richStyle.NotesFont = FONT_ROMAN
+	richStyle.FontSize = 8
+	Set doc = dc.GetFirstDocument
+	While Not doc Is Nothing
+		'Execução
+		If doc.Tipo(0) = "Desvio" Or doc.Tipo(0) = "Planejado" Then
+			If doc.Tipo(0) = "Desvio" Then
+				richStyle.NotesColor = COLOR_RED
+				Call rtitem.AppendStyle(richStyle)
+				Call rtitem.AppendDocLink( doc, "Link para o Desvio" )
+				Call rtitem.AppendText( "Desvio " )
+				If doc.Status(0) = "Pedir Aprovação" Then
+					Call rtitem.AppendText( "Pendente" )
+				Else
+					Call rtitem.AppendText( doc.Status(0) )
+				End If
+			ElseIf doc.Tipo(0) = "Planejado" Then
+				richStyle.NotesColor = COLOR_DARK_GREEN
+				Call rtitem.AppendStyle(richStyle)
+				Call rtitem.AppendDocLink( doc, "Link para o Controle Financeiro" )
+				Call rtitem.AppendText( "Controle Financeiro Planejado" )
+			End If
+			Call rtitem.AppendText( " " & Format(doc.Criacao(0), "dd/mm/yyyy") )
+			Call rtitem.AppendText( " - Custos: R$ " & Format(doc.CustoP(0), "Standard") )
+			Call rtitem.AppendText( " - Despesas de Projetos: R$ " & Format(doc.DespP(0), "Standard") )
+			Call rtitem.AppendText( " - HH: " & Format(doc.HHP(0), "Standard") )
+			If CStr(doc.TerceirosP(0)) = "" Then terceirosP = 0 Else terceirosP = doc.TerceirosP(0)
+			Call rtitem.AppendText( " - Terceiros Faturáveis: R$ " & Format(terceirosP, "Standard") )
+			If CStr(doc.VendasP(0)) = "" Then vendasP = 0 Else vendasP = doc.VendasP(0)
+			Call rtitem.AppendText( " - Despesas de Vendas: R$ " & Format(vendasP, "Standard") )
+			If doc.Tipo(0) = "Desvio" Or doc.Tipo(0) = "Pré-Venda" Or doc.Tipo(0) = "POC" Then
+				Call rtitem.AppendText( " - Descrição: " & doc.Justificativa(0))
+			End If
+			Call rtitem.AddNewLine( 1 )
+		'Pré-Venda
+		ElseIf doc.Tipo(0) = "Pré-Venda" Or doc.Tipo(0) = "Pré-Venda Planejada" Then
+			If doc.Tipo(0) = "Pré-Venda" Then
+				richStyle.NotesColor = COLOR_BLUE
+				Call rtitemPV.AppendStyle(richStyle)
+				Call rtitemPV.AppendDocLink( doc, "Link para o Controle Financeiro de Pré-Venda" )
+				Call rtitemPV.AppendText( "Pré-Venda " )
+				If doc.Status(0) = "Pedir Aprovação" Then
+					Call rtitemPV.AppendText( "Pendente" )
+				ElseIf doc.Status(0) = "Aprovado" Then
+					Call rtitemPV.AppendText( "Aprovada" )
+				ElseIf doc.Status(0) = "Não Aprovado" Then
+					Call rtitemPV.AppendText( "Não Aprovada" )	
+				Else
+					Call rtitemPV.AppendText( doc.Status(0) )
+				End If
+			ElseIf doc.Tipo(0) = "Pré-Venda Planejada" Then
+				richStyle.NotesColor = COLOR_BLUE
+				Call rtitemPV.AppendStyle(richStyle)
+				Call rtitemPV.AppendDocLink( doc, "Link para o Controle Financeiro de Pré-Venda Planejada" )
+				Call rtitemPV.AppendText( "Pré-Venda Planejada" )
+			End If
+			Call rtitemPV.AppendText( " " & Format(doc.Criacao(0), "dd/mm/yyyy") )
+			Call rtitemPV.AppendText( " - Custos: R$ " & Format(doc.CustoP(0), "Standard") )
+			Call rtitemPV.AppendText( " - Despesas de Projetos: R$ " & Format(doc.DespP(0), "Standard") )
+			Call rtitemPV.AppendText( " - HH: " & Format(doc.HHP(0), "Standard") )
+			If doc.Tipo(0) = "Pré-Venda" Then
+				Call rtitemPV.AppendText( " - Descrição: " & doc.Justificativa(0))
+			End If
+			Call rtitemPV.AddNewLine( 1 )
+		'POC
+		ElseIf doc.Tipo(0) = "POC" Or doc.Tipo(0) = "POC Planejado" Then
+			If doc.Tipo(0) = "POC" Then
+				richStyle.NotesColor = COLOR_BLUE
+				Call rtitemPOC.AppendStyle(richStyle)
+				Call rtitemPOC.AppendDocLink( doc, "Link para o Controle Financeiro de POC" )
+				Call rtitemPOC.AppendText( "POC " )
+				If doc.Status(0) = "Pedir Aprovação" Then
+					Call rtitemPOC.AppendText( "Pendente" )
+				Else
+					Call rtitemPOC.AppendText( doc.Status(0) )
+				End If
+			ElseIf doc.Tipo(0) = "POC Planejado" Then
+				richStyle.NotesColor = COLOR_BLUE
+				Call rtitemPOC.AppendStyle(richStyle)
+				Call rtitemPOC.AppendDocLink( doc, "Link para o Controle Financeiro de POC Planejado" )
+				Call rtitemPOC.AppendText( "POC Planejado" )
+			End If
+			Call rtitemPOC.AppendText( " " & Format(doc.Criacao(0), "dd/mm/yyyy") )
+			Call rtitemPOC.AppendText( " - Custos: R$ " & Format(doc.CustoP(0), "Standard") )
+			Call rtitemPOC.AppendText( " - Despesas de Projetos: R$ " & Format(doc.DespP(0), "Standard") )
+			Call rtitemPOC.AppendText( " - HH: " & Format(doc.HHP(0), "Standard") )
+			If doc.Tipo(0) = "POC" Then
+				Call rtitemPOC.AppendText( " - Descrição: " & doc.Justificativa(0))
+			End If
+			Call rtitemPOC.AddNewLine( 1 )
+		End If
+		Set doc = dc.GetNextDocument( doc )
+	Wend
+		
+End Sub
+
+'++LotusScript Development Environment:2:2:CalcCotacaoDoc:5:8
+%REM
+	Sub CalcCotacaoDoc
+	Description: Comments for Sub
+%END REM
+Sub CalcCotacaoDoc(doc As NotesDocument)
+	
+	Dim scan As Integer, qtd As Long, custoFOB As Double, fi As Double, custo As Double, cusTot As Double, icmsst As Double, fator As Double
+	Dim totCusto As Double, totICMSST As Double, totMateriais As Double
+	Dim array As Variant
+	For scan = 0 To 49
+		array = doc.Getitemvalue("Q_" & scan)
+		qtd = Val(array(0))
+		array = doc.Getitemvalue("Produto_" & scan)
+		If array(0) <> "" And qtd > 0 Then
+			'Calcula CustoFOB/FI/Custo
+			array = doc.Getitemvalue("CustoFOB_" & scan)
+			If CStr(array(0)) = "" Then custoFOB = 0 Else custoFOB = array(0)
+			array = doc.Getitemvalue("FI_" & scan)
+			If CStr(array(0)) = "" Then fi = 0 Else fi = array(0)
+			array = doc.Getitemvalue("Custo_" & scan)
+			If CStr(array(0)) = "" Then custo = 0 Else custo = array(0)
+			'Importação TDec
+			If custoFOB > 0 Or fi > 0 Then
+				'1) Calcula o Custo (CustoFOB e Fator de Importação preenchidos ou 3 campos preenchidos)
+				If (custoFOB > 0 And fi > 0 And custo = 0) Or (custoFOB > 0 And fi > 0 And custo > 0) Then
+					custo = custoFOB * fi
+					'2)	Calcula o Fator de Importação (CustoFOB e Custo preenchidos)
+				ElseIf custoFOB > 0 And fi = 0 And custo > 0 Then
+					fi = custo / custoFOB
+					'3) Calcula o CustoFOB (Fator de Importação e Custo preenchidos)
+				ElseIf custoFOB = 0 And fi > 0 And custo > 0 Then
+					custoFOB = custo / fi
+				End If
+				Call doc.ReplaceItemValue("CustoFOB_" & scan, custoFOB)
+				Call doc.ReplaceItemValue("FI_" & scan, fi)
+				Call doc.ReplaceItemValue("Custo_" & scan, custo)
+			End If
+			'
+			array = doc.Getitemvalue("Custo_" & scan)
+			If CStr(array(0)) = "" Then custo = 0 Else custo = array(0)
+			array = doc.Getitemvalue("ICMSSTC_" & scan)
+			If CStr(array(0)) = "" Then icmsst = 0 Else icmsst = array(0)
+			array = doc.Getitemvalue("Q_" & scan)
+			Call doc.ReplaceItemValue("CusTot_" & scan, Round((custo + icmsst) * array(0), 2))
+			array = doc.Getitemvalue("us_" & scan)
+			If array(0) = "US$C" Then fator = doc.USC(0) Else fator = 1
+			array = doc.Getitemvalue("CusTot_" & scan)
+			If CStr(array(0)) = "" Then cusTot = 0 Else cusTot = array(0)
+			totMateriais = totMateriais + cusTot * fator
+		End If
+	Next
+	Call doc.ReplaceItemValue("TotMateriais", Round(totMateriais, 2))
+	Call doc.ReplaceItemValue("TotMateriais_1", Round(totMateriais, 2))
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:GeraRequisicaoAlmoxarifado:5:8
+%REM
+	Sub GeraRequisicaoAlmoxarifado
+	Description: Comments for Sub
+%END REM
+Sub GeraRequisicaoAlmoxarifado(uidoc As NotesUIDocument)
+	
+	Dim session As New NotesSession
+	Dim scan As Integer
+	Dim db As New NotesDatabase(uidoc.Document.Parentdatabase.Server, "Almoxarifado.nsf")
+	Dim doc As New NotesDocument(db)
+	doc.Form = "Requisicao"
+	'Gera JavaId - LMO 27/09/17
+	doc.Id = geraJavaId(doc)
+	'
+	doc.Autor = session.Commonusername
+	doc.Criacao = Now
+	doc.CodRequisicao = GetCodRequisicao(uidoc)
+	doc.Sit = "OK"
+	doc.Tipo = "Contrato/Projeto"
+	doc.Area = uidoc.FieldGetText("AreaDespesa")
+	doc.Responsavel = session.Commonusername
+	doc.Codigo = uidoc.FieldGetText("Codigo")
+	doc.CodEmpresa = uidoc.FieldGetText("CodEmpresa")
+	doc.AprovadoPor = session.Commonusername
+	doc.DataAprovacao = Now
+	doc.StatusMateriais = "OK"
+	doc.Descricao = uidoc.FieldGetText("Descricao")
+	For scan = 0 To 49
+		Call doc.Replaceitemvalue("Q_" & scan, uidoc.Fieldgettext("PQ_" & scan))
+		Call doc.Replaceitemvalue("PartNo_" & scan, uidoc.Fieldgettext("PN_" & scan))
+		Call doc.Replaceitemvalue("Produto_" & scan, uidoc.Fieldgettext("PProd_" & scan))
+		Call doc.Replaceitemvalue("Un_" & scan, uidoc.Fieldgettext("Un_" & scan))
+		Call doc.Replaceitemvalue("Custo_" & scan, uidoc.Fieldgettext("PCU_" & scan))
+		Call doc.Replaceitemvalue("CusTot_" & scan, uidoc.Fieldgettext("PCT_" & scan))
+	Next
+	Call doc.Save(True, True)
+	
+End Sub
+
+
+'++LotusScript Development Environment:2:2:AprovaCotacao:5:8
+%REM
+	Sub AprovaCotacao
+	Description: Comments for Sub
+%END REM
+Sub AprovaCotacao(doc As NotesDocument)
+	
+	Dim session As New NotesSession
+	Dim rtitem As NotesRichTextItem
+	doc.Sit = "Aprovada"
+	doc.AprovadoPor = doc.User(0)
+	doc.DataAprovacao = Now
+	Call doc.Save(True, True)
+	'Envia Email
+	Dim richStyle As NotesRichTextStyle
+	Set richStyle = session.CreateRichTextStyle
+	richStyle.NotesFont = FONT_ROMAN
+	richStyle.FontSize = 10
+	Dim memo As NotesDocument
+	Set memo = New NotesDocument( session.CurrentDatabase )
+	memo.Form = "Memo"
+	memo.SendTo = doc.Requisitante(0)
+	memo.CopyTo = "Compras de Projetos"	
+	'memo.BlindCopyTo = "Ludimila Oliveira"
+	Set rtitem = memo.CreateRichTextItem( "Body" )
+	Call rtitem.AppendStyle(richStyle)
+	memo.Subject = "-> Cotação de Planilha Financeira Aprovada - " & doc.DocID(0)
+	Call rtitem.AppendText( "Cotação de Planilha Financeira Aprovada -> " )	
+	Call rtitem.AppendDocLink( doc, "Link para Cotação de Planilha Financeira")
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Tipo: " & doc.Tipo(0))
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Saldo: R$ " & Format(doc.Saldo(0), "Standard" ) )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Valor Solicitado: R$ " & Format(doc.TotMateriais(0), "Standard" ) )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Descrição: " & doc.DescricaoA(0))
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.Appendtext( doc.User(0) & "," )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.Appendtext( "TDec Network Group" )
+	Call memo.Send( False )
+		
+End Sub
+
+
+'++LotusScript Development Environment:2:1:PopulaMoeda:1:8
+Function PopulaMoeda As Variant
+	
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase(session.CurrentDatabase.Server, "sales.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Set view = db.GetView("3. Moedas")
+	Set doc = view.GetDocumentByKey(Format(Day(Today) & "/" & Month(Today) & "/" & Year(Today), "dd/mm/yyyy"), True)
+	If doc Is Nothing Then
+		MsgBox "Favor informar a Cotação das Moedas no Sales Force", 16, "Erro"
+		End
+	Else
+		Dim array(1) As Double
+		array(0) = doc.USC(0)
+		array(1) = doc.UST(0)
+		PopulaMoeda = array
+	End If
+	
+End Function
+
+
+'++LotusScript Development Environment:2:1:CheckCompra:5:8
+%REM
+	Function CheckCompra
+	Description: Comments for Function
+%END REM
+Function CheckCompra(codigo As String, item As String) As Boolean
+	
+	CheckCompra = True
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase(session.CurrentDatabase.Server, "listas.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim saldo As Long
+	Dim key(1) As String
+	key(0) = codigo & "Planilha"
+	key(1) = item
+	Set view = db.Getview("(NegocioForm)")
+	Set doc = view.Getdocumentbykey(key, True)
+	If Not doc Is Nothing Then
+		saldo = doc.Q(0) - doc.QCompra(0)
+		If saldo <= 0 Then
+			CheckCompra = False
+		End If
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:2:PopulaMargemConfig:5:8
+%REM
+	Sub PopulaMargem
+	Description: Comments for Sub
+%END REM
+Sub PopulaMargemConfig(doc As NotesDocument)
+	
+	Dim db As New NotesDatabase(doc.Parentdatabase.Server, "sales.nsf")
+	Dim view As NotesView
+	Dim config As NotesDocument
+	Set view = db.GetView("(ConfiguracaoMargem)")
+	Set config = view.Getfirstdocument()
+	If Not config Is Nothing Then
+		doc.FI_HW = config.FI_HW(0)
+		doc.FI_SW = config.FI_SW(0)
+		doc.FI_SV = config.FI_SV(0)
+	Else
+		doc.FI_HW = 1.85
+		doc.FI_SW = 1.32
+		doc.FI_SV = 1.46
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:RetiraSinaisCST:1:8
+Function RetiraSinaisCST ( texto As String) As String
+	
+	Dim i As Integer
+	Dim NovoTexto As String
+	Dim size As Long
+	Texto = UCase ( Texto )
+	Size = Len ( Texto )
+	For i = 1 To Size
+		Select Case Mid ( Texto, i, 1 )
+		Case "."
+		Case ","
+		Case "*"		
+		Case "-"
+		Case "/"
+		Case "R"
+		Case "$"
+		Case ":"
+		Case ";"
+		Case " "
+		Case Else
+			NovoTexto = NovoTexto + Mid ( Texto, i, 1 )
+		End Select
+	Next
+	RetiraSinaisCST = NovoTexto
+	
+End Function
+
+'++LotusScript Development Environment:2:1:CkClassificacao:5:8
+%REM
+	Function CkClassificacao
+	Description: Comments for Function
+%END REM
+Function CkClassificacao(uidoc As NotesUIDocument) As Boolean
+	
+	CkClassificacao = True
+	Dim db As New NotesDatabase(uidoc.Document.Parentdatabase.Server, "EstoqueMain.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim scan As Integer, x As Integer, msg As String, sep As String
+	Set view = db.GetView("(Catalogo)")
+	For scan = 0 To 49
+		If uidoc.Fieldgettext("PartNo_" & scan) <> "" Then
+			'CPS: tem que ser HW (Materiais)
+			If uidoc.FieldGetText("Tipo") = "CPS" Then
+				If uidoc.Fieldgettext("T_" & scan) <> "HW" Then
+					MsgBox "Em Compras para Prestação de Serviços o Tipo tem que ser HW no Item: " & (scan + 1), 16, "Erro na Lista de Materiais"
+					CkClassificacao = False
+					Call uidoc.Gotofield("PartNo_" & scan)
+					Exit Function
+				End If
+			'Ativo: tem que ser HW (Materiais)
+			ElseIf uidoc.FieldGetText("Tipo") = "Ativo" Then
+				If uidoc.Fieldgettext("T_" & scan) <> "HW" Then
+					MsgBox "Em Ativos para Prestação de Serviços o Tipo tem que ser HW no Item: " & (scan + 1), 16, "Erro na Lista de Materiais"
+					CkClassificacao = False
+					Call uidoc.Gotofield("PartNo_" & scan)
+					Exit Function
+				End If
+			
+			Else
+				If uidoc.Fieldgettext("T_" & scan) <> "SV" And uidoc.Fieldgettext("T_" & scan) <> "Serviço" And uidoc.Fieldgettext("T_" & scan) <> "SW" Then
+					MsgBox "Em " & uidoc.Fieldgettext("Tipo") & " o Tipo tem que ser SV ou SW no Item: " & (scan + 1), 16, "Erro na Lista de Materiais"
+					CkClassificacao = False
+					Call uidoc.Gotofield("PartNo_" & scan)
+					Exit Function
+				End If
+			End If
+		End If	
+	Next
+	If Not CkClassificacao Then
+		Msgbox "Classificação da Despesa diferente do Tipo nos itens: " & msg, 16 , "Erro"
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:2:SolicitaAprovacaoCotacao:5:8
+%REM
+	Sub SolicitaAprovacaoCotacao
+	Description: Comments for Sub
+%END REM
+Sub SolicitaAprovacaoCotacao(uidoc As NotesUIDocument)
+	
+	On Error Resume Next
+	Dim session As New NotesSession
+	'Atualiza Cotação
+	Call uidoc.FieldSetText("Requisitante", session.CommonUserName)
+	Call uidoc.FieldSetText("DataRequisicao", CStr(Now))
+	Call uidoc.FieldSetText("Sit", "Aguardando Aprovação")
+	uidoc.Save
+	uidoc.Close
+	'Envia Email para Área de Projetos
+	Dim rtitem As NotesRichTextItem
+	Dim richStyle As NotesRichTextStyle
+	Set richStyle = session.CreateRichTextStyle
+	richStyle.NotesFont = FONT_ROMAN
+	richStyle.FontSize = 10
+	Dim memo As NotesDocument
+	Set memo = New NotesDocument( session.CurrentDatabase )
+	memo.Form = "Memo"
+	memo.From = session.CommonUserName
+	memo.SendTo = "projetos@tdec.com.br"
+	'memo.BlindCopyTo = "Ludimila Oliveira/TDec"
+	Set rtitem = memo.CreateRichTextItem( "Body" )
+	Call rtitem.AppendStyle(richStyle)
+	memo.Subject = "-> Pedido de Aprovação para Cotação de Planilha Financeira: " & uidoc.FieldGettext( "Codigo" )
+	Call rtitem.AppendText( "Favor Aprovar a Cotação de Planilha Financeira." )
+	Call rtitem.AddNewLine( 2 )
+	richStyle.Bold = True
+	richStyle.Underline = True
+	Call rtitem.AppendStyle(richStyle)
+	Call rtitem.AppendText( "Acesso Notes:" )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendDocLink( uidoc.Document, "Link para a Cotação de Planilha Financeira")
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Acesso Web" )
+	richStyle.Bold = False
+	richStyle.Underline = False
+	Call rtitem.AppendStyle(richStyle)
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "http://" + uidoc.Document.Server(0) + "/" + session.CurrentDatabase.FileName + "/0/" + uidoc.Document.UniID(0) + "?OpenDocument" )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Tipo: " & uidoc.FieldGettext( "Tipo" ))
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Saldo: R$ " & Format(uidoc.FieldGettext( "Saldo" ), "Standard" ) )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Valor Solicitado: R$ " & Format(uidoc.FieldGettext( "TotMateriais" ), "Standard" ) )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Descrição: " & uidoc.FieldGettext( "DescricaoA" ))
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.Appendtext( session.CommonUserName & "," )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.Appendtext( "TDec Network Group" )
+	Call memo.Send( False )
+	MsgBox "Email encaminhado para Projetos", 64, "Aviso"
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:CkTipo:5:8
+%REM
+	Function CkTipo
+	Description: Comments for Function
+%END REM
+Function CkTipo(uidoc As NotesUIDocument) As Boolean
+	
+	CkTipo = True
+	Dim scan As Integer
+	For scan = 0 To 49
+		If uidoc.Fieldgettext("PartNo_" & scan) <> "" Then
+			'SW tem que ser Faturado como Licenciamento de Uso 
+			If uidoc.Fieldgettext("T_" & scan) = "SW" Or uidoc.Fieldgettext("T_" & scan) = "SV" Then
+				MsgBox "SW e SV não podem ser comprados pela Lista CPS no Item: " & (scan + 1) & Chr(10) & "Informar no Budget do Projeto em Terceiros não Faturáveis", 16, "Erro na Lista CPS"
+				CkTipo = False
+				Call uidoc.Gotofield("PartNo_" & scan)
+				Exit Function
+			End If
+		End If	
+	Next
+	
+End Function
+
+'++LotusScript Development Environment:2:1:CKICMS:1:8
+Function CKICMS(origem As String, destino As String) As Variant
+	
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim array(1) As Double
+	'Operações Estaduais Internas (mantém icms informado)
+	If destino = origem Then
+		Exit Function
+	End If
+	'Operações Interestaduais
+	Dim chave(1) As String
+	chave(0) = origem
+	chave(1) = destino
+	Set db = New NotesDatabase(session.CurrentDatabase.Server, "Faturas.nsf")
+	Set view = db.GetView("(Configuracao/ICMS)")
+	Set doc = view.GetDocumentByKey(chave, True)
+	If Not doc Is Nothing Then
+		array(0) = doc.ICMS(0)
+		array(1) = doc.ICMSImp(0)
+	End If
+	CKICMS = array
+	
+End Function
+
+'++LotusScript Development Environment:2:1:ConsisteValores:5:8
+%REM
+	Function ConsistePlanejado
+	Description: Comments for Function
+%END REM
+Function ConsisteValores(uidoc As NotesUIDocument) As Boolean
+	
+	On Error Resume next
+	ConsisteValores = False
+	Dim tipo As String
+	'*** Custos
+	Dim passP As Double, hospP As Double, alugP As Double, matP As Double, ativoP As Double, servP As Double
+	If uidoc.FieldGetText("PassP") <> "" Then passP = CDbl(uidoc.FieldGetText("PassP"))
+	If uidoc.FieldGetText("HospP") <> "" Then hospP = CDbl(uidoc.FieldGetText("HospP"))
+	If uidoc.FieldGetText("AlugP") <> "" Then alugP = CDbl(uidoc.FieldGetText("AlugP"))
+	If uidoc.FieldGetText("MatP") <> "" Then matP = CDbl(uidoc.FieldGetText("MatP"))
+	If uidoc.FieldGetText("AtivotP") <> "" Then ativoP = CDbl(uidoc.FieldGetText("AtivotP"))
+	If uidoc.FieldGetText("ServP") <> "" Then servP = CDbl(uidoc.FieldGetText("ServP"))
+	Dim passRT As Double, hospRT As Double, alugRT As Double, matRT As Double, ativoRT As Double, servRT As Double
+	If uidoc.FieldGetText("PassRT") <> "" Then passRT = CDbl(uidoc.FieldGetText("PassRT"))
+	If uidoc.FieldGetText("HospRT") <> "" Then hospRT = CDbl(uidoc.FieldGetText("HospRT"))
+	If uidoc.FieldGetText("AlugRT") <> "" Then alugRT = CDbl(uidoc.FieldGetText("AlugRT"))
+	If uidoc.FieldGetText("MatRT") <> "" Then matRT = CDbl(uidoc.FieldGetText("MatRT"))
+	If uidoc.FieldGetText("AtivoRT") <> "" Then ativoRT = CDbl(uidoc.FieldGetText("AtivoRT"))
+	If uidoc.FieldGetText("ServRT") <> "" Then servRT = CDbl(uidoc.FieldGetText("ServRT"))
+	'Verifica se Reserva Técnica é maior que o Valor Planejado
+	If passRT > passP Then
+		tipo = "Passagens"
+		Call uidoc.Gotofield("PassRT")
+		GoTo msg1
+	ElseIf hospRT > hospP Then
+		tipo = "Hospedagens"
+		Call uidoc.Gotofield("HospRT")
+		GoTo msg1
+	ElseIf alugRT > alugP Then
+		tipo = "Aluguéis"
+		Call uidoc.Gotofield("AlugRT")
+		GoTo msg1
+	ElseIf matRT > matP Then
+		tipo = "Compras para Prestação de Serviços"
+		Call uidoc.Gotofield("MatRT")
+		GoTo msg1
+	ElseIf ativoRT > ativoP Then
+		tipo = "Ativos para Prestação de Serviços"
+		Call uidoc.Gotofield("AtivoRT")
+		GoTo msg1
+	ElseIf servRT > servP Then
+		tipo = "Contratação de Terceiros não Faturáveis"
+		Call uidoc.Gotofield("ServRT")
+		GoTo msg1
+	End If
+	'Verifica se Reserva Técnica é negativa
+	If passRT < 0 Then
+		tipo = "Passagens"
+		Call uidoc.Gotofield("PassRT")
+		GoTo msg2
+	ElseIf hospRT < 0 Then
+		tipo = "Hospedagens"
+		Call uidoc.Gotofield("HospRT")
+		GoTo msg2
+	ElseIf alugRT < 0 Then
+		tipo = "Aluguéis"
+		Call uidoc.Gotofield("AlugRT")
+		GoTo msg2
+	ElseIf matRT < 0 Then
+		tipo = "Compras para Prestação de Serviços"
+		Call uidoc.Gotofield("MatRT")
+		GoTo msg2
+	ElseIf ativoRT < 0 Then
+		tipo = "Ativos para Prestação de Serviços"
+		Call uidoc.Gotofield("AtivoRT")
+		GoTo msg2
+	ElseIf servRT < 0 Then
+		tipo = "Contratação de Terceiros não Faturáveis"
+		Call uidoc.Gotofield("ServRT")
+		GoTo msg2
+	End If
+	'Verifica se Valor Utilizado é maior que o Valor Total
+	If CDbl(uidoc.Fieldgettext("PassU")) > CDbl(uidoc.Fieldgettext("PassT")) Then
+		tipo = "Passagens"
+		Call uidoc.Gotofield("PassRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("HospU")) > CDbl(uidoc.Fieldgettext("HospT")) Then
+		tipo = "Hospedagens"
+		Call uidoc.Gotofield("HospRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("AlugU")) > CDbl(uidoc.Fieldgettext("AlugT")) Then
+		tipo = "Aluguéis"
+		Call uidoc.Gotofield("AlugRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("MatU")) > CDbl(uidoc.Fieldgettext("MatT")) Then
+		tipo = "Compras para Prestação de Serviços"
+		Call uidoc.Gotofield("MatRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("AtivoU")) > CDbl(uidoc.Fieldgettext("AtivoT")) Then
+		tipo = "Ativos para Prestação de Serviços"
+		Call uidoc.Gotofield("AtivoRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("ServU")) > CDbl(uidoc.Fieldgettext("ServT")) Then
+		tipo = "Contratação de Terceiros não Faturáveis"
+		Call uidoc.Gotofield("ServRT")
+		GoTo msg3
+	End If
+	'Pré-Venda - Verifica se Valor Utilizado é maior que o Valor Total - LMO 01/10/19
+	If CDbl(uidoc.Fieldgettext("PassPVU")) > CDbl(uidoc.Fieldgettext("PassPVT")) Then
+		tipo = "Passagens de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("HospPVU")) > CDbl(uidoc.Fieldgettext("HospPVT")) Then
+		tipo = "Hospedagens de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("AlugPVU")) > CDbl(uidoc.Fieldgettext("AlugPVT")) Then
+		tipo = "Aluguéis de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("MatPVU")) > CDbl(uidoc.Fieldgettext("MatPVT")) Then
+		tipo = "Compras para Prestação de Serviços de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("AtivoPVU")) > CDbl(uidoc.Fieldgettext("AtivoPVT")) Then
+		tipo = "Ativos para Prestação de Serviços de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("ServPVU")) > CDbl(uidoc.Fieldgettext("ServPVT")) Then
+		tipo = "Contratação de Terceiros não Faturáveis de Pré-Venda"
+		GoTo msg3
+	End If
+	'POC - Verifica se Valor Utilizado é maior que o Valor Total - LMO 02/10/19
+	If CDbl(uidoc.Fieldgettext("PassPOCU")) > CDbl(uidoc.Fieldgettext("PassPOCT")) Then
+		tipo = "Passagens de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("HospPOCU")) > CDbl(uidoc.Fieldgettext("HospPOCT")) Then
+		tipo = "Hospedagens de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("AlugPOCU")) > CDbl(uidoc.Fieldgettext("AlugPOCT")) Then
+		tipo = "Aluguéis de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("MatPOCU")) > CDbl(uidoc.Fieldgettext("MatPOCT")) Then
+		tipo = "Compras para Prestação de Serviços de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("AtivoPOCU")) > CDbl(uidoc.Fieldgettext("AtivoPOCT")) Then
+		tipo = "Ativos para Prestação de Serviços de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("ServPOCU")) > CDbl(uidoc.Fieldgettext("ServPOCT")) Then
+		tipo = "Contratação de Terceiros não Faturáveis de POC"
+		GoTo msg3
+	End If
+	
+	'*** Despesas
+	Dim kmP As Double, transP As Double, alimP As Double, teleP As Double
+	If uidoc.FieldGetText("KmP") <> "" Then kmP = CDbl(uidoc.FieldGetText("KmP"))
+	If uidoc.FieldGetText("TranspP") <> "" Then transP = CDbl(uidoc.FieldGetText("TranspP"))
+	If uidoc.FieldGetText("AlimeP") <> "" Then alimP = CDbl(uidoc.FieldGetText("AlimeP"))
+	If uidoc.FieldGetText("TeleP") <> "" Then teleP = CDbl(uidoc.FieldGetText("TeleP"))
+	Dim kmRT As Double, transRT As Double, alimRT As Double, teleRT As Double
+	If uidoc.FieldGetText("KmRT") <> "" Then kmRT = CDbl(uidoc.FieldGetText("KmRT"))
+	If uidoc.FieldGetText("TranspRT") <> "" Then transRT = CDbl(uidoc.FieldGetText("TranspRT"))
+	If uidoc.FieldGetText("AlimeRT") <> "" Then alimRT = CDbl(uidoc.FieldGetText("AlimeRT"))
+	If uidoc.FieldGetText("TeleRT") <> "" Then teleRT = CDbl(uidoc.FieldGetText("TeleRT"))
+	'Verifica se Reserva Técnica é maior que o Valor Planejado
+	If kmRT > kmP Then
+		tipo = "Quilometragem"
+		Call uidoc.Gotofield("KmRT")
+		GoTo msg1
+	ElseIf transRT > transP Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("TranspRT")
+		GoTo msg1
+	ElseIf alimRT > alimP Then
+		tipo = "Alimentação"
+		Call uidoc.Gotofield("AlimeRT")
+		GoTo msg1
+	ElseIf teleRT > teleP Then
+		tipo = "Telecom"
+		Call uidoc.Gotofield("TeleRT")
+		GoTo msg1
+	End If
+	'Verifica se Reserva Técnica é negativa
+	If kmRT < 0 Then
+		tipo = "Quilometragem"
+		Call uidoc.Gotofield("KmRT")
+		GoTo msg2
+	ElseIf transRT < 0 Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("TranspRT")
+		GoTo msg2
+	ElseIf alimRT < 0 Then
+		tipo = "Alimentação"
+		Call uidoc.Gotofield("AlimeRT")
+		GoTo msg2
+	ElseIf teleRT < 0 Then
+		tipo = "Telecom"
+		Call uidoc.Gotofield("TeleRT")
+		GoTo msg2
+	End If
+	'Verifica se Valor Utilizado é maior que o Valor Total
+	If CDbl(uidoc.Fieldgettext("KmU")) > CDbl(uidoc.Fieldgettext("KmT")) Then
+		tipo = "Quilometragem"
+		Call uidoc.Gotofield("KmRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("TranspU")) > CDbl(uidoc.Fieldgettext("TranspT")) Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("TranspRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("AlimeU")) > CDbl(uidoc.Fieldgettext("AlimeT")) Then
+		tipo = "Alimentação"
+		Call uidoc.Gotofield("AlimeRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("TeleU")) > CDbl(uidoc.Fieldgettext("TeleT")) Then
+		tipo = "Telecom"
+		Call uidoc.Gotofield("TeleRT")
+		GoTo msg3
+	End If
+	'Pré-Venda - Verifica se Valor Utilizado é maior que o Valor Total - LMO 02/10/19
+	If CDbl(uidoc.Fieldgettext("KmPVU")) > CDbl(uidoc.Fieldgettext("KmPVT")) Then
+		tipo = "Quilometragem de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("TranspPVU")) > CDbl(uidoc.Fieldgettext("TranspPVT")) Then
+		tipo = "Transporte de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("AlimePVU")) > CDbl(uidoc.Fieldgettext("AlimePVT")) Then
+		tipo = "Alimentação de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("TelePVU")) > CDbl(uidoc.Fieldgettext("TelePVT")) Then
+		tipo = "Telecom de Pré-Venda"
+		GoTo msg3
+	End If
+	'POC - Verifica se Valor Utilizado é maior que o Valor Total - LMO 02/10/19
+	If CDbl(uidoc.Fieldgettext("KmPOCU")) > CDbl(uidoc.Fieldgettext("KmPOCT")) Then
+		tipo = "Quilometragem de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("TranspPOCU")) > CDbl(uidoc.Fieldgettext("TranspPOCT")) Then
+		tipo = "Transporte de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("AlimePOCU")) > CDbl(uidoc.Fieldgettext("AlimePOCT")) Then
+		tipo = "Alimentação de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("TelePOCU")) > CDbl(uidoc.Fieldgettext("TelePOCT")) Then
+		tipo = "Telecom de POC"
+		GoTo msg3
+	End If
+		
+	'*** Horas Homem
+	Dim planP As Double, gerP As Double, execP As Double, docP As Double
+	If uidoc.FieldGetText("PlanP") <> "" Then planP = CDbl(uidoc.FieldGetText("PlanP"))
+	If uidoc.FieldGetText("GerP") <> "" Then gerP = CDbl(uidoc.FieldGetText("GerP"))
+	If uidoc.FieldGetText("ExecP") <> "" Then execP = CDbl(uidoc.FieldGetText("ExecP"))
+	If uidoc.FieldGetText("DocP") <> "" Then docP = CDbl(uidoc.FieldGetText("DocP"))
+	Dim planRT As Double, gerRT As Double, execRT As Double, docRT As Double
+	If uidoc.FieldGetText("PlanRT") <> "" Then planRT = CDbl(uidoc.FieldGetText("PlanRT"))
+	If uidoc.FieldGetText("GerRT") <> "" Then gerRT = CDbl(uidoc.FieldGetText("GerRT"))
+	If uidoc.FieldGetText("ExecRT") <> "" Then execRT = CDbl(uidoc.FieldGetText("ExecRT"))
+	If uidoc.FieldGetText("DocRT") <> "" Then docRT = CDbl(uidoc.FieldGetText("DocRT"))
+	'Verifica se Reserva Técnica é maior que o Valor Planejado
+	If planRT > planP Then
+		tipo = "Horas de Planejamento"
+		Call uidoc.Gotofield("PlanRT")
+		GoTo msg1
+	ElseIf gerRT > gerP Then
+		tipo = "Horas de Gerenciamento"
+		Call uidoc.Gotofield("GerRT")
+		GoTo msg1
+	Elseif execRT > execP Then
+		tipo = "Horas de Execução"
+		Call uidoc.Gotofield("ExecRT")
+		GoTo msg1
+	ElseIf docRT > docP Then
+		tipo = "Horas de Documentação"
+		Call uidoc.Gotofield("DocRT")
+		GoTo msg1
+	End If
+	'Verifica se Reserva Técnica é negativa
+	If planRT < 0 Then
+		tipo = "Horas de Planejamento"
+		Call uidoc.Gotofield("PlanRT")
+		GoTo msg2
+	ElseIf gerRT < 0 Then
+		tipo = "Horas de Gerenciamento"
+		Call uidoc.Gotofield("GerRT")
+		GoTo msg2
+	ElseIf execRT < 0 Then
+		tipo = "Horas de Execução"
+		Call uidoc.Gotofield("ExecRT")
+		GoTo msg2
+	ElseIf docRT < 0 Then
+		tipo = "Horas de Documentação"
+		Call uidoc.Gotofield("DocRT")
+		GoTo msg2
+	End If
+	'Verifica se Valor Utilizado é maior que o Valor Total
+	If CDbl(uidoc.Fieldgettext("PlanU")) > CDbl(uidoc.Fieldgettext("PlanT")) Then
+		tipo = "Horas de Planejamento"
+		Call uidoc.Gotofield("PlanRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("GerU")) > CDbl(uidoc.Fieldgettext("GerT")) Then
+		tipo = "Horas de Gerenciamento"
+		Call uidoc.Gotofield("GerRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("ExecU")) > CDbl(uidoc.Fieldgettext("ExecT")) Then
+		tipo = "Horas de Execução"
+		Call uidoc.Gotofield("ExecRT")
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("DocU")) > CDbl(uidoc.Fieldgettext("DocT")) Then
+		tipo = "Horas de Documentação"
+		Call uidoc.Gotofield("DocRT")
+		GoTo msg3
+	End If
+	'%REM
+	'Pré-Venda - Verifica se Valor Utilizado é maior que o Valor Total - LMO 02/10/19
+	If CDbl(uidoc.Fieldgettext("PlanPVU")) > CDbl(uidoc.Fieldgettext("PlanPVT")) Then
+		tipo = "Horas de Planejamento de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("GerPVU")) > CDbl(uidoc.Fieldgettext("GerPVT")) Then
+		tipo = "Horas de Gerenciamento de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("ExecPVU")) > CDbl(uidoc.Fieldgettext("ExecPVT")) Then
+		tipo = "Horas de Execução de Pré-Venda"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("DocPVU")) > CDbl(uidoc.Fieldgettext("DocPVT")) Then
+		tipo = "Horas de Documentação de Pré-Venda"
+		GoTo msg3
+	End If
+	'POC - Verifica se Valor Utilizado é maior que o Valor Total - LMO 02/10/19
+	If CDbl(uidoc.Fieldgettext("PlanPOCU")) > CDbl(uidoc.Fieldgettext("PlanPOCT")) Then
+		tipo = "Horas de Planejamento de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("GerPOCU")) > CDbl(uidoc.Fieldgettext("GerPOCT")) Then
+		tipo = "Horas de Gerenciamento de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("ExecPOCU")) > CDbl(uidoc.Fieldgettext("ExecPOCT")) Then
+		tipo = "Horas de Execução de POC"
+		GoTo msg3
+	ElseIf CDbl(uidoc.Fieldgettext("DocPOCU")) > CDbl(uidoc.Fieldgettext("DocPOCT")) Then
+		tipo = "Horas de Documentação de POC"
+		GoTo msg3
+	End If
+	'%END REM
+	ConsisteValores = True
+	Exit function
+msg1:
+	MsgBox "A Reserva Técnica não pode ser maior do que o Valor Planejado em " & tipo, 16, "Erro em " & Tipo
+	Exit Function
+msg2:
+	MsgBox "A Reserva Técnica não pode ser negativa em " & tipo, 16, "Erro em " & Tipo
+	Exit Function
+msg3:
+	MsgBox "A Valor Utilizado não pode ser maior do que o Valor Total em " & tipo, 16, "Erro em " & Tipo
+	Exit Function
+	
+End Function
+
+'++LotusScript Development Environment:2:2:GetExcecaoTributaria:5:8
+%REM
+	Sub CkExcecaoTributaria
+	Description: Comments for Function
+%END REM
+Sub GetExcecaoTributaria(uidoc As NotesUIDocument)
+	
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase(session.Currentdatabase.Server, "empresas.nsf")
+	Dim view As NotesView
+	Dim dc As NotesDocumentCollection
+	Dim doc As NotesDocument
+	Dim scan As Integer
+	Set view = db.GetView("(ExcecaoTributaria)")
+	Set dc = view.Getalldocumentsbykey(uidoc.FieldGetText("FornecedorA"), True)
+	Set doc = dc.Getfirstdocument()
+	Do Until doc Is Nothing
+		tributos(scan) = doc.Codigo(0)
+		tipos(scan) = doc.Tipo(0)
+		suframa(scan) = doc.Suframa(0)
+		ncm(scan) = doc.NCM(0)
+		If doc.TipoReducao(0) = "" Then tipoReducao(scan) = "-" Else tipoReducao(scan) = doc.TipoReducao(0)
+		If CStr(doc.PercReducao(0)) <> "" Then reducao(scan) = doc.PercReducao(0)
+		scan = scan + 1
+		Set doc = dc.Getnextdocument(doc)
+	Loop
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:PopulaListaMateriaisUidoc:5:8
+%REM
+	Sub PopulaListaMateriais
+	Description: Comments for Sub
+%END REM
+Sub PopulaListaMateriaisUidoc(uidoc As NotesUIDocument)
+	
+	On Error Resume Next
+	Dim scan As Integer
+	Dim catalogo As Variant, impostos As Variant, indice As Variant, aliqICMSCompra As Variant
+	Dim icc As Double, ic As Double, fob As Double, fi As Double, icmsOP As Double, icmsST As Double, ip As Double, custo As Double, qtd As Long
+	'Verifica se o Fornecedor tem Exceções Tributárias - LMO 30/10/15
+	If uidoc.FieldGetText("Form") = "CotacaoFinanceira" Then	'Projeto não tem o Fornecedor - LMO 11/01/18
+		Call GetExcecaoTributaria(uidoc)
+	End If
+	'
+	For scan = 0 To 49
+		qtd = Val(uidoc.FieldGetText("Q_" & scan))
+		If uidoc.FieldGetText("Produto_" & scan) <> "" And qtd > 0 Then
+			If uidoc.FieldGetText("CustoFOB_" & scan) <> "" Then fob = CDbl(uidoc.FieldGetText("CustoFOB_" & scan)) Else fob = 0
+			If uidoc.FieldGetText("FI_" & scan) <> "" Then fi = CDbl(uidoc.FieldGetText("FI_" & scan)) Else fi = 0
+			'Popula UF de Compra Default
+			If fob > 0 Or fi > 0 Then
+				Call uidoc.FieldSetText("UFCompra_" & scan, "EX")
+			Else
+				If uidoc.FieldGetText("UFCompra_" & scan) = "" Or uidoc.FieldGetText("UFCompra_" & scan) = "EX" Then
+					Call uidoc.FieldSetText("UFCompra_" & scan, "SP")
+				End If
+			End If
+			'Limpa ICMSST de Compra
+			If uidoc.FieldGetText("T_" & scan) <> "HW" Or uidoc.FieldGetText("TipoCompra") = "Remessa" Then
+				Call uidoc.FieldSetText("ICMSSTC_" & scan, "")
+			Else
+				If Right(uidoc.FieldGetText("ST_" & scan), 2) <> "10" Then
+					Call uidoc.FieldSetText("ICMSSTC_" & scan, "")
+				End If
+			End If
+			'Popula CST 100 para Importação TDec
+			If fob > 0 Or fi > 0 Then
+				Call uidoc.FieldSetText("ST_" & scan, "100")
+			End If
+			'Popula campo Fabricante/Importador?
+			If (Left(uidoc.FieldGetText("ST_" & scan), 1) = "1" Or Left(uidoc.FieldGetText("ST_" & scan), 1) = "6") And Right(uidoc.FieldGetText("ST_" & scan), 2) <> "41" Then
+				Call uidoc.FieldSetText("Fabricante_" & scan, "S")
+			ElseIf Left(uidoc.FieldGetText("ST_" & scan), 1) = "2" Or Left(uidoc.FieldGetText("ST_" & scan), 1) = "7" Then
+				Call uidoc.FieldSetText("Fabricante_" & scan, "N")
+			End If
+			'
+			catalogo = CKCatalogo(uidoc.FieldGetText("PartNo_" & scan))
+			Call uidoc.FieldSetText("CF_" & scan, catalogo(0))
+			Call uidoc.FieldSetText("Un_" & scan, catalogo(1))
+			'Popula Impostos
+			impostos = GetImpostos(uidoc.FieldGetText("CF_" & scan))
+			'SW/SV
+			If uidoc.FieldGetText("T_" & scan) <> "HW" Then
+				Call uidoc.FieldSetText("ICC_" & scan, "0,00%")
+				Call uidoc.FieldSetText("II_" & scan, "0,00%")
+				Call uidoc.FieldSetText("IPC_" & scan, "0,00%")
+			'HW
+			Else
+				'ICC
+				'Compra de SP
+				If uidoc.FieldGetText("UFCompra_" & scan) = "SP" Then
+					Call uidoc.FieldSetText("ICC_" & scan, "0,00%")
+				'Importação
+				ElseIf uidoc.FieldGetText("UFCompra_" & scan) = "EX" Then
+					Call uidoc.FieldSetText("ICC_" & scan, Format(impostos(0), "percent"))
+				'Compra de Fora de SP
+				Else
+					aliqICMSCompra = CKICMS(uidoc.FieldGetText("UFCompra_" & scan), "SP")
+					If Left(uidoc.FieldGetText("ST_" & scan), 1) = "1" Or Left(uidoc.FieldGetText("ST_" & scan), 1) = "2" Or Left(uidoc.FieldGetText("ST_" & scan), 1) = "3" Or Left(uidoc.FieldGetText("ST_" & scan), 1) = "8" Then icc = aliqICMSCompra(1) Else icc = aliqICMSCompra(0)
+					If Right(uidoc.FieldGetText("ST_" & scan), 2) <> "10" Then
+						Call uidoc.FieldSetText("ICC_" & scan, "0,00%")
+					Else
+						'Regime Normal
+						If uidoc.FieldGetText("RegimeTributario") = "Normal" Or uidoc.FieldGetText("Form") = "Projeto" Then	'Projeto não tem o Fornecedor - LMO 11/01/18
+							Call uidoc.FieldSetText("ICC_" & scan, Format(icc, "percent"))
+						End If
+					End If
+				End If
+				'IPI
+				If uidoc.FieldGetText("Fabricante_" & scan) = "S" Then
+					'Exceção Tributária - LMO 30/10/15
+					indice = ArrayGetIndex(tributos, "IPI")
+					If Not IsNull(indice) Then
+						If tipos(indice) = "Isenção" Then
+							Call uidoc.FieldSetText("IPC_" & scan, "0,00%")
+						Else
+							If tipoReducao(indice) = "Alíquota" Then
+								Call uidoc.FieldSetText("IPC_" & scan, Format(reducao(indice), "percent"))
+							End If
+						End If
+					Else
+						Call uidoc.FieldSetText("IPC_" & scan, Format(impostos(1), "percent"))
+					End If
+				Else
+					Call uidoc.FieldSetText("IPC_" & scan, "0,00%")
+				End If
+				'II
+				If fob > 0 Or fi > 0 Then
+					'Importação TDec
+					Call uidoc.FieldSetText("II_" & scan, Format(impostos(2), "percent"))
+				Else
+					Call uidoc.FieldSetText("II_" & scan, "0,00%")
+				End If
+				'ICMS-ST Outros Estados
+				If uidoc.FieldGetText("UFCompra_" & scan) <> "SP" And uidoc.FieldGetText("UFCompra_" & scan) <> "EX" Then
+					If Right(uidoc.FieldGetText("ST_" & scan), 2) <> "10" Then
+						If uidoc.FieldGetText("IPC_" & scan) <> "" Then ip = CDbl(uidoc.FieldGetText("IPC_" & scan)) Else ip = 0
+						If uidoc.FieldGetText("Custo_" & scan) <> "" Then custo = CDbl(uidoc.FieldGetText("Custo_" & scan)) Else custo = 0
+						icmsOP = custo / (1 + ip) * icc
+						icmsST = (custo - icmsOP) / (1 - impostos(0)) * impostos(0)
+						Call uidoc.FieldSetText("ICMSSTC_" & scan, CStr(Round(icmsST - icmsOP, 4)))
+					End If
+				End If
+			End If
+		Else
+			Call uidoc.FieldSetText("Q_" & scan, "")
+			Call uidoc.FieldSetText("t_" & scan, "HW")
+			Call uidoc.FieldSetText("Un_" & scan, "")
+			Call uidoc.FieldSetText("CF_" & scan, "")
+			Call uidoc.FieldSetText("ST_" & scan, "")
+			Call uidoc.FieldSetText("UFCompra_" & scan, "")
+			Call uidoc.FieldSetText("us_" & scan, "R$")
+			Call uidoc.FieldSetText("CustoFOB_" & scan, "")
+			Call uidoc.FieldSetText("FI_" & scan, "")
+			Call uidoc.FieldSetText("Custo_" & scan, "")
+			Call uidoc.FieldSetText("ICMSSTC_" & scan, "")
+			Call uidoc.FieldSetText("CusTot_" & scan, "0,00")
+			Call uidoc.FieldSetText("ICC_" & scan, "")
+			Call uidoc.FieldSetText("IPC_" & scan, "")
+			Call uidoc.FieldSetText("II_" & scan, "")
+		End If
+Proximo:
+	Next
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:CheckItensListaUidoc:1:8
+Function CheckItensListaUidoc(ui As NotesUIDocument)
+	
+	On Error Resume Next
+	'Verifica dados relevantes da Lista CPS
+	Dim custoFOB As Double, fi As Double, custo As Double, mg As Double, venda As Double, icmsst As Double
+	Dim scan As Integer, scan2 As Integer, item As String
+	CheckItensListaUidoc = True
+	
+	'******* Pré-Venda *******
+	'1.Quantidade, PartNo, Produto
+	If ui.Fieldgettext("Form") = "Projeto" And InStr(ui.FieldGetText("Sit"), "Pré-Venda") > 0 Then
+		For scan = 0 To 49
+			If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+				If Val(ui.FieldGetText("Q_" & scan)) = 0 Or ui.FieldGetText("PartNo_" & scan) = "" Or ui.FieldGetText("Produto_" & scan) = "" Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			End If
+		Next
+		If Not CheckItensListaUidoc Then
+			MsgBox "Você precisa informar a Quantidade, PartNo e Produto na Lista CPS no(s) Item(s) " & item & "." & Chr(10) & "Corrija no Projeto.", 16, "Erro de Preenchimento"
+			Call ui.GotoField("Q_0")
+			Exit Function
+		End If
+		Exit Function
+	End If
+	
+	'1.Quantidade, PartNo, Produto, Unidade de Medida e UF de Compra
+	If ui.Fieldgettext("Form") <> "Projeto" Then
+		For scan = 0 To 49
+			If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+				If ui.FieldGetText("PartNo_" & scan) = "" Or ui.FieldGetText("Produto_" & scan) = "" Or ui.FieldGetText("Un_" & scan) = "" Or ui.FieldGetText("UFCompra_" & scan) = "" Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			End If
+		Next
+		If Not CheckItensListaUidoc Then
+			MsgBox "Você precisa informar a Quantidade, PartNo, Produto, Unidade de Medida e UF de Compra na Lista CPS no(s) Item(s) " & item & "." & Chr(10) & "Corrija na Lista CPS.", 16, "Erro de Preenchimento"
+			Call ui.GotoField("PartNo_0")
+			Exit Function
+		End If
+	End If	
+	'2.Código da Situação Tributária de Compra (Branco, Tamanho, Origem, Situação Tributária)
+	For scan = 0 To 49
+		If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+				If ui.FieldGetText("ST_" & scan) = "" Or Len(ui.FieldGetText("ST_" & scan)) <> 3 Or _
+				(Left(ui.FieldGetText("ST_" & scan), 1) <> "0" And Left(ui.FieldGetText("ST_" & scan), 1) <> "1" And Left(ui.FieldGetText("ST_" & scan), 1) <> "2" And Left(ui.FieldGetText("ST_" & scan), 1) <> "3" And Left(ui.FieldGetText("ST_" & scan), 1) <> "4" And Left(ui.FieldGetText("ST_" & scan), 1) <> "5" And Left(ui.FieldGetText("ST_" & scan), 1) <> "6" And Left(ui.FieldGetText("ST_" & scan), 1) <> "7" And Left(ui.FieldGetText("ST_" & scan), 1) <> "8") Or _
+				(Right(ui.FieldGetText("ST_" & scan), 2) <> "00" And Right(ui.FieldGetText("ST_" & scan), 2) <> "10" And Right(ui.FieldGetText("ST_" & scan), 2) <> "20" And Right(ui.FieldGetText("ST_" & scan), 2) <> "30" And Right(ui.FieldGetText("ST_" & scan), 2) <> "40" And Right(ui.FieldGetText("ST_" & scan), 2) <> "41" And Right(ui.FieldGetText("ST_" & scan), 2) <> "50" And Right(ui.FieldGetText("ST_" & scan), 2) <> "51" And Right(ui.FieldGetText("ST_" & scan), 2) <> "60" And Right(ui.FieldGetText("ST_" & scan), 2) <> "70" And Right(ui.FieldGetText("ST_" & scan), 2) <> "90") Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+		End If
+	Next
+	If Not CheckItensListaUidoc Then
+		MsgBox "Código da Situação Tributária de Compra Inválido no(s) Item(s) " & item & "." & Chr(10) & "Corrija no Projeto/Cotação Financeira." & Chr(10) & "Não pode estar em Branco." & Chr(10) & "Precisa ter 3 caracteres." & Chr(10) & "Primeiro caracter: 0, 1, 2, 3, 4, 5, 6, 7 ou 8." & Chr(10) & "Dois últimos caracteres: 00, 10, 20, 30, 40, 41, 50, 51, 60, 70 ou 90.", 16, "Erro de Preenchimento"
+		Call ui.GotoField("ST_0")
+		Exit Function
+	End If
+	'3.Custo/Mg/CustoUnit
+	If ui.Fieldgettext("Form") = "Projeto" Then
+		For scan = 0 To 49
+			If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+				If ui.FieldGetText("Custo_" & scan) = "" Or ui.FieldGetText("Mg_" & scan) = "" Or ui.FieldGetText("CustoUnit_" & scan) = "" Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			End If
+		Next
+		If Not CheckItensListaUidoc Then
+			MsgBox "Você precisa completar todos os dados da Lista CPS no(s) Item(s) " & item & "." & Chr(10) & "Corrija no Projeto.", 16, "Erro de Preenchimento"
+			Call ui.GotoField("Custo_0")
+			Exit Function
+		End If
+		'Mg Inferior a 15% (Não cobre os Impostos)
+		For scan = 0 To 49
+			If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+				If CDbl(ui.FieldGetText("Mg_" & scan)) > 0.85 Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			End If
+		Next
+		If Not CheckItensListaUidoc Then
+			MsgBox "A Margem não pode ser maior que 0,85 na Lista CPS no(s) Item(s) " & item & "." & Chr(10) & "Corrija no Projeto.", 16, "Erro de Preenchimento"
+			Call ui.GotoField("Mg_0")
+			Exit Function
+		End If
+	ElseIf ui.Fieldgettext("Form") = "CotacaoFinanceira" Then
+		For scan = 0 To 49
+			If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+				If ui.FieldGetText("Custo_" & scan) = "" Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			End If
+		Next
+		If Not CheckItensListaUidoc Then
+			MsgBox "Você precisa informar o Custo Unitário no(s) Item(s) " & item & "." & Chr(10) & "Corrija na Cotação Financeira.", 16, "Erro de Preenchimento"
+			Call ui.GotoField("CustoUnit_0")
+			Exit Function
+		End If
+	End If
+	'4.CustoFOB/FI
+	For scan = 0 To 49
+		If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+			'Preenchimento dos Campos na Importação TDec (FOB e FI)
+			If ui.Document.Form(0) = "CotacaoFinanceira" Then
+				If ui.FieldGetText("Acao") = "Importacao" And (ui.FieldGetText("CustoFOB_" & scan) = "" And ui.FieldGetText("FI_" & scan) = "" Or ui.FieldGetText("CustoFOB_" & scan) <> "" And ui.FieldGetText("FI_" & scan) = "" Or ui.FieldGetText("CustoFOB_" & scan) = "" And ui.FieldGetText("FI_" & scan) <> "") Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			ElseIf ui.Document.Form(0) = "Projeto" Then
+				If ui.FieldGetText("CustoFOB_" & scan) <> "" And ui.FieldGetText("FI_" & scan) = "" Or ui.FieldGetText("CustoFOB_" & scan) = "" And ui.FieldGetText("FI_" & scan) <> "" Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			End If	
+		End If
+	Next
+	If Not CheckItensListaUidoc Then
+		MsgBox "Você precisa completar os dados da Importação TDec na Lista CPS no(s) Item(s) " & item & "." & Chr(10) & "Corrija no Projeto/Cotação Financeira.", 16, "Erro de Preenchimento"
+		Call ui.GotoField("CustoFOB_0")
+		Exit Function
+	End If
+	'5.ICMS de Compra (Branco)
+	For scan = 0 To 49
+		If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+			If ui.FieldGetText("T_" & scan) = "HW" Then
+				If ui.FieldGetText("ICC_" & scan) = "" Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			End If
+		End If
+	Next
+	If Not CheckItensListaUidoc Then
+		MsgBox "O ICMS de Compra não pode estar em Branco. Solicite a Atualização da Carga Tributária a nossa Área Contábil/Fiscal no(s) Item(s) " & item & ".", 16, "Erro na Lista de Materiais"
+		Exit Function
+	End If
+	'6.Protocolo de Compra (Inexistente ou Desatualizado)
+	For scan = 0 To 49
+		If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+			If ui.FieldGetText("T_" & scan) = "HW" Then
+				If ui.FieldGetText("ICC_" & scan) = "?" Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			End If
+		End If
+	Next
+	If Not CheckItensListaUidoc Then
+		MsgBox "Solicitar a Consulta do Protocolo de Compra Contribuinte a nossa Área Contábil/Fiscal no(s) Item(s) " & item & ".", 16, "Erro na Lista de Materiais"
+		Exit Function
+	End If
+	'7.ICMS de Compra (Zero)
+	If ui.Fieldgettext("Form") = "CotacaoFinanceira" Then
+		If ui.Fieldgettext("RegimeTributario") <> "Simples Nacional" Then
+			For scan = 0 To 49
+				If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+					If ui.FieldGetText("T_" & scan) = "HW" Then
+						If ui.FieldGetText("UFCompra_" & scan) <> "SP" Then
+							If Right(ui.FieldGetText("ST_" & scan), 2) = "10" Or ui.FieldGetText("UFCompra_" & scan) = "EX" Then
+								If CDbl(ui.FieldGetText("ICC_" & scan)) = 0 Then
+									CheckItensListaUidoc = False
+									If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+									scan2 = scan2 + 1
+								End If
+							End If	
+						End If
+					End If
+				End If
+			Next
+		End If
+	Else
+		For scan = 0 To 49
+			If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+				If ui.FieldGetText("T_" & scan) = "HW" Then
+					If ui.FieldGetText("UFCompra_" & scan) <> "SP" Then
+						If Right(ui.FieldGetText("ST_" & scan), 2) = "10" Or ui.FieldGetText("UFCompra_" & scan) = "EX" Then
+							If CDbl(ui.FieldGetText("ICC_" & scan)) = 0 Then
+								CheckItensListaUidoc = False
+								If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+								scan2 = scan2 + 1
+							End If
+						End If	
+					End If
+				End If
+			End If
+		Next
+	End If	
+	If Not CheckItensListaUidoc Then
+		MsgBox "A alíquota do ICMS de Compra não pode ser zero. Solicite a Atualização da Carga Tributária a nossa Área Contábil/Fiscal no(s) Item(s) " & item & ".", 16, "Erro na Lista de Materiais"
+		Exit Function
+	End If
+	'8.ICMS de Compra (Maior que 100%)
+	For scan = 0 To 49
+		If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+			If ui.FieldGetText("T_" & scan) = "HW" Then
+				If CDbl(ui.FieldGetText("ICC_" & scan)) > 1 Then
+					CheckItensListaUidoc = False
+					If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+					scan2 = scan2 + 1
+				End If
+			End If
+		End If
+	Next
+	If Not CheckItensListaUidoc Then
+		If ui.Fieldgettext("Form") = "CotacaoFinanceira" Then
+			MsgBox "A alíquota do ICMS de Compra não pode ser maior que 100% no(s) Item(s) " & item & "." & Chr(10) & "Atualize a Cotação Financeira", 16, "Erro de Preenchimento"
+		Else
+			MsgBox "A alíquota do ICMS de Compra não pode ser maior que 100% no(s) Item(s) " & item & "." & Chr(10) & "Solicite a Atualização da Carga Tributária a nossa Área Contábil/Fiscal no(s) Item(s) " & item & ".", 16, "Erro de Preenchimento"
+		End If	
+		Exit Function
+	End If
+	'9.II na Importação TDec (Não pode ser zero)
+	For scan = 0 To 49
+		If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+			If ui.FieldGetText("T_" & scan) = "HW" Then
+				If ui.FieldGetText("CustoFOB_" & scan) <> "" And ui.FieldGetText("FI_" & scan) <> "" Then
+					If ui.FieldGetText("TipoCompra") <> "Consumo" And ui.FieldGetText("TipoCompra") <> "Remessa" And ui.FieldGetText("TipoCompra") <> "Ativo" Then
+						If ui.FieldGetText("II_" & scan) = "" Then
+							CheckItensListaUidoc = False
+							If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+							scan2 = scan2 + 1
+						End If
+					End If
+				End If
+			End If
+		End If
+	Next
+	If Not CheckItensListaUidoc Then
+		MsgBox "A alíquota do II não pode estar em branco na Importação TDec(FOB e FI preenchidos) no(s) Item(s) " & item & "." & Chr(10) & "Solicite a Atualização da Carga Tributária a nossa Área Contábil/Fiscal no(s) Item(s) " & item & ".", 16, "Erro de Preenchimento"
+		Exit Function
+	End If
+	'10.UF do Fornecedor e UF do Item
+	If ui.Document.Form(0) = "CotacaoFinanceira" Then
+		For scan = 0 To 49
+			If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+				If ui.FieldGetText("FornecedorA") <> "TDECREDES" Then
+					If ui.FieldGetText("UFCompra_" & scan) <> "EX" Then
+						If ui.FieldGetText("UFA") <> ui.FieldGetText("UFCompra_" & scan) Then
+							CheckItensListaUidoc = False
+							If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+							scan2 = scan2 + 1
+						End If
+					End If
+				End If
+			End If
+		Next
+		If Not CheckItensListaUidoc Then
+			MsgBox "UF do Fornecedor precisa ser igual a UF de Compra no(s) Item(s) " & item & "." & Chr(10) & "Selecione outro Fornecedor ou altere a UF de Compra no Projeto/Cotação Financeira.", 16, "Erro de Preenchimento"
+			Exit Function
+		End If
+	End If
+	'11.ICMSST de Compra do Fornecedor (Branco ou Zero)
+	For scan = 0 To 49
+		If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+			If ui.FieldGetText("T_" & scan) = "HW" Then
+				If Right(ui.FieldGetText("ST_" & scan), 2) = "10" Then
+					If ui.FieldGetText("ICMSSTC_" & scan) = "" Then icmsst = 0 Else icmsst = CDbl(ui.FieldGetText("ICMSSTC_" & scan))
+					If icmsst = 0 Then
+						CheckItensListaUidoc = False
+						If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+						scan2 = scan2 + 1
+					End If
+				End If	
+			End If
+		End If
+	Next
+	If Not CheckItensListaUidoc Then
+		MsgBox "O ICMS-ST de Compra não pode ser branco nem zero no(s) Item(s) " & item & "." & Chr(10) & "Corrija no Projeto/Cotação Financeira.", 16, "Erro de Preenchimento"
+		Call ui.GotoField("ICMSSTC_0")
+		Exit Function
+	End If
+	'12.ICMS Outros Estados (Branco ou Zero)
+	For scan = 0 To 49
+		If ui.FieldGetText("Produto_" & scan) <> "" Or Val(ui.FieldGetText("Q_" & scan)) > 0 Then
+			If ui.FieldGetText("T_" & scan) = "HW" Then
+				If ui.FieldGetText("UFCompra_" & scan) <> "SP" And ui.FieldGetText("UFCompra_" & scan) <> "EX" Then
+					If Right(ui.FieldGetText("ST_" & scan), 2) = "10" Then
+						If ui.FieldGetText("ICMSSTC_" & scan) = "" Then icmsst = 0 Else icmsst = CDbl(ui.FieldGetText("ICMSSTC_" & scan))
+						If icmsst = 0 Then
+							CheckItensListaUidoc = False
+							If scan2 = 0 Then item = CStr(scan + 1) Else item = item & ", " & (scan + 1)
+							scan2 = scan2 + 1
+						End If
+					End If
+				End If
+			End If
+		End If
+	Next
+	If Not CheckItensListaUidoc Then
+		MsgBox "Solicitar a Consulta de Protocolo da UF de Compra a nossa Área Contábil/Fiscal no(s) Item(s) " & item & ".", 16, "Erro de Preenchimento"
+		Exit Function
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:2:GeraControle:5:8
+%REM
+	Sub CriaPlanilhaFinanceira
+	Description: Comments for Sub
+%END REM
+Sub GeraControle(doc As NotesDocument, tipo As String)
+	
+	Dim ws As New NotesUIWorkspace
+	Dim session As New NotesSession
+	Dim controle As NotesUIDocument 
+	Set controle = ws.ComposeDocument("", "", "ControleFinanceiro")
+	controle.Document.Autor = session.Commonusername
+	controle.Document.Criacao = Now
+	controle.Document.Area = doc.Area(0)
+	controle.Document.AreaVendas = doc.AreaVendas(0)
+	controle.Document.CodigoOrigem = doc.Codigo(0)
+	controle.Document.IdOrigem = doc.Id(0)
+	controle.Document.DescricaoOrigem = doc.Descricao(0)
+	controle.Document.Codigo = doc.Codigo(0)
+	controle.Document.Tipo = tipo
+	controle.Document.Resultado_P = doc.Resultado_P(0)
+	controle.Document.ValorEstimado = doc.ValorEstimado(0)
+	controle.Document.ValorEstimadoPOC = doc.ValorEstimadoPOC(0)
+	controle.Document.GerenteConta = doc.GerenteConta(0)
+	controle.Document.Inside = doc.Inside(0)
+	controle.Document.TipoVenda = doc.TipoVenda(0)
+	controle.Document.Desconto = doc.Desconto(0)
+	'Popula Campos de Saldo para consistencia no Remanejamento de Verbas - LMO 02/10/24
+	Call AtualizaSaldosControle(controle)
+	If tipo = "Planejado" Or tipo = "Pré-Venda Planejada" Or tipo = "POC Planejado" Then
+		controle.Document.Status = "Aprovado"
+	End If
+	Call controle.Refreshhideformulas
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:CKCustoHora:5:8
+%REM
+	Function GetCustoHora
+	Description: Comments for Function
+%END REM
+Function CKCustoHora(area As String) As Double
+	
+	On Error Resume Next
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase(session.Currentdatabase.Server, "timesheet.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument, docCusto As NotesDocument
+	Set view = db.GetView("(CustoHora)")
+	'Verifica se Área tem Custo da Hora 
+	Set doc = view.Getdocumentbykey(area, True)
+	If doc Is Nothing Then
+		Exit Function
+	End if 
+	'
+	Dim key(1) As String
+	key(0) = area
+	Dim data As New NotesDateTime(Today)
+	Do While docCusto Is Nothing
+		key(1) = Month(data.DateOnly) & "/" & Year(data.DateOnly)
+		Set docCusto = view.Getdocumentbykey(key, True)
+		Call data.Adjustmonth(-1)
+	Loop
+	CKCustoHora = Round(docCusto.CustoMedioHoraComOverhead(0), 2)
+	
+End Function
+
+'++LotusScript Development Environment:2:2:AtualizaPlanilhaFinanceira:5:8
+%REM
+	Sub AtualizaPlanilha
+	Description: Comments for Sub
+%END REM
+Sub AtualizaPlanilhaFinanceira(doc As NotesDocument)
+	
+	On Error Resume Next
+	Dim db As New NotesDatabase(doc.ParentDatabase.Server, "servicos.nsf")
+	Dim view As NotesView
+	Dim planilha As NotesDocument
+	Set view = db.GetView("(Planilha/Codigo)")
+	Set planilha = view.Getdocumentbykey(doc.Codigo(0), True)
+	If Not planilha Is Nothing Then
+		If doc.Form(0) = "Projeto" Then
+			planilha.Descricao = doc.Descricao(0)
+			planilha.StatusNegocio = doc.StatusNegocio(0)
+			planilha.Sit = doc.Sit(0)
+			planilha.SitNumero = doc.SitNumero(0)
+			planilha.AreaVenda = doc.AreaVenda(0)
+			planilha.Area = doc.Area(0)
+			planilha.CodCliente = doc.CodCliente(0)
+			planilha.CodClienteFaturamento = doc.CodClienteFaturamento(0)
+			planilha.Resultado_P = doc.Resultado_P(0)
+			planilha.GerenteConta = doc.GerenteConta(0)
+			planilha.Inside = doc.Inside(0)
+			planilha.Desconto = doc.Desconto(0)
+		End If
+		Call CalcPlanilha(planilha)
+		Call planilha.Save(True, True)
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:CkCampos:1:8
+Function CkCampos (uidoc As NotesuiDocument, CodPed As String) As Boolean
+	'Verifica campos da Cotação Financeira
+	
+	CkCampos = True
+	If uidoc.FieldGetText( "Fornecedor" & CodPed$ ) = "" Then
+		Msgbox "Favor informar o Código de Fornecedor", 16 , "Erro"
+		CkCampos = False
+	Elseif uidoc.FieldGetText( "PrazoPagto" & CodPed$ ) = "" Then
+		Msgbox "Favor informar o Prazo de Pagamento", 16 , "Erro"
+		Call uidoc.Gotofield("PrazoPagto" & CodPed$ )
+		CkCampos = False
+	Elseif uidoc.FieldGetText( "Entrega" & CodPed$ ) = "" Then
+		Msgbox "Favor informar o Local da Entrega", 16 , "Erro"
+		Call uidoc.Gotofield("Entrega" & CodPed$ )
+		CkCampos = False
+	Elseif uidoc.FieldGetText( "PrazoEntrega" & CodPed$ ) = "" Then
+		Msgbox "Favor informar o Prazo de Entrega", 16 , "Erro"
+		Call uidoc.Gotofield("PrazoEntrega" & CodPed$ )
+		CkCampos = False
+	Elseif uidoc.FieldGetText( "Garantia" & CodPed$ ) = "" Then
+		Msgbox "Favor informar a Garantia dos Produtos", 16 , "Erro"
+		Call uidoc.Gotofield("Garantia" & CodPed$ )
+		CkCampos = False
+	ElseIf uidoc.FieldGetText( "Descricao" & CodPed$ ) = "" Then
+		MsgBox "Favor informar a Descrição", 16 , "Erro"
+		Call uidoc.Gotofield("Descricao" & CodPed$ )
+		CkCampos = False
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:1:GetCodRequisicao:1:8
+Function GetCodRequisicao(uidoc As NotesUIDocument) As String
+	
+	Dim db As New NotesDatabase(uidoc.Document.Parentdatabase.Server, "Almoxarifado.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim x As Integer
+	x = 1
+	Set view = db.GetView("(Requisicao/Codigo)")
+	Set doc = view.GetDocumentByKey("Almoxarifado-" & x)
+	Do Until doc Is Nothing
+		x = x + 1
+		Set doc = view.GetDocumentByKey("Almoxarifado-" & x)
+	Loop
+	GetCodRequisicao = "Almoxarifado-" & x
+	
+End Function
+
+'++LotusScript Development Environment:2:1:GeraCodigoPedidoFornecedor:1:8
+Function GeraCodigoPedidoFornecedor(fornecedor As String)
+	
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase(session.CurrentDatabase.Server, "compras.nsf")
+	Dim view As NotesView
+	Dim dc As NotesDocumentCollection
+	Dim doc As NotesDocument
+	Dim ckCodigo As String, cont As Integer
+	Set view = db.getView("(PedidosPO)")
+	Set dc = view.Getalldocumentsbykey(fornecedor & "-", False)
+	cont = dc.Count + 1
+	Set doc = view.Getdocumentbykey(Fornecedor & "-" & cont, True)
+	Do Until doc Is Nothing
+		cont = cont + 1
+		Set doc = view.Getdocumentbykey(Fornecedor & "-" & cont, True)
+	Loop
+	GeraCodigoPedidoFornecedor = Fornecedor & "-" & cont
+	
+End Function
+
+'++LotusScript Development Environment:2:2:ReprovaCotacao:5:8
+%REM
+	Sub ReprovaCotacao
+	Description: Comments for Sub
+%END REM
+Sub ReprovaCotacao(doc As NotesDocument)
+	
+	Dim session As New NotesSession
+	Dim rtitem As NotesRichTextItem
+	doc.Sit = "Não Aprovada"
+	doc.AprovadoPor = doc.User(0)
+	doc.DataAprovacao = Now
+	Call doc.Save(True, True)
+	'Atualiza Planilha Financeira
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim planilha As NotesDocument
+	Set db = session.CurrentDatabase
+	Set view = db.GetView("(Planilha/Codigo)")
+	Set planilha = view.GetDocumentByKey(doc.Codigo(0), True)
+	If Not planilha Is Nothing Then
+		Call CalcPlanilha(planilha)
+		Call planilha.Save(False, False)
+	End If
+	'Envia Email
+	Dim richStyle As NotesRichTextStyle
+	Set richStyle = session.CreateRichTextStyle
+	richStyle.NotesFont = FONT_ROMAN
+	richStyle.FontSize = 10
+	Dim memo As NotesDocument
+	Set memo = New NotesDocument( session.CurrentDatabase )
+	memo.Form = "Memo"
+	memo.From = session.CommonUserName
+	memo.SendTo = doc.Requisitante(0)
+	memo.CopyTo = "Compras de Projetos"
+	'memo.BlindCopyTo = "Ludimila Oliveira"
+	memo.Subject = "-> Cotação de Planilha Financeira Reprovada - " & doc.DocID(0)
+	Call rtitem.AppendText( "Cotação de Planilha Financeira Reprovada -> " )	
+	Call rtitem.AppendDocLink( doc, "Link para Cotação de Planilha Financeira")
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Tipo: " & doc.Tipo(0))
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Saldo: R$ " & Format(doc.Saldo(0), "Standard" ) )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Valor Solicitado: R$ " & Format(doc.TotMateriais(0), "Standard" ) )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Descrição: " & doc.DescricaoA(0))
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.Appendtext( doc.User(0) & "," )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.Appendtext( "TDec Network Group" )
+	Call memo.Send( False )
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:SolicitaAprovacaoControle:5:8
+%REM
+	Sub SolicitaAprovacaoControle
+	Description: Comments for Sub
+%END REM
+Sub SolicitaAprovacaoControle(uidoc As NotesUIDocument)
+	
+	On Error Resume Next
+	Dim session As New NotesSession
+	Call uidoc.FieldSetText("Requisitante", session.CommonUserName)
+	Call uidoc.FieldSetText("DataRequisicao", CStr(Now))
+	If uidoc.Fieldgettext("Status") = "Pedir Aprovação" Then
+		Call uidoc.FieldSetText("Status", "Aguardando Aprovação do Gerente")
+	Else
+		'Diretoria aprova Despesas do Projeto 
+		If CDbl(uidoc.Fieldgettext("CustoP")) > 0 Or CDbl(uidoc.Fieldgettext("VendasP")) > 0 Or CDbl(uidoc.Fieldgettext("TerceirosP")) > 0 Then
+			Call uidoc.FieldSetText("Status", "Aguardando Aprovação da Diretoria")
+		'Projetos aprova Despesas do Time Sheet
+		Else
+			Call uidoc.FieldSetText("Status", "Aguardando Aprovação de Projetos")
+		End If
+	End If
+	uidoc.Save
+	uidoc.Close
+	'Envia Email
+	Call AvisoSolicitaAprovacaoControle(uidoc.Document)
+
+End Sub
+
+'++LotusScript Development Environment:2:1:ConsisteValoresControle:5:8
+%REM
+	Function ConsisteValoresControle
+	Description: Comments for Function
+%END REM
+Function ConsisteValoresControle(uidoc As NotesUIDocument) As Boolean
+	
+	ConsisteValoresControle = False
+	Dim tipo As String
+	Dim passP As Double, passP_1 As Double, hospP As Double, hospP_1 As Double, alugP As Double, alugP_1 As Double, matP As Double, matP_1 As Double, matP_2 As Double, servP As Double, servP_1 As Double
+	Dim kmP As Double, kmP_1 As Double, transP As Double, transP_1 As Double, transP_2 As Double, transP_3 As Double, transP_4 As Double, transP_5 As Double, transP_6 As Double, alimP As Double, alimP_1 As Double, teleP As Double
+	Dim planP As Double, gerP As Double, execP As Double, docP As Double
+	Dim terceirosP As Double
+	Dim freteP As Double, intermediacaoP As Double
+	If uidoc.FieldGetText("PassP") <> "" Then passP = CDbl(uidoc.FieldGetText("PassP"))
+	If uidoc.FieldGetText("PassP_1") <> "" Then passP_1 = CDbl(uidoc.FieldGetText("PassP_1"))
+	If uidoc.FieldGetText("HospP") <> "" Then hospP = CDbl(uidoc.FieldGetText("HospP"))
+	If uidoc.FieldGetText("HospP_1") <> "" Then hospP_1 = CDbl(uidoc.FieldGetText("HospP_1"))
+	If uidoc.FieldGetText("AlugP") <> "" Then alugP = CDbl(uidoc.FieldGetText("AlugP"))
+	If uidoc.FieldGetText("AlugP_1") <> "" Then alugP_1 = CDbl(uidoc.FieldGetText("AlugP_1"))
+	If uidoc.FieldGetText("MatP") <> "" Then matP = CDbl(uidoc.FieldGetText("MatP"))
+	If uidoc.FieldGetText("MatP_1") <> "" Then matP_1 = CDbl(uidoc.FieldGetText("MatP_1"))
+	If uidoc.FieldGetText("MatP_2") <> "" Then matP_2 = CDbl(uidoc.FieldGetText("MatP_2"))
+	If uidoc.FieldGetText("ServP") <> "" Then servP = CDbl(uidoc.FieldGetText("ServP"))
+	If uidoc.FieldGetText("ServP_1") <> "" Then servP_1 = CDbl(uidoc.FieldGetText("ServP_1"))
+	If uidoc.FieldGetText("KmP") <> "" Then kmP = CDbl(uidoc.FieldGetText("KmP"))
+	If uidoc.FieldGetText("KmP_1") <> "" Then kmP_1 = CDbl(uidoc.FieldGetText("KmP_1"))
+	If uidoc.FieldGetText("TransP") <> "" Then transP = CDbl(uidoc.FieldGetText("TransP"))
+	If uidoc.FieldGetText("TransP_1") <> "" Then transP_1 = CDbl(uidoc.FieldGetText("TransP_1"))
+	If uidoc.FieldGetText("TransP_2") <> "" Then transP_2 = CDbl(uidoc.FieldGetText("TransP_2"))
+	If uidoc.FieldGetText("TransP_3") <> "" Then transP_3 = CDbl(uidoc.FieldGetText("TransP_3"))
+	If uidoc.FieldGetText("TransP_4") <> "" Then transP_4 = CDbl(uidoc.FieldGetText("TransP_4"))
+	If uidoc.FieldGetText("TransP_5") <> "" Then transP_5 = CDbl(uidoc.FieldGetText("TransP_5"))
+	If uidoc.FieldGetText("TransP_6") <> "" Then transP_6 = CDbl(uidoc.FieldGetText("TransP_6"))
+	If uidoc.FieldGetText("AlimP") <> "" Then alimP = CDbl(uidoc.FieldGetText("AlimP"))
+	If uidoc.FieldGetText("AlimP_1") <> "" Then alimP_1 = CDbl(uidoc.FieldGetText("AlimP_1"))
+	If uidoc.FieldGetText("TeleP") <> "" Then teleP = CDbl(uidoc.FieldGetText("TeleP"))
+	If uidoc.FieldGetText("PlanP") <> "" Then planP = CDbl(uidoc.FieldGetText("PlanP"))
+	If uidoc.FieldGetText("GerP") <> "" Then gerP = CDbl(uidoc.FieldGetText("GerP"))
+	If uidoc.FieldGetText("ExecP") <> "" Then execP = CDbl(uidoc.FieldGetText("ExecP"))
+	If uidoc.FieldGetText("DocP") <> "" Then docP = CDbl(uidoc.FieldGetText("DocP"))
+	If uidoc.FieldGetText("TerceirosP") <> "" Then terceirosP = CDbl(uidoc.FieldGetText("TerceirosP"))
+	If uidoc.FieldGetText("FreteP") <> "" Then freteP = CDbl(uidoc.FieldGetText("FreteP"))
+	If uidoc.FieldGetText("IntermediacaoP") <> "" Then intermediacaoP = CDbl(uidoc.FieldGetText("IntermediacaoP"))
+	'Verifica se o Valor é negativo
+	If passP < 0 Then
+		tipo = "Passagens"
+		Call uidoc.Gotofield("Pass")
+		GoTo msg
+	ElseIf passP_1 < 0 Then
+		tipo = "Passagens"
+		Call uidoc.Gotofield("Pass_1")
+		GoTo msg
+	ElseIf hospP < 0 Then
+		tipo = "Hospedagens"
+		Call uidoc.Gotofield("Hosp")
+		GoTo msg
+	ElseIf hospP_1 < 0 Then
+		tipo = "Hospedagens"
+		Call uidoc.Gotofield("Hosp_1")
+		GoTo msg
+	ElseIf alugP < 0 Then
+		tipo = "Aluguéis"
+		Call uidoc.Gotofield("Alug")
+		GoTo msg
+	ElseIf alugP_1 < 0 Then
+		tipo = "Aluguéis"
+		Call uidoc.Gotofield("Alug_1")
+		GoTo msg
+	ElseIf matP < 0 Then
+		tipo = "Compras para Prestação de Serviços"
+		Call uidoc.Gotofield("Mat")
+		GoTo msg
+	ElseIf matP_1 < 0 Then
+		tipo = "Compras para Prestação de Serviços"
+		Call uidoc.Gotofield("Mat_1")
+		GoTo msg
+	ElseIf matP_2 < 0 Then
+		tipo = "Compras para Prestação de Serviços"
+		Call uidoc.Gotofield("Mat_2")
+		GoTo msg
+	ElseIf servP < 0 Then
+		tipo = "Contratação de Terceiros não Faturáveis"
+		Call uidoc.Gotofield("Serv")
+		GoTo msg
+	ElseIf servP_1 < 0 Then
+		tipo = "Contratação de Terceiros não Faturáveis"
+		Call uidoc.Gotofield("Serv_1")
+		GoTo msg
+	ElseIf kmP < 0 Then
+		tipo = "Quilometragem"
+		Call uidoc.Gotofield("Km")
+		GoTo msg
+	ElseIf kmP_1 < 0 Then
+		tipo = "Quilometragem"
+		Call uidoc.Gotofield("Km_1")
+		GoTo msg
+	ElseIf transP < 0 Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans")
+		GoTo msg
+	ElseIf transP_1 < 0 Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_1")
+		GoTo msg
+	ElseIf transP_2 < 0 Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_2")
+		GoTo msg
+	ElseIf transP_3 < 0 Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_3")
+		GoTo msg
+	ElseIf transP_4 < 0 Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_4")
+		GoTo msg
+	ElseIf transP_5 < 0 Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_5")
+		GoTo msg
+	ElseIf transP_6 < 0 Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_6")
+		GoTo msg
+	ElseIf alimP < 0 Then
+		tipo = "Alimentação"
+		Call uidoc.Gotofield("Alim")
+		GoTo msg
+	ElseIf alimP_1 < 0 Then
+		tipo = "Alimentação"
+		Call uidoc.Gotofield("Alim_1")
+		GoTo msg
+	ElseIf teleP < 0 Then
+		tipo = "Telecom"
+		Call uidoc.Gotofield("Tele")
+		GoTo msg
+	ElseIf planP < 0 Then
+		tipo = "Horas de Planejamento"
+		Call uidoc.Gotofield("HorasPlan")
+		GoTo msg
+	ElseIf gerP < 0 Then
+		tipo = "Horas de Gerenciamento"
+		Call uidoc.Gotofield("HorasGer")
+		GoTo msg
+	ElseIf execP < 0 Then
+		tipo = "Horas de Execução"
+		Call uidoc.Gotofield("HorasExec")
+		GoTo msg
+	ElseIf docP < 0 Then
+		tipo = "Horas de Documentação"
+		Call uidoc.Gotofield("HorasDoc")
+		GoTo msg
+	ElseIf terceirosP < 0 Then
+		tipo = "Terceiros Faturáveis"
+		Call uidoc.Gotofield("TerceirosP")
+		GoTo msg
+	ElseIf freteP < 0 Then
+		tipo = "Despesas de Vendas: Frete"
+		Call uidoc.Gotofield("Frete")
+		GoTo msg
+	ElseIf intermediacaoP < 0 Then
+		tipo = "Despesas de Vendas: Intermediação de Vendas"
+		Call uidoc.Gotofield("Intermediacao")
+		GoTo msg
+	End If
+	ConsisteValoresControle = True
+	Exit Function
+	msg:
+	MsgBox "O Valor não pode ser negativo em " & tipo, 16, "Erro em " & tipo
+	Exit Function
+	
+End Function
+
+'++LotusScript Development Environment:2:1:ConsisteSaldosControle:5:8
+%REM
+	Function ConsisteSaldosControle
+	Description: Comments for Function
+%END REM
+Function ConsisteSaldosControle(uidoc As NotesUIDocument) As Boolean
+	
+	ConsisteSaldosControle = False
+	Dim tipo As String
+	Dim passP As Double, passP_1 As Double, hospP As Double, hospP_1 As Double, alugP As Double, alugP_1 As Double, matP As Double, matP_1 As Double, matP_2 As Double, servP As Double, servP_1 As Double
+	Dim kmP As Double, kmP_1 As Double, transP As Double, transP_1 As Double, transP_2 As Double, transP_3 As Double, transP_4 As Double, transP_5 As Double, transP_6 As Double, alimP As Double, alimP_1 As Double, teleP As Double
+	Dim planP As Double, gerP As Double, execP As Double, docP As Double
+	Dim terceirosP As Double
+	Dim freteP As Double, intermediacaoP As Double
+	If uidoc.FieldGetText("PassP") <> "" Then passP = CDbl(uidoc.FieldGetText("PassP"))
+	If uidoc.FieldGetText("PassP_1") <> "" Then passP_1 = CDbl(uidoc.FieldGetText("PassP_1"))
+	If uidoc.FieldGetText("HospP") <> "" Then hospP = CDbl(uidoc.FieldGetText("HospP"))
+	If uidoc.FieldGetText("HospP_1") <> "" Then hospP_1 = CDbl(uidoc.FieldGetText("HospP_1"))
+	If uidoc.FieldGetText("AlugP") <> "" Then alugP = CDbl(uidoc.FieldGetText("AlugP"))
+	If uidoc.FieldGetText("AlugP_1") <> "" Then alugP_1 = CDbl(uidoc.FieldGetText("AlugP_1"))
+	If uidoc.FieldGetText("MatP") <> "" Then matP = CDbl(uidoc.FieldGetText("MatP"))
+	If uidoc.FieldGetText("MatP_1") <> "" Then matP_1 = CDbl(uidoc.FieldGetText("MatP_1"))
+	If uidoc.FieldGetText("MatP_2") <> "" Then matP_2 = CDbl(uidoc.FieldGetText("MatP_2"))
+	If uidoc.FieldGetText("ServP") <> "" Then servP = CDbl(uidoc.FieldGetText("ServP"))
+	If uidoc.FieldGetText("ServP_1") <> "" Then servP_1 = CDbl(uidoc.FieldGetText("ServP_1"))
+	If uidoc.FieldGetText("KmP") <> "" Then kmP = CDbl(uidoc.FieldGetText("KmP"))
+	If uidoc.FieldGetText("KmP_1") <> "" Then kmP_1 = CDbl(uidoc.FieldGetText("KmP_1"))
+	If uidoc.FieldGetText("TransP") <> "" Then transP = CDbl(uidoc.FieldGetText("TransP"))
+	If uidoc.FieldGetText("TransP_1") <> "" Then transP_1 = CDbl(uidoc.FieldGetText("TransP_1"))
+	If uidoc.FieldGetText("TransP_2") <> "" Then transP_2 = CDbl(uidoc.FieldGetText("TransP_2"))
+	If uidoc.FieldGetText("TransP_3") <> "" Then transP_3 = CDbl(uidoc.FieldGetText("TransP_3"))
+	If uidoc.FieldGetText("TransP_4") <> "" Then transP_4 = CDbl(uidoc.FieldGetText("TransP_4"))
+	If uidoc.FieldGetText("TransP_5") <> "" Then transP_5 = CDbl(uidoc.FieldGetText("TransP_5"))
+	If uidoc.FieldGetText("TransP_6") <> "" Then transP_6 = CDbl(uidoc.FieldGetText("TransP_6"))
+	If uidoc.FieldGetText("AlimP") <> "" Then alimP = CDbl(uidoc.FieldGetText("AlimP"))
+	If uidoc.FieldGetText("AlimP_1") <> "" Then alimP_1 = CDbl(uidoc.FieldGetText("AlimP_1"))
+	If uidoc.FieldGetText("TeleP") <> "" Then teleP = CDbl(uidoc.FieldGetText("TeleP"))
+	If uidoc.FieldGetText("PlanP") <> "" Then planP = CDbl(uidoc.FieldGetText("PlanP"))
+	If uidoc.FieldGetText("GerP") <> "" Then gerP = CDbl(uidoc.FieldGetText("GerP"))
+	If uidoc.FieldGetText("ExecP") <> "" Then execP = CDbl(uidoc.FieldGetText("ExecP"))
+	If uidoc.FieldGetText("DocP") <> "" Then docP = CDbl(uidoc.FieldGetText("DocP"))
+	If uidoc.FieldGetText("TerceirosP") <> "" Then terceirosP = CDbl(uidoc.FieldGetText("TerceirosP"))
+	If uidoc.FieldGetText("FreteP") <> "" Then freteP = CDbl(uidoc.FieldGetText("FreteP"))
+	If uidoc.FieldGetText("IntermediacaoP") <> "" Then intermediacaoP = CDbl(uidoc.FieldGetText("IntermediacaoP"))
+	'Verifica o Saldo se o Valor for negativo - LMO 02/10/24
+	If passP < 0 And Abs(passP) > CDbl(uidoc.FieldGetText("PassS")) Then
+		tipo = "Passagens"
+		Call uidoc.Gotofield("Pass")
+		GoTo msg
+	ElseIf passP_1 < 0 And Abs(passP_1) > CDbl(uidoc.FieldGetText("PassS_1")) Then
+		tipo = "Passagens"
+		Call uidoc.Gotofield("Pass_1")
+		GoTo msg
+	ElseIf hospP < 0 And Abs(hospP) > CDbl(uidoc.FieldGetText("HospS")) Then
+		tipo = "Hospedagens"
+		Call uidoc.Gotofield("Hosp")
+		GoTo msg
+	ElseIf hospP_1 < 0 And Abs(hospP_1) > CDbl(uidoc.FieldGetText("HospS_1")) Then
+		tipo = "Hospedagens"
+		Call uidoc.Gotofield("Hosp_1")
+		GoTo msg
+	ElseIf alugP < 0 And Abs(alugP) > CDbl(uidoc.FieldGetText("AlugS")) Then
+		tipo = "Aluguéis"
+		Call uidoc.Gotofield("Alug")
+		GoTo msg
+	ElseIf alugP_1 < 0 And Abs(alugP_1) > CDbl(uidoc.FieldGetText("AlugS_1")) Then
+		tipo = "Aluguéis"
+		Call uidoc.Gotofield("Alug_1")
+		GoTo msg
+	ElseIf matP < 0 And Abs(matP) > CDbl(uidoc.FieldGetText("MatS")) Then
+		tipo = "Compras para Prestação de Serviços"
+		Call uidoc.Gotofield("Mat")
+		GoTo msg
+	ElseIf matP_1 < 0 And Abs(matP_1) > CDbl(uidoc.FieldGetText("MatS_1")) Then
+		tipo = "Compras para Prestação de Serviços"
+		Call uidoc.Gotofield("Mat_1")
+		GoTo msg
+	ElseIf matP_2 < 0 And Abs(matP_2) > CDbl(uidoc.FieldGetText("MatS_2")) Then
+		tipo = "Compras para Prestação de Serviços"
+		Call uidoc.Gotofield("Mat_2")
+		GoTo msg
+	ElseIf servP < 0 And Abs(servP) > CDbl(uidoc.FieldGetText("ServS")) Then
+		tipo = "Contratação de Terceiros não Faturáveis"
+		Call uidoc.Gotofield("Serv")
+		GoTo msg
+	ElseIf servP_1 < 0 And Abs(servP_1) > CDbl(uidoc.FieldGetText("ServS_1")) Then
+		tipo = "Contratação de Terceiros não Faturáveis"
+		Call uidoc.Gotofield("Serv_1")
+		GoTo msg
+	ElseIf kmP < 0 And Abs(kmP) > CDbl(uidoc.FieldGetText("KmS")) Then
+		tipo = "Quilometragem"
+		Call uidoc.Gotofield("Km")
+		GoTo msg
+	ElseIf kmP_1 < 0 And Abs(kmP_1) > CDbl(uidoc.FieldGetText("KmS_1")) Then
+		tipo = "Quilometragem"
+		Call uidoc.Gotofield("Km_1")
+		GoTo msg
+	ElseIf transP < 0 And Abs(transP) > CDbl(uidoc.FieldGetText("TranspS")) Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans")
+		GoTo msg
+	ElseIf transP_1 < 0 And Abs(transP_1) > CDbl(uidoc.FieldGetText("TranspS_1")) Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_1")
+		GoTo msg
+	ElseIf transP_2 < 0 And Abs(transP_2) > CDbl(uidoc.FieldGetText("TranspS_2")) Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_2")
+		GoTo msg
+	ElseIf transP_3 < 0 And Abs(transP_3) > CDbl(uidoc.FieldGetText("TranspS_3")) Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_3")
+		GoTo msg
+	ElseIf transP_4 < 0 And Abs(transP_4) > CDbl(uidoc.FieldGetText("TranspS_4")) Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_4")
+		GoTo msg
+	ElseIf transP_5 < 0 And Abs(transP_5) > CDbl(uidoc.FieldGetText("TranspS_5")) Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_5")
+		GoTo msg
+	ElseIf transP_6 < 0 And Abs(transP_6) > CDbl(uidoc.FieldGetText("TranspS_6")) Then
+		tipo = "Transporte"
+		Call uidoc.Gotofield("Trans_6")
+		GoTo msg
+	ElseIf alimP < 0 And Abs(alimP) > CDbl(uidoc.FieldGetText("AlimeS")) Then
+		tipo = "Alimentação"
+		Call uidoc.Gotofield("Alim")
+		GoTo msg
+	ElseIf alimP_1 < 0 And Abs(alimP_1) > CDbl(uidoc.FieldGetText("AlimeS_1")) Then
+		tipo = "Alimentação"
+		Call uidoc.Gotofield("Alim_1")
+		GoTo msg
+	ElseIf teleP < 0 And Abs(teleP) > CDbl(uidoc.FieldGetText("TeleS")) Then
+		tipo = "Telecom"
+		Call uidoc.Gotofield("Tele")
+		GoTo msg
+	ElseIf planP < 0 And Abs(planP) > CDbl(uidoc.FieldGetText("PlanS")) Then
+		tipo = "Horas de Planejamento"
+		Call uidoc.Gotofield("HorasPlan")
+		GoTo msg
+	ElseIf gerP < 0 And Abs(gerP) > CDbl(uidoc.FieldGetText("GerS")) Then
+		tipo = "Horas de Gerenciamento"
+		Call uidoc.Gotofield("HorasGer")
+		GoTo msg
+	ElseIf execP < 0 And Abs(execP) > CDbl(uidoc.FieldGetText("ExecS")) Then
+		tipo = "Horas de Execução"
+		Call uidoc.Gotofield("HorasExec")
+		GoTo msg
+	ElseIf docP < 0 And Abs(docP) > CDbl(uidoc.FieldGetText("DocS")) Then
+		tipo = "Horas de Documentação"
+		Call uidoc.Gotofield("HorasDoc")
+		GoTo msg
+	ElseIf terceirosP < 0 And Abs(terceirosP) > CDbl(uidoc.FieldGetText("TerceirosS")) Then
+		tipo = "Terceiros Faturáveis"
+		Call uidoc.Gotofield("Terceiros")
+		GoTo msg
+	ElseIf freteP < 0 And Abs(freteP) > CDbl(uidoc.FieldGetText("FreteS")) Then
+		tipo = "Despesas de Vendas: Frete"
+		Call uidoc.Gotofield("Frete")
+		GoTo msg
+	ElseIf intermediacaoP < 0 And Abs(intermediacaoP) > CDbl(uidoc.FieldGetText("IntermediacaoS")) Then
+		tipo = "Despesas de Vendas: Intermediação de Vendas"
+		Call uidoc.Gotofield("Intermediacao")
+		GoTo msg
+	Else
+		If passP = 0 And passP_1 = 0 And hospP = 0 And hospP_1 = 0 And alugP = 0 And alugP_1 = 0 And matP = 0 And matP_1 = 0 And matP_2 = 0 And servP = 0 And _
+		servP_1 = 0 And kmP = 0 And kmP_1 = 0 And transP = 0 And transP_1 = 0 And transP_2 = 0 And transP_3 = 0 And transP_4 = 0 And transP_5 = 0 And transP_6 = 0 And _
+		alimP = 0 And alimP_1 = 0 And teleP = 0 And planP = 0 And gerP = 0 And execP = 0 And docP = 0 And terceirosP = 0 And freteP = 0 And intermediacaoP = 0 Then
+			MsgBox "Não foi informado nenhum Valor para Remanejamento.", 16, "Erro em Remanejar Despesas"
+			Call uidoc.Gotofield("Pass")
+			Exit Function
+		End If 
+	End If
+	ConsisteSaldosControle = True
+	Exit Function
+	msg:
+	MsgBox "O Valor Remanejado não pode ser maior que o Saldo em " & tipo, 16, "Erro em " & tipo
+	Exit Function
+	
+End Function
+
+'++LotusScript Development Environment:2:2:CalcTotaisPedidoDoc:1:8
+Sub CalcTotaisPedidoDoc(doc As NotesDocument)
+	
+	Dim scan As Integer, total As Double, totalPago As Double, totalPagar As Double, totalICMSST As Double
+	Dim pago As Integer, pagar As Variant, us As Variant, qvar As Variant, custoUnit As Variant, icmsst As Variant
+	Dim moeda As Double
+	For scan = 0 To 49
+		qvar = doc.GetItemValue("Q_" & scan)
+		If CStr(qvar(0)) <> "" Then
+			us = doc.GetItemValue("Us_" & scan)
+			If us(0) = "US$C" Then
+				moeda = doc.USC(0)
+			ElseIf us(0) = "US$T" Then
+				moeda = doc.UST(0)
+			ElseIf us(0) = "R$" Then
+				moeda = 1
+			End If
+			custoUnit = doc.GetItemValue("CustoUnit_" & scan)
+			pagar = doc.GetItemValue("S_" & scan)
+			icmsst = doc.GetItemValue("ICMSST_" & scan)
+			pago = qvar(0) - Val(pagar(0))
+			total = total + (qvar(0) * CDbl(custoUnit(0)) * moeda)
+			totalPago = totalPago + (pago * CDbl(custoUnit(0)) * moeda)
+			totalPagar = totalPagar + (Val(pagar(0)) * CDbl(custoUnit(0)) * moeda)
+			If CStr(icmsst(0)) <> "" Then
+				totalICMSST = totalICMSST + (CDbl(icmsst(0)) * moeda)
+			End If
+		End If
+	Next 
+	doc.TotTot = total
+	doc.TotPago = totalPago
+	doc.TotPagar = totalPagar
+	doc.TotICMSST = totalICMSST
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:AvisoSolicitaAprovacaoControle:5:8
+%REM
+	Sub AvisoSolicitaAprovacaoControle
+	Description: Comments for Sub
+%END REM
+Sub AvisoSolicitaAprovacaoControle(doc As NotesDocument)
+	
+	Dim session As New NotesSession
+	Dim rtitem As NotesRichTextItem
+	Dim richStyle As NotesRichTextStyle
+	Dim memo As NotesDocument
+	Dim recipients(2) As String
+	recipients(0) = "Junior Castro/TDec"
+	recipients(1) = "Marcelo Castro/TDec"
+	Set richStyle = session.CreateRichTextStyle
+	richStyle.NotesFont = FONT_ROMAN
+	richStyle.FontSize = 10
+	Set memo = New NotesDocument( session.CurrentDatabase )
+	memo.Form = "Memo"
+	memo.From = session.CommonUserName
+	If doc.Status(0) = "Aguardando Aprovação do Gerente" Then
+		memo.SendTo = doc.GerenteConta(0) & "/TDec"
+		recipients(2) = doc.Inside(0) & "/TDec"
+		memo.CopyTo = recipients
+	Else
+		'Projetos
+		If doc.Status(0) = "Aguardando Aprovação de Projetos" Then
+			memo.SendTo = "projetos@tdec.com.br"
+		'Diretoria	
+		Else
+			memo.SendTo = recipients
+		End If
+		'Gerente e Inside
+		recipients(0) = doc.GerenteConta(0) & "/TDec"
+		recipients(1) = doc.Inside(0) & "/TDec"
+		recipients(2) = doc.Requisitante(0) & "/TDec"
+		memo.CopyTo = recipients
+	End If
+	'memo.BlindCopyTo = "Ludimila Oliveira/TDec"
+	Set rtitem = memo.CreateRichTextItem( "Body" )
+	Call rtitem.AppendStyle(richStyle)
+	If doc.Status(0) = "Aguardando Aprovação do Gerente" And doc.GerenteConta(0) <> "" Then
+		Call rtitem.AppendText( doc.GerenteConta(0) & "," )
+		Call rtitem.AddNewLine( 2 )
+	End If
+	'Desvio de Projeto
+	If doc.Tipo(0) = "Desvio" Then
+		If Val(doc.Resultado_P(0)) > 0 Then
+			memo.Subject = "-> Desvio de Projeto " & doc.Status(0) & ": " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard") & " (" & Format(doc.TotTot(0)/doc.Resultado_P(0), "Percent") & " da Margem Prevista do Negócio)"
+		Else
+			memo.Subject = "-> Desvio de Projeto " & doc.Status(0) & ": " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard")
+		End If
+		Call rtitem.AppendText( "Favor Aprovar o Desvio de Projeto." )
+	'Pré-Venda
+	ElseIf doc.Tipo(0) = "Pré-Venda" Then
+		If Val(doc.ValorEstimado(0)) > 0 Then
+			memo.Subject = "-> Despesas e Horas de Pré-Venda " & doc.Status(0) & ": " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard") & " (" & Format(doc.TotTot(0)/doc.ValorEstimado(0), "Percent") & " do Valor Estimado do Negócio)"
+		Else
+			memo.Subject = "-> Despesas e Horas de Pré-Venda " & doc.Status(0) & ": " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard")
+		End If
+		Call rtitem.AppendText( "Favor Aprovar o Controle Finaceiro de Pré-Venda." )
+	'POC
+	ElseIf doc.Tipo(0) = "POC" Then
+		If Val(doc.ValorEstimadoPOC(0)) > 0 Then
+			memo.Subject = "-> Despesas e Horas de POC " & doc.Status(0) & ": " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard") & " (" & Format(doc.TotTot(0)/doc.ValorEstimadoPOC(0), "Percent") & " do Valor Estimado do Negócio)"
+		Else
+			memo.Subject = "-> Despesas e Horas de POC " & doc.Status(0) & ": " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard")
+		End If
+		Call rtitem.AppendText( "Favor Aprovar o Controle Finaceiro de POC." )
+	End If
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Negócio: " & doc.Codigo(0) & " - " & doc.DescricaoOrigem(0) )
+	Call rtitem.AddNewLine( 2 )
+	richStyle.Bold = True
+	richStyle.Underline = True
+	Call rtitem.AppendStyle(richStyle)
+	Call rtitem.AppendText( "Acesso Notes:" )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendDocLink( doc, "Link para " & doc.Tipo(0))
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Acesso Web" )
+	richStyle.Bold = False
+	richStyle.Underline = False
+	Call rtitem.AppendStyle(richStyle)
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "http://" + doc.Server(0) + "/" + session.CurrentDatabase.FileName + "/0/" + doc.DocID(0) + "?OpenDocument" )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Descrição: " & doc.Justificativa(0) )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Custos: R$ " & Format(doc.CustoP(0), "Standard") )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Despesas: R$ " & Format(doc.DespP(0), "Standard") )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Custo dos Serviços: R$ " & Format(doc.CustoServicos(0), "Standard") & " (" & Format(doc.HHP(0), "Standard") & " HH)" )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Terceiros Faturáveis: R$ " & Format(doc.TotalTerceiros(0), "Standard") )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Despesas de Vendas: R$ " & Format(doc.TotalVendas(0), "Standard") )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.Appendtext( session.CommonUserName & "," )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.Appendtext( "TDec Network Group" )
+	Call memo.Send( False )
+	If doc.Status(0) = "Aguardando Aprovação do Gerente" Then
+		MsgBox "Email encaminhado para o Gerente da Conta.", 64, "Aviso"
+	ElseIf doc.Status(0) = "Aguardando Aprovação da Diretoria" Then
+		MsgBox "Email encaminhado para a Diretoria.", 64, "Aviso"
+	ElseIf doc.Status(0) = "Aguardando Aprovação de Projetos" Then
+		MsgBox "Email encaminhado para Projetos.", 64, "Aviso"
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:ReprovaControle:5:8
+%REM
+	Sub ReprovaControle
+	Description: Comments for Sub
+%END REM
+Sub ReprovaControle(doc As NotesDocument)
+	
+	On Error Resume Next
+	Dim session As New NotesSession
+	Dim nome As New NotesName(session.Effectiveusername)
+	Dim rtitem As NotesRichTextItem
+	doc.Status = "Não Aprovado"
+	If doc.AprovadoPorGerente(0) = "" Then
+		doc.AprovadoPorGerente = nome.Common
+		doc.DataAprovacaoGerente = Now
+	End If
+	doc.AprovadoPor = nome.Common
+	doc.DataAprovacao = Now
+	Call doc.Save(True, True)
+	'Envia Email
+	Call AvisoControle(doc)
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:LinkPedidos:1:8
+Sub LinkPedidos(cotacao As NotesDocument)
+	
+	Call cotacao.RemoveItem( "LinkPedidos" )
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase( cotacao.ParentDatabase.Server, "compras.nsf" )
+	Dim view As NotesView
+	Set view = db.GetView( "(PedidosOrigem)" )
+	Dim doc As NotesDocument
+	Dim dc As NotesDocumentCollection
+	Dim rtitem As NotesRichTextItem
+	Dim richstyle As NotesRichTextStyle
+	Set dc = view.GetAllDocumentsByKey(cotacao.DocID(0), True)
+	If dc.Count = 0 Then
+		Exit Sub
+	End If
+	Set doc = dc.GetFirstDocument   
+	Set richStyle = session.CreateRichTextStyle
+	richStyle.NotesFont = FONT_ROMAN
+	richStyle.FontSize = 8
+	richStyle.NotesColor = COLOR_DARK_BLUE
+	Set rtitem = cotacao.CreateRichTextItem( "LinkPedidos" )
+	Call rtitem.AppendStyle(richStyle)
+	If rtitem.Type = RICHTEXT Then
+		While Not ( doc Is Nothing )                         
+			Call rtitem.AppendDocLink( doc, "Link com Pedido de Compra" )
+			Call rtitem.AppendText( doc.DataEmissaoNF(0) )
+			Call rtitem.AppendText( doc.PO(0) )
+			Call rtitem.AppendText( " " )
+			richStyle.NotesColor = COLOR_WHITE
+			Call rtitem.AppendStyle(richStyle)
+			Call rtitem.AppendText( doc.Sit(0)  )
+			richStyle.NotesColor = COLOR_DARK_BLUE
+			Call rtitem.AppendStyle(richStyle)
+			Call rtitem.AddNewLine( 1 )
+			Set doc = dc.GetNextDocument( doc )
+		Wend                            
+	End If
+	
+End Sub
+
+
+'++LotusScript Development Environment:2:2:GravaPedido:1:8
+Sub GravaPedido(uidoc As NotesUiDocument)
+	
+	On Error Resume Next
+	Dim session As New NotesSession
+	'Obtém Cotação
+	Dim cotacao As NotesDocument
+	Set cotacao = session.Currentdatabase.Getdocumentbyunid(uidoc.Fieldgettext("IDNegocio"))
+	If cotacao Is Nothing Then
+		MsgBox "Cotação de Planilha Financeira não encontrada, não foi possível gravar o Pedido de Compra", 16, "Erro"
+		Exit sub
+	End If
+	'Planilha Financeira
+	Dim planilha As NotesDocument
+	Dim view As NotesView
+	Set view = session.Currentdatabase.Getview("(Planilha/Codigo)")
+	Set planilha = view.Getdocumentbykey(cotacao.Codigo(0), True)
+	'Gravação de Pedido de Compra
+	Dim scan As Integer
+	Dim db As New NotesDatabase(uidoc.Document.ParentDatabase.Server, "compras.nsf")
+	Dim doc As New NotesDocument(db)
+	doc.Form = "Pedido"
+	doc.Id = geraJavaId(doc)
+	doc.Origem = cotacao.DocID(0)
+	doc.Estoque = "Sim"
+	doc.Status = "Pendente"     
+	doc.Criacao = Now
+	doc.Autor = session.Commonusername
+	doc.DataCotacaoUS = Today
+	doc.USC = Cdbl(uidoc.FieldGetText("USC"))
+	doc.UST = Cdbl(uidoc.FieldGetText("UST"))
+	doc.PO = uidoc.FieldGetText("PO")
+	doc.GerenteConta = uidoc.Document.GerenteConta
+	doc.Inside = uidoc.Document.Inside
+	Dim dataPo As New NotesDateTime(uidoc.FieldGetText("Data"))
+	Set doc.DataPO = dataPO
+	doc.Codigo = uidoc.FieldGetText("Codigo")
+	doc.CodClienteFaturamento = uidoc.FieldGetText("CodClienteFaturamento")
+	doc.CodEmpresa = uidoc.FieldGetText("CodEmpresa")
+	doc.Natureza = uidoc.FieldGetText("Natureza")
+	doc.CodCliente = uidoc.FieldGetText("CodFornecedor")
+	doc.GrupoEconomico = uidoc.FieldGetText( "GrupoEconomico" )
+	doc.IdEmpresa = uidoc.FieldGetText( "IdEmpresa" )
+	doc.UF = uidoc.FieldGetText("UF")
+	doc.Contato = uidoc.FieldGetText("Contato")
+	doc.Email = uidoc.FieldGetText("Email")
+	doc.TelVendendor = uidoc.FieldGetText("Telefones")
+	doc.Fax = uidoc.FieldGetText("Fax")
+	doc.Descricao = uidoc.FieldGetText("Descricao")
+	doc.CondicaoPagto = uidoc.FieldgetText("PrazoPagto")
+	Dim prevEntrega As New NotesDateTime(uidoc.FieldgetText("PrevEntrega" ))
+	Set doc.PrazoEntrega = prevEntrega
+	Set doc.Entrega = prevEntrega
+	doc.CondicaoEntrega = uidoc.FieldgetText("Entrega")
+	doc.Garantia = Val(uidoc.FieldGetText("Garantia"))
+	doc.AreaDespesa = uidoc.FieldGetText("AreaDespesa")
+	doc.ResponsavelDespesa = uidoc.FieldGetText("ResponsavelDespesa")
+	doc.ClassificacaoDespesa = uidoc.FieldGetText("ClassificacaoDespesa")
+	doc.TipoCompra = uidoc.FieldGetText("TipoCompra")
+	doc.Obs = uidoc.FieldGetText("Observacoes")
+	doc.Area = cotacao.Area
+	doc.Areas = cotacao.Areas
+	doc.Overhead = cotacao.Overhead
+	For scan = 0 To 49
+		If uidoc.FieldGetText("PProd_" & scan) <> "" Then
+			Call doc.ReplaceItemValue("i_" & scan, uidoc.FieldGetText("PI_" & scan))
+			Call doc.ReplaceItemValue("Q_" & scan, Val( uidoc.FieldGetText("PQ_" & scan)))
+			Call doc.ReplaceItemValue("S_" & scan, Val( uidoc.FieldGetText("PQ_" & scan)))
+			Call doc.ReplaceItemValue("QOrig_" & scan, Val( uidoc.FieldGetText("PQ_" & scan)))
+			Call doc.ReplaceItemValue("PartNo_" & scan, uidoc.FieldGetText("PN_" & scan))
+			Call doc.ReplaceItemValue("Produto_" & scan, uidoc.FieldGetText("PProd_" & scan))
+			Call doc.ReplaceItemValue("Us_" & scan, uidoc.FieldGetText("PU_" & scan))
+			Call doc.ReplaceItemValue("CustoUnit_" & scan, Cdbl(uidoc.FieldGetText("PCU_" & scan)))
+			Call doc.ReplaceItemValue("ICMSST_" & scan, CDbl(uidoc.FieldGetText("ICMSST_" & scan)) * Val( uidoc.FieldGetText("PQ_" & scan)))
+			Call doc.ReplaceItemValue("CusTot_" & scan, Cdbl(uidoc.FieldGetText("PCT_" & scan)))
+			Call doc.ReplaceItemValue("IC_" & scan, 0)	'Será sempre zero no Pedido de Compra, pois já está no Custo.
+			Call doc.ReplaceItemValue("IP_" & scan, Cdbl(uidoc.FieldGetText("PIP_" & scan)))
+			Call doc.ReplaceItemValue("PrazoEntrega_" & scan, uidoc.FieldGetText("PrazoEntrega_" & scan))
+			Call doc.ReplaceItemValue("t_" & scan, uidoc.FieldGetText("T_" & scan))
+			Call doc.ReplaceItemValue("Un_" & scan, uidoc.FieldGetText("Un_" & scan))
+			Call doc.ReplaceItemValue("ST_" & scan, uidoc.FieldGetText("ST_" & scan))
+			Call doc.ReplaceItemValue("CF_" & scan, uidoc.FieldGetText("CF_" & scan))
+		End If
+	Next
+	'Gera Link entre o Pedido de Compra e a Cotação
+	Dim rtitem As NotesRichTextItem
+	Set rtitem = New NotesRichTextItem( doc, "LinkCotacao" )
+	Call rtitem.AppendDocLink( cotacao, "Link com Cotação" )
+	'Calcula os Totais do Pedido
+	Call CalcTotaisPedidoDoc(doc)
+	Call doc.Save( False, False )
+	'Atualiza Status da Cotação
+	cotacao.Sit = "OK"
+	Call cotacao.save(True, True)
+	'Cria/Atualiza Itens em Listas (form Planilha)
+	Dim listas As New NotesDatabase( uidoc.Document.ParentDatabase.Server, "listas.nsf" )
+	Dim viewListas As NotesView
+	Dim item As NotesDocument, itemLIsta As NotesDocument
+	Set viewListas = listas.Getview("(NegocioNItens)")
+	For scan = 0 To 49
+		If uidoc.FieldGetText("PProd_" & scan) <> "" Then
+			Set item = viewListas.Getdocumentbykey(cotacao.DocID(0) & "-" & (scan+1), True)
+			If Not item Is Nothing Then
+				Set itemLIsta = item
+			Else
+				Set itemLista = New NotesDocument(listas)
+				itemLista.Form = "Planilha"
+			End If
+			'Gera JavaId - LMO 27/09/17
+			itemLista.Id = geraJavaId(itemLista)
+			itemLista.Autor = session.Commonusername
+			itemLista.Criacao = Now
+			itemLista.Status = "Ativa"
+			itemLista.Codigo = cotacao.DocID(0)
+			itemLista.NItem = uidoc.FieldGetText("PI_" & scan)
+			itemLista.Q = CLng(uidoc.FieldGetText("PQ_" & scan))
+			itemLista.PartNo = uidoc.FieldGetText("PN_" & scan)
+			itemLista.Produto = uidoc.FieldGetText("PProd_" & scan)
+			itemLista.T = uidoc.FieldGetText("T_" & scan)
+			itemLista.Un = uidoc.FieldGetText("Un_" & scan)
+			itemLista.ST = uidoc.FieldGetText("ST_" & scan)
+			itemLista.CF = uidoc.FieldGetText("CF_" & scan)
+			itemLista.Us = uidoc.FieldGetText("PU_" & scan)
+			itemLista.Custo = CDbl(uidoc.FieldGetText("PCU_" & scan))
+			itemLista.ICMSSTC = CDbl(uidoc.FieldGetText("ICMSST_" & scan))
+			itemLista.Mg = 1
+			itemLista.CustoUnit = itemLista.Custo(0) + itemLista.ICMSSTC(0)
+			itemLista.CusTot = itemLista.CustoUnit(0) * itemLista.Q(0)
+			itemLista.ICC = CDbl(uidoc.FieldGetText("PIC_" & scan))
+			itemLista.IC = 0
+			itemLista.IPIC = CDbl(uidoc.FieldGetText("PIP_" & scan))
+			itemLista.II = CDbl(uidoc.FieldGetText("PII_" & scan))
+			itemLista.Garantia = CLng(uidoc.FieldGetText("Garantia"))
+			'Campos de Controle
+			itemLista.QCompra = Val(uidoc.FieldGetText("PQ_" & scan))
+			itemLista.QFat = 0
+			itemLista.QSimplesFaturamento = 0
+			itemLista.QPreBaixa = 0
+			itemLista.QBaixa = 0
+			itemLista.VlCompra = CDbl(uidoc.FieldGetText("PCU_" & scan))
+			itemLista.QRecibo = 0
+			'Link para a Planilha Financeira
+			If Not planilha Is Nothing Then
+				Dim ligacao As NotesRichTextItem
+				Set ligacao = itemLista.CreateRichTextItem( "LinkNegocio" )
+				Call ligacao.AppendDocLink( planilha, "Link para a Planilha Financeira " + uidoc.FieldGetText( "Codigo" ) )
+			End If 
+			Call doc.ComputeWithForm(False, False)
+			Call itemLista.Save(True, True)
+		End If
+	Next
+	'Atualiza Planilha Financeira
+	If Not planilha Is Nothing Then
+		Call CalcPlanilha(planilha)
+		Call planilha.Save(False, False)
+	End If
+	'Envia Email do Pedido
+	Call EnviaEmailPedido(doc)
+		
+End Sub
+
+'++LotusScript Development Environment:2:1:GetImpostos:5:8
+%REM
+	Function BuscaImpostos
+	Description: Comments for Function
+%END REM
+Function GetImpostos(ncm As String) As Variant
+	
+	On Error Resume Next
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase(session.Currentdatabase.Server, "faturas.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim array(5) As Variant
+	Set view = db.GetView("(CargaTributaria)")
+	Set doc = view.GetDocumentByKey(ncm, True)
+	If Not doc Is Nothing Then
+		array(0) = doc.ICMS(0)
+		array(1) = doc.IPI(0)
+		array(2) = doc.II(0)
+		array(3) = doc.ISS(0)
+		array(4) = doc.IRRF(0)
+		array(5) = doc.INSSRF(0)
+	End If
+	GetImpostos = array
+	
+End Function
+
+'++LotusScript Development Environment:2:2:EnviaEmailPedido:5:8
+%REM
+	Sub EnviaEmailPedido
+	Description: Comments for Sub
+%END REM
+Sub EnviaEmailPedido(doc As NotesDocument)
+	
+	On Error Resume Next
+	Dim session As New NotesSession
+	Dim answer As Integer, scan As Integer
+	answer = MessageBox("Confirma o envio do Pedido de Compra para o Fornecedor?", 4+32+0+4096, "Envio de Email")
+	'Fornecedor
+	ReDim recipients(0) As String
+	If answer% = 6  Then
+		recipients(0) = doc.Email(0)
+		doc.EnviaEmail = "Sim"
+	Else
+		doc.EnviaEmail = "Não"
+	End If
+	Call doc.Save(False, False)
+	'Suporte a Vendas
+	For scan = 0 To UBound(doc.Inside)
+		ReDim Preserve recipients(scan + 1) As String
+		recipients(scan + 1) = doc.Inside(scan)
+	Next
+	scan = UBound(recipients) + 1
+	'Gerente da Conta
+	ReDim Preserve recipients(scan) As String
+	recipients(scan) = doc.GerenteConta(0)
+	Dim memo As New NotesDocument(session.CurrentDatabase)
+	memo.Form = "Memo"
+	If doc.TipoCompra(0) = "Projeto" Then
+		memo.Subject = "-> Pedido de Compra - " & doc.PO(0) & " / " & doc.Codigo(0)
+	Else
+		memo.Subject = "-> Pedido de Compra - " & doc.PO(0)
+	End If
+	memo.CopyTo = session.CommonUserName
+	'memo.BlindCopyTo = "ludoliveira@hotmail.com"
+	'memo.BlindCopyTo = "Ludimila Oliveira/TDec"
+	Dim rtitem As New NotesRichTextItem(memo, "Body")
+	Call doc.RenderToRTItem(rtitem)
+	'Forçar a conversão do RichText para HTML (Onde 2 é o valor para a conversão MIME) - LMO 19/09/24
+	'Call memo.ConvertToMIME(2) 'Habilitado MIME no Outbound do Servidor
+	memo.SignOnSend = True
+	Call memo.Send(False, recipients)
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:GeraPedidoImportacao:1:8
+Function GeraPedidoImportacao( uidoc As NotesUIDocument, CodPed As String ) As Boolean
+	
+	Dim scan As Integer, scan2 As Integer, ck As Long, j As Long, x As Long, valor As Double, fator As Double
+	'Empresas
+	Dim db As New NotesDatabase(uidoc.Document.ParentDatabase.Server, "empresas.nsf")
+	Dim view As NotesView
+	'Contato
+	Dim contato As NotesDocument
+	Set view = db.GetView( "(ContatosGrupoEconomicoAtivos)" )
+	Set contato = view.GetDocumentByKey( uidoc.FieldGetText("GrupoEconomico" & CodPed$), True )
+	If contato Is Nothing Then
+		MsgBox "Não existe um Contato Ativo nesse Grupo Econômico", 16,"Erro de Cadastramento do Contato"
+		Exit Function
+	End If
+	'Fornecedor
+	Set view = db.GetView( "(Dados Cadastrais)" )
+	Dim empresa As NotesDocument
+	Set empresa = view.GetDocumentByKey( uidoc.FieldGetText("Fornecedor" & CodPed$), True )
+	If empresa Is Nothing Then
+		MsgBox( "O Fornecedor, por algum motivo, não está em nossa base de dados!" )
+		Exit Function
+	End If
+	'Verifica Empresa
+	Dim ckE As Variant
+	ckE = ConsisteDadosEmpresa(empresa)
+	If Not ckE(0) Then
+		MsgBox "Atualizar em Empresas os Campos:" + ckE(1), 16, "Erro no Cadastro do Fornecedor"
+		Exit Function
+	End If
+	
+	'Previsão de Entrega
+	Dim prevEntrega As New NotesDateTime(Today)
+	Call prevEntrega.AdjustDay( Val( uidoc.FieldGetText( "PrazoEntrega" & CodPed$)))
+	'Listas
+	Dim listas As New NotesDatabase(uidoc.Document.ParentDatabase.Server, "listas.nsf")
+	Dim viewListas As NotesView
+	Dim item As NotesDocument, itemLIsta As NotesDocument
+	Set viewListas = listas.Getview("(NegocioNItens)")
+	'Sales Force
+	Dim dbNegocios As New NotesDatabase(uidoc.Document.ParentDatabase.Server, "sales.nsf")
+	Dim negocio As NotesDocument
+	
+	Dim session As New NotesSession
+	Dim importacao As New NotesDatabase(uidoc.Document.ParentDatabase.Server, "Importacao.nsf" )
+	Dim doc As NotesDocument
+	Dim rtitem As NotesRichTextItem
+	
+	For scan = 0 To 49
+		ck = Val(uidoc.FieldGetText("Q_" & scan))
+		If ck > 0 Then
+			j = 65
+			x = x + 1
+			If uidoc.FieldGetText("us_" & scan) = "US$C" Then
+				fator = CDbl(uidoc.FieldGetText("USC"))
+				valor = CDbl(uidoc.FieldGetText("CustoFOB_" & scan)) * fator
+			Else
+				fator = 1
+				valor = CDbl(uidoc.FieldGetText("CustoFOB_" & scan))
+			End If
+			For scan2 = 0 To (ck - 1)
+				'Gera Solicitação de Importação
+				Set doc = importacao.CreateDocument
+				doc.Form = "Solicitacao"
+				doc.Id = geraJavaId(doc)
+				doc.Autor = session.CommonUserName
+				doc.Criacao = Now
+				doc.Sit = "Aguardando PO"
+				doc.TipoCompra = uidoc.FieldGetText("TipoCompra")
+				doc.CodEmpresa = uidoc.FieldGetText("CodEmpresa")
+				doc.PartNo = uidoc.FieldGetText("PartNo_" & scan)
+				doc.Descricao = uidoc.FieldGetText("Produto_" & scan)
+				doc.Chave = CStr(Year(Now)) + CStr(Month(Now)) + CStr(Day(Now)) + CStr(Hour(Now)) + CStr(Minute(Now)) + CStr(Second(Now)) + CStr(x) + Chr(j)
+				doc.Responsavel = session.CommonUserName
+				doc.Area = uidoc.FieldGetText("AreaDespesa")
+				doc.CodCliente = uidoc.FieldGetText("Fornecedor" & CodPed)
+				doc.Codigo = uidoc.FieldGetText("DocID")
+				doc.CodClienteFaturamento = uidoc.FieldGetText("CodClienteFaturamento")
+				doc.NItem = CStr(scan + 1)
+				doc.Moeda = uidoc.FieldGetText("us_" & scan)
+				doc.CF = uidoc.FieldGetText("CF_" & scan)
+				doc.ST = uidoc.FieldGetText("ST_" & scan)
+				doc.CustoUnit = CDbl(uidoc.FieldGetText("CustoFob_" & scan))
+				doc.Cotacao = fator
+				doc.Custo = valor
+				doc.T = uidoc.FieldGetText("t_" & scan)
+				doc.IC = CDbl(uidoc.FieldGetText("ICC_" & scan))
+				doc.IPI = CDbl(uidoc.FieldGetText("IPC_" & scan))
+				doc.II = CDbl(uidoc.FieldGetText("II_" & scan))
+				doc.Un = uidoc.FieldGetText("Un_" & scan)
+				doc.FI_Negocio = CDbl(uidoc.FieldGetText("FI_" & scan))
+				Call doc.ComputeWithForm(False, False)
+				Call doc.Save(True, True)
+				'%END REM
+				j = j + 1
+				If j = 91 Then
+					j = 65
+				End If
+			Next
+			'Cria/Atualiza Item em Listas (form Planilha)
+			Set itemLista = viewListas.Getdocumentbykey(uidoc.FieldGetText("DocID") & "-" & (scan+1), True)
+			If Not itemLista Is Nothing Then
+				Set item = itemLista
+			Else
+				Set item = New NotesDocument(listas)
+				item.Form = "Planilha"
+			End If
+			item.Id = geraJavaId(item)
+			item.Autor = session.Commonusername
+			item.Criacao = Now
+			item.Status = "Ativa"
+			item.Codigo = uidoc.FieldGetText("DocID")
+			item.NItem = CStr(scan + 1)
+			item.Q = CLng(uidoc.FieldGetText("Q_" & scan))
+			item.PartNo = uidoc.FieldGetText("PartNo_" & scan)
+			item.Produto = uidoc.FieldGetText("Produto_" & scan)
+			item.T = uidoc.FieldGetText("t_" & scan)
+			item.Un = uidoc.FieldGetText("Un_" & scan)
+			item.CF = uidoc.FieldGetText("CF_" & scan)
+			item.ST = uidoc.FieldGetText("ST_" & scan)
+			item.UFCompra = uidoc.FieldGetText("UFCompra_" & scan)
+			item.UFVenda = uidoc.FieldGetText("UF")
+			item.Us = uidoc.FieldGetText("us_" & scan)
+			item.CustoFOB = CDbl(uidoc.FieldGetText("CustoFOB_" & scan))
+			item.FI = CDbl(uidoc.FieldGetText("FI_" & scan))
+			item.Custo = CDbl(uidoc.FieldGetText("Custo_" & scan))
+			item.Mg = 1
+			item.CustoUnit = CDbl(uidoc.FieldGetText("Custo_" & scan))
+			item.CusTot = CDbl(uidoc.FieldGetText("CusTot_" & scan))
+			item.ICC = CDbl(uidoc.FieldGetText("ICC_" & scan))
+			item.IC = 0
+			item.IPIC = CDbl(uidoc.FieldGetText("IPC_" & scan))
+			item.II = CDbl(uidoc.FieldGetText("II_" & scan))
+			item.Garantia = CLng(uidoc.FieldGetText("GarantiaA"))
+			'Campos de Controle
+			item.QCompra = Val(uidoc.FieldGetText("Q_" & scan))
+			item.QFat = 0
+			item.QSimplesFaturamento = 0
+			item.QPreBaixa = 0
+			item.QBaixa = 0
+			item.VlCompra = CDbl(uidoc.FieldGetText("CustoFOB_" & scan))
+			item.QRecibo = 0
+			'Link para a Planilha Financeira
+			Dim ligacao As NotesRichTextItem
+			Set ligacao = item.CreateRichTextItem("LinkNegocio")
+			Call ligacao.AppendDocLink(uidoc.Document, "Link para a Planilha Financeira " & uidoc.FieldGetText("DocID"))
+			Call item.Save(True, True)
+		End If
+	Next
+	GeraPedidoImportacao = True
+	
+End Function
+
+'++LotusScript Development Environment:2:1:GeraPedido:1:8
+Function GeraPedido( uidoc As NotesUIDocument, CodPed As String ) As Boolean
+	
+	Dim scan As Integer, scan2 As Integer, ck As Long
+	Dim tipoAnterior As String
+	'Verificando se houve troca de tipo de produto no mesmo pedido
+	For scan = 0 To 49
+		If Val(uidoc.FieldGetText("Q_" & scan)) > 0 Then
+			If scan2 > 0 Then
+				If tipoAnterior <> uidoc.FieldGetText("t_" & scan) Then
+					MsgBox "Você não pode pedir ítens de tipos diferentes na mesma Cotação Financeira", 16, "Erro no Item " & (scan + 1)
+					Exit Function
+				End If
+			End If
+			scan2 = scan2 + 1
+			tipoAnterior = uidoc.FieldGetText("t_" & scan)
+		End If
+	Next
+	'Verifica Contato
+	Dim db As New NotesDatabase( uidoc.Document.ParentDatabase.Server, "empresas.nsf" )
+	Dim view As NotesView
+	Dim contato As NotesDocument
+	Set view = db.GetView( "(ContatosGrupoEconomicoAtivos)" )
+	Set contato = view.GetDocumentByKey( uidoc.FieldGetText("GrupoEconomico" & CodPed$), True )
+	If contato Is Nothing Then
+		MsgBox "Não existe um Contato Ativo nesse Grupo Econômico", 16,"Erro de Cadastramento do Contato"
+		Exit Function
+	End If
+	'Verifica Fornecedor
+	Set view = db.GetView( "(Dados Cadastrais)" )
+	Dim empresa As NotesDocument
+	Set empresa = view.GetDocumentByKey( uidoc.FieldGetText("Fornecedor" & CodPed$), True )
+	If empresa Is Nothing Then
+		MsgBox( "O Fornecedor, por algum motivo, não está em nossa base de dados!" )
+		Exit Function
+	End If
+	'Verifica Dados da Empresa
+	Dim ckE As Variant
+	ckE = ConsisteDadosEmpresa(empresa)
+	If Not ckE(0) Then
+		MsgBox "Atualizar em Empresas os Campos:" + ckE(1), 16, "Erro no Cadastro do Fornecedor"
+		Exit Function
+	End If
+	'Cotação da Moeda
+	Dim array As Variant, comercial As Double, turismo As Double
+	array = PopulaMoeda
+	comercial = array(0)
+	turismo = array(1)
+	'Gera Pedido
+	Dim workspace As New NotesUIWorkspace
+	Dim session As New NotesSession
+	Dim pedido As NotesUIDocument
+	Dim valor As Double, valortotal As Double, icmsst As Double
+	Dim prevEntrega As New NotesDateTime(Today)
+	Call prevEntrega.AdjustDay( Val( uidoc.FieldGetText( "PrazoEntrega" & CodPed$)))
+	Set pedido = workspace.ComposeDocument("", "", "Pedido")
+	pedido.Document.GerenteConta = uidoc.Document.GerenteConta(0)
+	pedido.Document.Inside = uidoc.Document.Inside
+	Call pedido.FieldSetText("CodFornecedor", uidoc.FieldGetText("Fornecedor" & CodPed))
+	Call pedido.FieldSetText("GrupoEconomico", uidoc.FieldGetText("GrupoEconomico" & CodPed))
+	Call pedido.FieldSetText("IdEmpresa", empresa.Id(0))
+	Call pedido.FieldSetText("Tipo", uidoc.FieldGetText("Tipo"))
+	Call pedido.FieldSetText("UF", empresa.Estado(0))
+	Call pedido.FieldSetText("PO", GeraCodigoPedidoFornecedor(uidoc.FieldGetText("Fornecedor" & CodPed)))
+	Call pedido.FieldSetText("Garantia", uidoc.FieldGetText("Garantia" & CodPed))
+	Call pedido.FieldSetText("Codigo", uidoc.FieldGetText("Codigo"))
+	Call pedido.FieldSetText("CodClienteFaturamento", uidoc.FieldGetText("CodClienteFaturamento"))
+	Call pedido.FieldSetText("CodEmpresa", uidoc.FieldGetText("CodEmpresa"))
+	Call pedido.FieldSetText("Responsavel", session.CommonUsername)
+	Call pedido.FieldSetText("Fornecedor", contato.NomeEmpresa(0))
+	Call pedido.FieldSetText("Contato", contato.Nome(0))
+	Call pedido.FieldSetText("Email", contato.Email(0))
+	Call pedido.FieldSetText("Telefones", contato.Telefones(0))
+	Call pedido.FieldSetText("Fax", contato.Fax(0))
+	Call pedido.FieldSettext("IDNegocio", uidoc.Document.UniversalID)
+	Call pedido.FieldSettext("Descricao", uidoc.Document.Descricao(0))
+	'Campos para Envio de Fax
+	Call pedido.FieldSetText("SendTo", contato.Nome(0) & " @ " & contato.Fax(0) & " @ fax")
+	Call pedido.FieldSetText("Subject", "Confirmação de Pedido de Compra")
+	'
+	Call pedido.FieldSetText("Data", Format(Today, "dd/mm/yyyy"))
+	Call pedido.FieldSetText("PrazoPagto", uidoc.FieldGetText( "PrazoPagto" & CodPed$))
+	Call pedido.FieldSetText("PrevEntrega", prevEntrega.DateOnly)
+	Call pedido.FieldSetText("Entrega", uidoc.FieldGetText( "Entrega" & CodPed))
+	scan2 = 0
+	For scan = 0 To 49
+		ck = Val(uidoc.FieldGetText("Q_" & scan))
+		If ck > 0 Then
+			If uidoc.FieldGetText( "ICMSSTC_" & scan) = "" Then icmsst = 0 Else icmsst = CDbl(uidoc.FieldGetText( "ICMSSTC_" & scan))
+			Call pedido.FieldSetText("Pi_" & scan2, CStr(scan + 1))
+			Call pedido.FieldSetText("PN_" & scan2, uidoc.FieldGetText("PartNo_" & scan))
+			Call pedido.FieldSetText("PProd_" & scan2, uidoc.FieldGetText("Produto_" & scan))
+			Call pedido.FieldSetText("T_" & scan2, uidoc.FieldGetText("t_" & scan))
+			Call pedido.FieldSetText("PU_" & scan2, uidoc.FieldGetText("us_" & scan))
+			Call pedido.FieldSetText("PQ_" & scan2, CStr(ck))
+			Call pedido.FieldSetText("PCU_" & scan2, uidoc.FieldGetText("Custo_" & scan))
+			Call pedido.FieldSetText("ICMSST_" & scan2, CStr(icmsst))
+			Call pedido.FieldSetText("PCT_" & scan2, Format(uidoc.FieldGetText("Custo_" & scan) * ck, "Standard"))
+			Call pedido.FieldSetText("PIC_" & scan2, uidoc.FieldGetText("ICC_" & scan))
+			Call pedido.FieldSetText("PIP_" & scan2, uidoc.FieldGetText("IPC_" & scan))
+			Call pedido.FieldSetText("PII_" & scan2, uidoc.FieldGetText("II_" & scan))
+			Call pedido.FieldSetText("PrazoEntrega_" & scan2, prevEntrega.DateOnly)
+			Call pedido.FieldSetText("Un_" & scan2, uidoc.FieldGetText("Un_" & scan))
+			Call pedido.FieldSetText("ST_" & scan2, uidoc.FieldGetText("ST_" & scan))
+			Call pedido.FieldSetText("CF_" & scan2, uidoc.FieldGetText("CF_" & scan))
+			If uidoc.FieldGetText("us_" & scan) = "US$C" Then
+				valor# = CDbl(uidoc.FieldGetText( "Custo_" & scan)) * ck * comercial
+			ElseIf uidoc.FieldGetText("us_" & scan) = "US$T" Then
+				valor# = CDbl(uidoc.FieldGetText( "Custo_" & scan)) * ck * turismo
+			Else
+				valor# = CDbl(uidoc.FieldGetText( "Custo_" & scan)) * ck
+			End If
+			valortotal# = valortotal# + valor#
+			scan2 = scan2 + 1
+		End If
+	Next
+	'Campos de Classificação da Despesa
+	Call pedido.FieldSetText("AreaDespesa", uidoc.FieldGetText("AreaDespesa"))
+	Call pedido.FieldSetText("ResponsavelDespesa", uidoc.FieldGetText("ResponsavelDespesa"))
+	Call pedido.FieldSetText("ClassificacaoDespesa", uidoc.FieldGetText("ClassificacaoDespesa"))
+	Call pedido.FieldSetText("TipoCompra", uidoc.FieldGetText("TipoCompra"))
+	If uidoc.Fieldgettext("Tipo") = "CPS" Or uidoc.Fieldgettext("Tipo") = "Ativo" Then
+		Call pedido.FieldSetText("Natureza", "Venda")
+	Else
+		If tipoAnterior = "SW" Then
+			Call pedido.FieldSetText("Natureza", "Licenciamento de Uso")
+		Else
+			Call pedido.FieldSetText("Natureza", "Prestação de Serviços")
+		End If
+	End If
+	Call pedido.FieldSetText("USC" , CStr( comercial#))
+	Call pedido.FieldSetText("UST" , CStr( turismo#))
+	Call pedido.FieldSetText("Valor" , Format(valortotal, "Fixed"))
+	Call pedido.Refresh
+	GeraPedido = True
+	
+End Function
+
+'++LotusScript Development Environment:2:1:ConsisteDadosEmpresa:1:8
+Function ConsisteDadosEmpresa (empresa As NotesDocument) As Variant
+	
+	Dim ck(1) As Variant
+	Dim msg As String
+	ck(0) = True
+	If empresa.Nome(0) = "" Then
+		msg = Chr(10) + "Razão Social"
+		ck(0) = False
+	End If
+	If empresa.Endereco(0) = "" Then
+		msg = msg + Chr(10) + "Endereço"
+		ck(0) = False
+	End If
+	If empresa.Telefones(0) = "" Then
+		msg = msg + Chr(10) + "Telefones"
+		ck(0) = False
+	End If
+	If empresa.Cidade(0) = "" Then
+		msg = msg + Chr(10) + "Cidade"
+		ck(0) = False
+	End If
+	If empresa.Estado(0) = "" Then
+		msg = msg + Chr(10) + "Estado"
+		ck(0) = False
+	End If
+	If empresa.Pais(0) = "Brasil" Or empresa.Pais(0) = "Brazil" Then
+		If empresa.Cep(0) = "" Then
+			msg = msg + Chr(10) + "Cep"
+			ck(0) = False
+		End If
+		If empresa.Bairro(0) = "" Then
+			msg = msg + Chr(10) + "Bairro"
+			ck(0) = False
+		End If
+		If empresa.CGC(0) = "" And empresa.CGC(0) = "CPF" Then
+			msg = msg + Chr(10) + "CNPJ/CPF"
+			ck(0) = False
+		End If
+		If empresa.Hasitem("IndicadorIE") Then
+			If (empresa.IndicadorIE(0) = "--" Or empresa.IndicadorIE(0) = "1") And empresa.Inscricao(0) = "" Then
+				msg = msg + Chr(10) + "Inscrição Estadual"
+				ck(0) = False
+			End If
+		Else
+			If empresa.Inscricao(0) = "" Then
+				msg = msg + Chr(10) + "Inscrição Estadual"
+				ck(0) = False
+			End If
+		End If
+	End If
+	ck(1) = msg
+	ConsisteDadosEmpresa = ck
+	
+End Function
+
+'++LotusScript Development Environment:2:2:AvisoControle:5:8
+%REM
+	Sub AvisoAprovaControle
+	Description: Comments for Sub
+%END REM
+Sub AvisoControle(doc As NotesDocument)
+	
+	Dim session As New NotesSession
+	Dim nome As New NotesName(session.Effectiveusername)
+	Dim memo As NotesDocument
+	Dim recipients(2) As String
+	Dim richStyle As NotesRichTextStyle
+	Dim rtitem As NotesRichTextItem
+	Set richStyle = session.CreateRichTextStyle
+	richStyle.NotesFont = FONT_ROMAN
+	richStyle.FontSize = 10
+	Set memo = New NotesDocument( session.CurrentDatabase )
+	memo.Form = "Memo"
+	recipients(0) = doc.Requisitante(0) & "/TDec"
+	recipients(1) = doc.GerenteConta(0) & "/TDec"
+	recipients(2) = doc.Inside(0) & "/TDec"
+	memo.SendTo = recipients
+	'memo.BlindCopyTo = "Ludimila Oliveira/TDec"
+	Set rtitem = memo.CreateRichTextItem( "Body" )
+	Call rtitem.AppendStyle(richStyle)
+	'Desvio
+	If doc.Tipo(0) = "Desvio" Then
+		If Val(doc.Resultado_P(0)) > 0 Then
+			memo.Subject = "-> Desvio de Projeto " & doc.Status(0) & " - " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard") & " (" & Format(doc.TotTot(0)/doc.Resultado_P(0), "Percent") & " da Margem Prevista do Negócio)"
+		Else
+			memo.Subject = "-> Desvio de Projeto " & doc.Status(0) & " - " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard")
+		End If
+		Call rtitem.AppendText( "Desvio de Projeto " & doc.Status(0) & " -> " )
+		Call rtitem.AppendDocLink( doc, "Link para o Desvio de Projeto")
+	'Pré-Venda
+	ElseIf doc.Tipo(0) = "Pré-Venda" Then
+		If Val(doc.Resultado_P(0)) > 0 Then
+			memo.Subject = "-> Controle Financeiro de Pré-Venda " & doc.Status(0) & " - " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard") & " (" & Format(doc.TotTot(0)/doc.Resultado_P(0), "Percent") & " da Margem Prevista do Negócio)"
+		Else
+			memo.Subject = "-> Controle Financeiro de Pré-Venda " & doc.Status(0) & " - " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard")
+		End If
+		Call rtitem.AppendText( "Controle Financeiro de Pré-Venda " & doc.Status(0) & " -> " )
+		Call rtitem.AppendDocLink( doc, "Link para o Controle Financeiro de Pré-Venda")
+	'POC
+	ElseIf doc.Tipo(0) = "POC" Then
+		If Val(doc.Resultado_P(0)) > 0 Then
+			memo.Subject = "-> Controle Financeiro de POC " & doc.Status(0) & " - " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard") & " (" & Format(doc.TotTot(0)/doc.Resultado_P(0), "Percent") & " da Margem Prevista do Negócio)"
+		Else
+			memo.Subject = "-> Controle Financeiro de POC " & doc.Status(0) & " - " & doc.Codigo(0) & " R$ " & Format(doc.TotTot(0), "Standard")
+		End If
+		Call rtitem.AppendText( "Controle Financeiro de POC " & doc.Status(0) & " -> " )
+		Call rtitem.AppendDocLink( doc, "Link para o Controle Financeiro de POC")
+	End If
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Descrição: " & doc.Justificativa(0))
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( "Custos: R$ " & Format(doc.CustoP(0), "Standard" ) )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Despesas: R$ " & Format(doc.DespP(0), "Standard" ) )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Custo dos Serviços: R$ " & Format(doc.CustoServicos(0), "Standard" ) & " (" & Format(doc.HHP(0), "Standard" ) & " HH)" )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Terceiros Faturáveis: R$ " & Format(doc.TotalTerceiros(0), "Standard" ) )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Despesas de Vendas: R$ " & Format(doc.TotalVendas(0), "Standard" ) )
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.Appendtext( nome.Common & "," )
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.Appendtext( "TDec Network Group" )
+	Call memo.Send( False )
+		
+End Sub
+
+'++LotusScript Development Environment:2:2:AtualizaSaldosControle:5:8
+%REM
+	Sub AtualizaSaldos
+	Description: Comments for Sub
+%END REM
+Sub AtualizaSaldosControle(controle As NotesUIDocument)
+	
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim passS As Double, hospS As Double, transporteS As Double, alugS As Double, matS As Double, ativoS As Double, servS As Double, freteMS As Double, custoS As Double
+	Dim kmS As Double, transpS As Double, alimeS As Double, teleS As Double, despS As Double
+	Dim planS As Double, gerS As Double, execS As Double, deslocamentoS As Double, docS As Double, hhS As Double
+	Dim terceirosS As Double
+	Dim freteS As Double, intermediacaoS As Double, vendasS As Double
+	Set db = session.CurrentDatabase
+	Set view = db.GetView("(Planilha/Codigo)")
+	Set doc = view.GetDocumentByKey(controle.Document.Codigo(0), True)
+	If Not doc Is Nothing Then
+		'*** Execução ***
+		If controle.FieldGetText("Tipo") = "Desvio" Then
+			'Custos
+			If CStr(doc.PassS(0)) <> "" Then passS = doc.PassS(0)
+			If CStr(doc.HospS(0)) <> "" Then hospS = doc.HospS(0)
+			If CStr(doc.TransporteS(0)) <> "" Then transporteS = doc.TransporteS(0)
+			If CStr(doc.AlugS(0)) <> "" Then alugS = doc.AlugS(0)
+			If CStr(doc.MatS(0)) <> "" Then matS = doc.MatS(0)
+			If CStr(doc.AtivoS(0)) <> "" Then ativoS = doc.AtivoS(0)
+			If CStr(doc.ServS(0)) <> "" Then servS = doc.ServS(0)
+			If CStr(doc.FreteMS(0)) <> "" Then freteMS = doc.FreteMS(0)
+			If CStr(doc.CustoS(0)) <> "" Then custoS = doc.CustoS(0)
+			'Despesas
+			If CStr(doc.KmS(0)) <> "" Then kmS = doc.KmS(0)
+			If CStr(doc.TranspS(0)) <> "" Then transpS = doc.TranspS(0)
+			If CStr(doc.AlimeS(0)) <> "" Then alimeS = doc.AlimeS(0)
+			If CStr(doc.TeleS(0)) <> "" Then teleS = doc.TeleS(0)
+			If CStr(doc.DespS(0)) <> "" Then despS = doc.DespS(0)
+			'Horas
+			If CStr(doc.PlanS(0)) <> "" Then planS = doc.PlanS(0)
+			If CStr(doc.GerS(0)) <> "" Then gerS = doc.GerS(0)
+			If CStr(doc.ExecS(0)) <> "" Then execS = doc.ExecS(0)
+			If CStr(doc.DeslocamentoS(0)) <> "" Then deslocamentoS = doc.DeslocamentoS(0)
+			If CStr(doc.DocS(0)) <> "" Then docS = doc.DocS(0)
+			If CStr(doc.HHS(0)) <> "" Then hhS = doc.HHS(0)
+			'Terceiros Faturáveis
+			If CStr(doc.TerceirosS(0)) <> "" Then terceirosS = doc.TerceirosS(0)
+			'Despesas de Vendas
+			If CStr(doc.FreteS(0)) <> "" Then freteS = doc.FreteS(0)
+			If CStr(doc.IntermediacaoS(0)) <> "" Then intermediacaoS = doc.IntermediacaoS(0)
+			If CStr(doc.VendasS(0)) <> "" Then vendasS = doc.VendasS(0)
+		'*** Pré-Venda ***
+		ElseIf controle.FieldGetText("Tipo") = "Pré-Venda" Then
+			'Custos
+			If CStr(doc.PassPVS(0)) <> "" Then passS = doc.PassPVS(0)
+			If CStr(doc.HospPVS(0)) <> "" Then hospS = doc.HospPVS(0)
+			If CStr(doc.TransportePVS(0)) <> "" Then transporteS = doc.TransportePVS(0)
+			If CStr(doc.AlugPVS(0)) <> "" Then alugS = doc.AlugS(0)
+			If CStr(doc.MatPVS(0)) <> "" Then matS = doc.MatPVS(0)
+			If CStr(doc.AtivoPVS(0)) <> "" Then ativoS = doc.AtivoPVS(0)
+			If CStr(doc.ServPVS(0)) <> "" Then servS = doc.ServPVS(0)
+			If CStr(doc.FreteMPVS(0)) <> "" Then freteMS = doc.FreteMPVS(0)
+			If CStr(doc.CustoPVS(0)) <> "" Then custoS = doc.CustoPVS(0)
+			'Despesas
+			If CStr(doc.KmPVS(0)) <> "" Then kmS = doc.KmPVS(0)
+			If CStr(doc.TranspPVS(0)) <> "" Then transpS = doc.TranspPVS(0)
+			If CStr(doc.AlimePVS(0)) <> "" Then alimeS = doc.AlimePVS(0)
+			If CStr(doc.TelePVS(0)) <> "" Then teleS = doc.TelePVS(0)
+			If CStr(doc.DespPVS(0)) <> "" Then despS = doc.DespPVS(0)
+			'Horas
+			If CStr(doc.PlanPVS(0)) <> "" Then planS = doc.PlanPVS(0)
+			If CStr(doc.GerPVS(0)) <> "" Then gerS = doc.GerPVS(0)
+			If CStr(doc.ExecPVS(0)) <> "" Then execS = doc.ExecPVS(0)
+			If CStr(doc.DeslocamentoPVS(0)) <> "" Then deslocamentoS = doc.DeslocamentoPVS(0)
+			If CStr(doc.DocPVS(0)) <> "" Then docS = doc.DocPVS(0)
+			If CStr(doc.HHPVS(0)) <> "" Then hhS = doc.HHPVS(0)
+		'*** POC ***
+		ElseIf controle.FieldGetText("Tipo") = "POC" Then
+			'Custos
+			If CStr(doc.PassPOCS(0)) <> "" Then passS = doc.PassPOCS(0)
+			If CStr(doc.HospPOCS(0)) <> "" Then hospS = doc.HospPOCS(0)
+			If CStr(doc.TransportePOCS(0)) <> "" Then transporteS = doc.TransportePOCS(0)
+			If CStr(doc.AlugPOCS(0)) <> "" Then alugS = doc.AlugPOCS(0)
+			If CStr(doc.MatPOCS(0)) <> "" Then matS = doc.MatPOCS(0)
+			If CStr(doc.AtivoPOCS(0)) <> "" Then ativoS = doc.AtivoPOCS(0)
+			If CStr(doc.ServPOCS(0)) <> "" Then servS = doc.ServPOCS(0)
+			If CStr(doc.FreteMPOCS(0)) <> "" Then freteMS = doc.FreteMPOCS(0)
+			If CStr(doc.CustoPOCS(0)) <> "" Then custoS = doc.CustoPOCS(0)
+			'Despesas
+			If CStr(doc.KmPOCS(0)) <> "" Then kmS = doc.KmPOCS(0)
+			If CStr(doc.TranspPOCS(0)) <> "" Then transpS = doc.TranspPOCS(0)
+			If CStr(doc.AlimePOCS(0)) <> "" Then alimeS = doc.AlimePOCS(0)
+			If CStr(doc.TelePOCS(0)) <> "" Then teleS = doc.TelePOCS(0)
+			If CStr(doc.DespPOCS(0)) <> "" Then despS = doc.DespPOCS(0)
+			'Horas
+			If CStr(doc.PlanPOCS(0)) <> "" Then planS = doc.PlanPOCS(0)
+			If CStr(doc.GerPOCS(0)) <> "" Then gerS = doc.GerPOCS(0)
+			If CStr(doc.ExecPOCS(0)) <> "" Then execS = doc.ExecPOCS(0)
+			If CStr(doc.DeslocamentoPOCS(0)) <> "" Then deslocamentoS = doc.DeslocamentoPOCS(0)
+			If CStr(doc.DocPOCS(0)) <> "" Then docS = doc.DocPOCS(0)
+			If CStr(doc.HHPOCS(0)) <> "" Then hhS = doc.HHPOCS(0)
+		End If
+		'Custos
+		controle.Document.PassS = passS
+		controle.Document.HospS = hospS
+		controle.Document.TransporteS = transporteS
+		controle.Document.AlugS = alugS
+		controle.Document.MatS = matS
+		controle.Document.AtivoS = ativoS
+		controle.Document.ServS = servS
+		controle.Document.FreteMS = freteMS
+		controle.Document.CustoS = custoS
+		'Despesas
+		controle.Document.KmS = kmS
+		controle.Document.TranspS = transpS
+		controle.Document.AlimeS = alimeS
+		controle.Document.TeleS = teleS
+		controle.Document.DespS = despS
+		'Horas
+		controle.Document.PlanS = planS
+		controle.Document.GerS = gerS
+		controle.Document.ExecS = execS
+		controle.Document.DeslocamentoS = deslocamentoS
+		controle.Document.DocS = docS
+		controle.Document.HHS = hhS
+		'Terceiros Faturáveis
+		controle.Document.TerceirosS = terceirosS
+		'Despesas de Vendas
+		controle.Document.FreteS = freteS
+		controle.Document.IntermediacaoS = intermediacaoS
+		controle.Document.VendasS = vendasS
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:GeraDocID:1:8
+Sub GeraDocID(uidoc As NotesUIDocument)
+	
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim dc As NotesDocumentCollection
+	Dim doc As NotesDocument
+	Dim cont As Integer
+	Set db = session.CurrentDatabase
+	Set view = db.GetView("(Cotacao/DocID)")
+	Set dc = view.GetAllDocumentsByKey(uidoc.FieldGetText("Codigo") & "-", False)
+	cont = dc.Count + 1
+	Set doc = view.GetDocumentByKey(uidoc.FieldGetText("Codigo") & "-" & cont, True)
+	Do Until doc Is Nothing
+		cont = cont + 1
+		Set doc = view.GetDocumentByKey(uidoc.FieldGetText("Codigo") & "-" & cont, True)
+	Loop
+	Call uidoc.FieldSetText("DocID", uidoc.FieldGetText("Codigo") & "-" & cont)
+	
+End Sub
+
+
+'++LotusScript Development Environment:2:2:CalcCotacao:5:8
+%REM
+	Sub CalcCotacao
+	Description: Comments for Sub
+%END REM
+Sub CalcCotacao(uidoc As NotesUIDocument)
+	
+	Dim scan As Integer, qtd As Long, custoFOB As Double, fi As Double, custo As Double, icmsst As Double, fator As Double, totCusto As Double, totICMSST As Double, totMateriais As Double
+	For scan = 0 To 49
+		qtd = Val(uidoc.Fieldgettext("Q_" & scan))
+		If uidoc.Fieldgettext("Produto_" & scan) <> "" And qtd > 0 Then
+			'Calcula CustoFOB/FI/Custo
+			If uidoc.FieldGetText("CustoFOB_" & scan) = "" Then custoFOB = 0 Else custoFOB = CDbl(uidoc.FieldGetText("CustoFOB_" & scan))
+			If uidoc.FieldGetText("FI_" & scan) = "" Then fi = 0 Else fi = CDbl(uidoc.FieldGetText("FI_" & scan))
+			If uidoc.FieldGetText("Custo_" & scan) = "" Then custo = 0 Else custo = CDbl(uidoc.FieldGetText("Custo_" & scan))
+			'Importação TDec
+			If custoFOB > 0 Or fi > 0 Then
+				'1) Calcula o Custo (CustoFOB e Fator de Importação preenchidos ou 3 campos preenchidos)
+				If (custoFOB > 0 And fi > 0 And custo = 0) Or (custoFOB > 0 And fi > 0 And custo > 0) Then
+					custo = custoFOB * fi
+					'2)	Calcula o Fator de Importação (CustoFOB e Custo preenchidos)
+				ElseIf custoFOB > 0 And fi = 0 And custo > 0 Then
+					fi = custo / custoFOB
+					'3) Calcula o CustoFOB (Fator de Importação e Custo preenchidos)
+				ElseIf custoFOB = 0 And fi > 0 And custo > 0 Then
+					custoFOB = custo / fi
+				End If
+				Call uidoc.FieldSetText("CustoFOB_" & scan, Format(custoFOB, "Standard"))
+				Call uidoc.FieldSetText("FI_" & scan, Format(fi, "Standard"))
+				Call uidoc.FieldSetText("Custo_" & scan, CStr(custo))
+			End If
+			'
+			If uidoc.FieldGetText("Custo_" & scan) = "" Then custo = 0 Else custo = CDbl(uidoc.FieldGetText("Custo_" & scan))
+			If uidoc.FieldGetText("ICMSSTC_" & scan) = "" Then icmsst = 0 Else icmsst = CDbl(uidoc.FieldGetText("ICMSSTC_" & scan))
+			Call uidoc.FieldSetText("CusTot_" & scan, Format(Round((custo + icmsst) * Val(uidoc.Fieldgettext("Q_" & scan)), 2), "Standard"))
+			If uidoc.FieldGetText("us_" & scan) = "US$C" Then fator = CDbl(uidoc.FieldGetText("USC")) Else fator = 1
+			totMateriais = totMateriais + CDbl(uidoc.FieldGetText("CusTot_" & scan)) * fator
+		End If
+	Next
+	Call uidoc.FieldSetText("TotMateriais", Format(totMateriais, "Standard"))
+	Call uidoc.FieldSetText("TotMateriais_1", Format(totMateriais, "Standard"))
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:AprovaControle:5:8
+%REM
+	Sub AprovaControle
+	Description: Comments for Sub
+%END REM
+Sub AprovaControle(doc As NotesDocument)
+	
+	On Error Resume Next
+	Dim session As New NotesSession
+	Dim nome As New NotesName(session.Effectiveusername)
+	Dim indice As Variant
+	Dim recipients(2) As String
+	recipients(0) = "Junior Castro/TDec"
+	recipients(1) = "Marcelo Castro/TDec"
+	indice = ArrayGetIndex(recipients, doc.GerenteConta(0) & "/TDec")
+	If nome.Common = doc.GerenteConta(0) And IsNull(indice) And doc.Status(0) <> "Aguardando Aprovação da Diretoria" And doc.Status(0) <> "Aguardando Aprovação de Projetos" Then
+		'Diretoria aprova Despesas do Projeto 
+		If doc.CustoP(0) > 0 Or doc.VendasP(0) > 0 Or doc.TerceirosP(0) > 0 Then
+			doc.Status = "Aguardando Aprovação da Diretoria"
+		'Projetos aprova Despesas do Time Sheet
+		Else
+			doc.Status = "Aguardando Aprovação de Projetos"
+		End If
+		doc.AprovadoPorGerente = nome.Common
+		doc.DataAprovacaoGerente = Now
+	Else
+		doc.Status = "Aprovado"
+		doc.AprovadoPor = nome.Common
+		doc.DataAprovacao = Now
+		If doc.AprovadoPorGerente(0) = "" Then
+			doc.AprovadoPorGerente = nome.Common
+			doc.DataAprovacaoGerente = Now
+		End If
+	End If
+	Call doc.Save(True, True)
+	'Atualiza Planilha Financeira
+	If doc.Status(0) = "Aprovado" Then
+		Call AtualizaPlanilhaFinanceira(doc)
+		Call AtualizaProjeto(doc)
+	End If
+	'Envia Email
+	If doc.Status(0) = "Aprovado" Then
+		Call AvisoControle(doc)
+	Else
+		Call AvisoSolicitaAprovacaoControle(doc)
+	End If
+	
+End Sub

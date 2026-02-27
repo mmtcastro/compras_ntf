@@ -1,0 +1,477 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library ICMSST
+	Created Jun 27, 2012 by Ludimila Oliveira/TDec
+	Description: Comments for Library
+%END REM
+Option Public
+Option Declare
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Function ConverteTexto ( ByVal Texto As String, ByVal Tamanho As Integer ) As String
+Declare Function ConverteValor ( ByVal Valor As Variant, ByVal Casas As Integer, ByVal Tamanho As Integer ) As String
+Declare Sub RessarcimentoICMSST
+Declare Function RetiraSinais ( texto As String) As String
+Declare Function ConverteData ( ByVal Data As Variant, ByVal Tamanho As Integer ) As String
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:1:ConverteTexto:1:8
+Function ConverteTexto ( ByVal Texto As String, ByVal Tamanho As Integer ) As String
+'Converte o Texto entrado, de forma que ele se adeque ao formato apropriado. Caso o Texto não possua o 
+'Tamanho entrado, espaços em branco são acrescidos ao final do Texto, até que o tamanho seja atingido
+'Remove os acentos e "tils" caso existam e retorna o Texto formatado.
+	
+	Dim i As Integer
+	Dim Size As Integer
+	Texto = UCase(Texto)
+	Size = Len ( Texto )
+	For i = 1 To Size								'Substitui caracteres inválidos
+		Select Case Mid ( Texto, i, 1 )
+		Case "Á"
+			Mid ( Texto, i, 1 ) = "A"
+		Case "Â"
+			Mid ( Texto, i, 1 ) = "A"
+		Case "À"
+			Mid ( Texto, i, 1 ) = "A"
+		Case "Ã"
+			Mid ( Texto, i, 1 ) = "A"
+		Case "É"
+			Mid ( Texto, i, 1 ) = "E"
+		Case "Ê"
+			Mid ( Texto, i, 1 ) = "E"
+		Case "Í"
+			Mid ( Texto, i, 1 ) = "I"
+		Case "Ó"
+			Mid ( Texto, i, 1 ) = "O"
+		Case "Ô"
+			Mid ( Texto, i, 1 ) = "O"
+		Case "Õ"
+			Mid ( Texto, i, 1 ) = "O"
+		Case "Ú"
+			Mid ( Texto, i, 1 ) = "U"
+		Case "Ç"
+			Mid ( Texto, i, 1 ) = "C"
+		Case "º"
+			Mid ( Texto, i, 1 ) = " "
+		Case "'"
+			Mid ( Texto, i, 1 ) = " "
+		Case "´"
+			Mid ( Texto, i, 1 ) = " "
+		Case "`"
+			Mid ( Texto, i, 1 ) = " "
+		Case "&"
+			Mid ( Texto, i, 1 ) = "E"
+		Case "$"
+			Mid ( Texto, i, 1 ) = " "
+		Case ","
+			Mid ( Texto, i, 1 ) = " "
+		Case Chr(10)	'TAB
+			Mid ( Texto, i, 1 ) = " "
+		End Select
+	Next
+	
+	If Size <=Tamanho Then
+		i = Size + 1
+		For i = i To Tamanho
+			Texto = Texto + " "	
+		Next
+	Else
+		MsgBox ("Estouro. Texto entrado é maior que o tamanho especificado. -> " + Texto)
+		ConverteTexto = ""
+		Exit Function
+	End If
+	ConverteTexto = Texto
+	
+End Function
+
+'++LotusScript Development Environment:2:1:ConverteValor:1:8
+Function ConverteValor ( ByVal Valor As Variant, ByVal Casas As Integer, ByVal Tamanho As Integer ) As String
+'Converte um valor númerico de forma que ele fique no formato 000IIIDD, de acordo com o Tamanho de Entrada
+'Os 0s à esquerda são acrescentados caso o valor formatado não possua o Tamanho entrado.
+'I se refere à parte inteira do Valor. D se refere à parte decimal do Valor.
+'Retorna o valor formatado adequadamente
+	
+	Dim Saida As String
+	Dim Aux As String
+	Dim Inteira As String
+	Dim Fracionaria As String
+	Dim Pos As Integer
+	Dim i As Integer
+	Aux = CStr ( Valor )
+	Pos = InStr ( 1, Valor, "," )
+	If Pos > 0 Then
+		Inteira = Left ( Aux, Pos - 1 )
+		Fracionaria = Mid ( Aux, Pos + 1 )
+		If (Len(Inteira) + Casas ) > Tamanho Then 
+			MsgBox ("Estouro. Possível perda de dados -> " + Aux)
+			Stop
+			ConverteValor = ""
+			Exit Function
+		End If
+		If  Len ( Fracionaria ) > Casas  Then
+			MsgBox ("Estouro. Criar arredondamento ? -> " + Aux)
+			Stop
+			ConverteValor = ""
+			Exit Function
+		End If
+		For i = 1 To Casas - Len ( Fracionaria )
+			Fracionaria = Fracionaria + CStr ( 0 )
+		Next
+	Else
+		Inteira = Aux
+		Fracionaria = ""
+		If (Len(Inteira) + Casas ) > Tamanho Then 
+			MsgBox ("Estouro. Possível perda de dados -> " + Aux)
+			Stop
+			ConverteValor = ""	
+			Exit Function
+		End If
+		For i = 1 To Casas
+			Fracionaria = Fracionaria + CStr ( 0 )
+		Next
+	End If
+	
+	Saida = ""
+	For i = 1 To Tamanho - ( Len ( Inteira) + Len ( Fracionaria ) )
+		Saida = Saida + "0"
+	Next
+	Saida = Saida + Inteira + Fracionaria
+	ConverteValor = Saida
+	
+End Function
+
+
+'++LotusScript Development Environment:2:2:RessarcimentoICMSST:5:8
+%REM
+	Sub RessarcimentoICMSST
+	Description: Comments for Sub
+%END REM
+Sub RessarcimentoICMSST
+	
+	'On Error GoTo fim
+	Dim ws As New NotesUIWorkspace
+	Dim uiview As NotesUIView
+	Dim dc As NotesDocumentCollection
+	Dim doc As NotesDocument
+	Dim array As Variant, ipi As Variant, iva As Variant, index As Variant
+	Dim scan As Integer
+	Set uiview = ws.Currentview
+	Set dc = uiview.Documents
+	Set doc = dc.Getfirstdocument()
+	'Estabelecimento
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase(session.CurrentDatabase.Server, "empresas.nsf")
+	Dim view As NotesView
+	Dim empresa As NotesDocument
+	Set view = db.GetView( "(Dados Cadastrais)" )
+	Set empresa = view.GetDocumentByKey(doc.CodEmpresa(0), True)
+	If empresa Is Nothing Then
+		MsgBox "Estabelecimento " &  doc.CodEmpresa(0) & " não encontrado em Empresas.", 16, "Erro"
+		Exit Sub
+	End If
+	'Define Data Inicial e Final
+	If Not doc Is Nothing Then
+		Dim dataI As New NotesDateTime("01/" & Month(doc.DataEmissaoNF(0)) & "/" & Year(doc.DataEmissaoNF(0)))
+		Dim dataF As New NotesDateTime("01/" & Month(doc.DataEmissaoNF(0)) & "/" & Year(doc.DataEmissaoNF(0)))
+		Call dataF.Adjustmonth(1)
+		Call dataF.Adjustday(-1)
+	End If
+	'Gera Arquivo
+	Dim arqName As String
+	Dim FileNumber As Integer
+	Dim Buffer As String
+	Dim Tamanho As Long
+	FileNumber = FreeFile ( )
+	arqName = "C:\ICMSST\" & doc.CodEmpresa(0) & "\Entrada\ICMSST" & Format(dataI.Dateonly, "ddmmyyyy") & "-" & Format(dataF.Dateonly, "ddmmyyyy") & "E.TXT"
+	Open ArqName For Output As FileNumber
+	'
+	Dim tipo As String, endereco As String, numero As String, complemento As String
+	Dim tot As Double, totD As Double, i As Integer, x As Integer, pos As Integer, icmsst As Double
+	Dim cont0 As Double, cont1 As Double, cont2 As Double, cont3 As Double, cont4 As Double, cont5 As Double, cont6 As Double
+
+	
+	'********************************* Registro Tipo 1: Mestre do Estabelecimento ********************************* 
+	Buffer = ""																	'Limpando a variável
+	Buffer = "01"																'Tipo de Registro
+	Buffer = Buffer + ConverteValor(RetiraSinais(empresa.CGC(0)), 0, 14)		'CNPJ
+	Buffer = Buffer + ConverteTexto(RetiraSinais(empresa.Inscricao(0)), 14)		'Inscrição Estadual
+	Buffer = Buffer + ConverteValor("6201500", 0, 7)							'CNAE Fiscal
+	Buffer = Buffer + ConverteTexto(RetiraSinais(empresa.Cliente(0)), 35)		'Razão Social
+	Buffer = Buffer + ConverteTexto(empresa.Cidade(0), 30)						'Município
+	Buffer = Buffer + ConverteTexto(empresa.Estado(0), 2)						'Unidade da Federação
+	Buffer = Buffer + ConverteData(dataI.DateOnly, 8)							'Data Inicial
+	Buffer = Buffer + ConverteData(dataF.DateOnly, 8)							'Data Final
+	'Endereço
+	pos = InStr(empresa.Endereco(0), " ")
+	tipo = Left(empresa.Endereco(0), pos - 1)
+	endereco = Mid(empresa.Endereco(0), pos + 1)
+	pos = InStr(endereco, ",")
+	If pos > 0 Then
+		numero = Mid(endereco, pos + 1)
+		endereco = Left(endereco, pos - 1)
+	End If
+	pos = InStr(numero, " ")
+	If pos = 1 Then
+		numero = Mid(numero, pos + 1)
+	End If
+	pos = InStr(numero, " ")
+	If pos > 0 Then
+		complemento = Mid(numero, pos + 1)
+		numero = Left(numero, pos - 1)
+	End If
+	'
+	Buffer = Buffer + ConverteTexto(endereco, 34)								'Logradouro
+	Buffer = Buffer + ConverteValor(RetiraSinais(numero), 0, 5)					'Número do Endereço do Tomador
+	Buffer = Buffer + ConverteTexto(RetiraSinais(complemento), 22)				'Complemento do Endereço do Tomador
+	Buffer = Buffer + ConverteTexto(empresa.Bairro(0), 15)						'Bairro do Tomador
+	Buffer = Buffer + ConverteValor(RetiraSinais(empresa.Cep(0)), 0, 8)			'CEP do Tomador
+	Buffer = Buffer + ConverteTexto("Marcelo Castro", 28)						'Nome do Contato
+	Buffer = Buffer + ConverteValor(RetiraSinais(empresa.Fax(0)), 0, 10)		'Fax
+	Buffer = Buffer + ConverteValor(RetiraSinais(empresa.Telefones(0)), 0, 12)	'Telefone
+	Buffer = Buffer + ConverteTexto(empresa.EmailEmpresa(0), 50)				'Email do Contato
+	Buffer = Buffer + ConverteTexto(empresa.PaginaWeb(0), 40)					'Site
+	Tamanho = Len( Buffer ) 													'Contabiliza tamanho total do Buffer
+	If Tamanho <> 344 Then GoTo fim
+	Print #FileNumber, Buffer													'Salva registro no arquivo
+	cont0 = cont0 + 1															'Totalizador de Registros Geral
+	cont1 = cont1 + 1															'Totalizador de Registros Tipo 01
+	'********************************************************************************************************************
+	
+	
+	'********************************* Registro Tipo 2: Movimentação de Mercadorias por Nota Fiscal - Entradas *********************************
+	Do Until doc Is Nothing
+		If Val(doc.ICMSST(0)) > 0 Then
+			Set empresa = view.GetDocumentByKey(doc.CodCliente(0), True)
+			If empresa Is Nothing Then
+				MsgBox "Fornecedor " & doc.CodCliente(0) & " não encontrado em Empresas.", 16, "Erro"
+				GoTo fim
+			End If
+			For scan = 0 To 49
+				array = doc.Getitemvalue("ST_" & scan)
+				If array(0) = "110" Then
+					Buffer = ""																		'Limpando a variável
+					Buffer = "02"																	'Tipo de Registro
+					Buffer = Buffer + ConverteValor(RetiraSinais(empresa.CGC(0)), 0, 14)			'CNPJ
+					If empresa.Inscricao(0) <> "" Then
+						Buffer = Buffer + ConverteTexto(RetiraSinais(empresa.Inscricao(0)), 14)		'Inscrição Estadual
+					Else
+						Buffer = Buffer + ConverteTexto("ISENTO", 14)								'Inscrição Estadual
+					End If
+					If Trim(UCase(empresa.Pais(0))) = "BRASIL" Or Trim(UCase(empresa.Pais(0))) = "BRAZIL" Then
+						Buffer = Buffer + ConverteTexto(empresa.Estado(0), 2)						'Unidade da Federação
+					Else
+						Buffer = Buffer + ConverteTexto("EX", 2)									'Unidade da Federação
+					End If
+					Buffer = Buffer + ConverteData(doc.DataEmissaoNF(0), 8)							'Data Emissão/Recebimento
+					Buffer = Buffer + ConverteTexto("", 2)											'Série NFiscal
+					Buffer = Buffer + ConverteValor(doc.NFiscal(0), 0, 6)							'NFiscal
+					Buffer = Buffer + ConverteValor(1403, 0, 4)										'CFOP
+					Buffer = Buffer + ConverteValor(0, 0, 2)										'Código Complementar da Operação
+					array = doc.Getitemvalue("Q_" & scan)
+					Buffer = Buffer + ConverteValor(Val(array(0)), 3, 13)							'Quantidade
+					'
+					array = doc.Getitemvalue("CusTot_" & scan)										'Custo Total
+					ipi = doc.Getitemvalue("IPI_" & scan)											'Valor do IPI
+					iva = doc.Getitemvalue("IVA_" & scan)											'Alíquota do IVA
+					Buffer = Buffer + ConverteValor(Round((CDbl(array(0)) + _
+					CDbl(ipi(0)))*(1+iva(0)), 2), 2, 13)											'Valor Total BC-ICMSST
+					Buffer = Buffer + ConverteValor(CDbl(array(0)), 2, 13)							'Valor de Confronto
+					'
+					array = doc.Getitemvalue("PartNo_" & scan)
+					Buffer = Buffer + ConverteTexto(Left(array(0), 14), 14)							'Código da Mercadoria
+					Tamanho = Len( Buffer ) 														'Contabiliza tamanho total do Buffer
+					If Tamanho <> 107 Then GoTo fim
+					Print #FileNumber, Buffer														'Salva registro no arquivo
+					cont0 = cont0 + 1																'Totalizador de Registros Geral
+					cont2 = cont2 + 1																'Totalizador de Registros Tipo 02
+					'Popula PartN, Descrição, Unidade de Medida, Período de Vigência e Alíquota do ICMS
+					ReDim Preserve partN(x) As String, desc(x) As String, un(x) As String, periodo(x) As String, aliquota(x) As Double
+					If x = 0 Then
+						array = doc.Getitemvalue("PartNo_" & scan)
+						partN(x) = array(0)
+						array = doc.Getitemvalue("Produto_" & scan)
+						desc(x) = array(0)
+						array = doc.Getitemvalue("Un_" & scan)
+						un(x) = array(0)
+						periodo(x) = doc.DataEmissaoNF(0)
+						array = doc.Getitemvalue("IC_" & scan)
+						aliquota(x) = array(0)
+						x = x + 1
+					Else
+						array = doc.Getitemvalue("PartNo_" & scan)
+						index = ArrayGetIndex(partN, array(0))
+						If Not IsNull(index) Then
+							array = doc.Getitemvalue("IC_" & scan)
+							If CDbl(array(0)) <> aliquota(scan) Then
+								ReDim Preserve partN(x) As String, desc(x) As String, un(x) As String, periodo(x) As String, aliquota(x) As Double
+								array = doc.Getitemvalue("PartNo_" & scan)
+								partN(x) = array(0)
+								array = doc.Getitemvalue("Produto_" & scan)
+								desc(x) = array(0)
+								array = doc.Getitemvalue("Un_" & scan)
+								un(x) = array(0)
+								periodo(x) = doc.DataEmissaoNF(0)
+								array = doc.Getitemvalue("IC_" & scan)
+								aliquota(x) = array(0)
+								x = x + 1
+							End If
+						Else
+							ReDim Preserve partN(x) As String, desc(x) As String, un(x) As String, periodo(x) As String, aliquota(x) As Double
+							array = doc.Getitemvalue("PartNo_" & scan)
+							partN(x) = array(0)
+							array = doc.Getitemvalue("Produto_" & scan)
+							desc(x) = array(0)
+							array = doc.Getitemvalue("Un_" & scan)
+							un(x) = array(0)
+							periodo(x) = doc.DataEmissaoNF(0)
+							array = doc.Getitemvalue("IC_" & scan)
+							aliquota(x) = array(0)
+							x = x + 1
+						End If
+					End If
+				End If
+			Next
+		End If
+		Set doc = dc.Getnextdocument(doc)
+		i = i + 1
+	Loop
+	'*******************************************************************************************************************************************
+	
+	
+	'********************************* Registro Tipo 4: Código da Mercadoria '*********************************
+	For scan = 0 To UBound(partN)
+		Buffer = ""													'Limpando a variável
+		Buffer = Buffer + "04"										'Tipo do Registro
+		Buffer = Buffer + ConverteTexto(Left(partN(scan), 14), 14)	'Código da Mercadoria
+		Buffer = Buffer + ConverteTexto(Left(desc(scan), 75), 75)	'Descrição da Mercadoria
+		Buffer = Buffer + ConverteTexto(un(scan), 3)				'Unidade de Medida da Mercadoria
+		Tamanho = Len( Buffer )										'Contabiliza tamanho total do Buffer
+		If Tamanho <> 94 Then GoTo fim
+		Print #FileNumber, Buffer									'Salva registro no arquivo
+		cont0 = cont0 + 1											'Totalizador de Registros Geral
+		cont4 = cont4 + 1											'Totalizador de Registros Tipo 04
+	Next
+	'*******************************************************************************************************************************************
+	
+	
+	'********************************* Registro Tipo 5: Alíquota de ICMS '*********************************
+	For scan = 0 To UBound(partN)
+		Buffer = ""														'Limpando a variável
+		Buffer = Buffer + "05"											'Tipo do Registro
+		Buffer = Buffer + ConverteTexto(Left(partN(scan), 14), 14)		'Código da Mercadoria
+		Buffer = Buffer + ConverteData(dataI.Dateonly, 8) 				'Data Inicial
+		Buffer = Buffer + ConverteData(dataF.Dateonly, 8)				'Data Final
+		Buffer = Buffer + ConverteValor(aliquota(scan) * 100, 2, 4)		'Alíquota de ICMS
+		Tamanho = Len( Buffer )											'Contabiliza tamanho total do Buffer
+		If Tamanho <> 36 Then GoTo fim
+		Print #FileNumber, Buffer										'Salva registro no arquivo
+		cont0 = cont0 + 1												'Totalizador de Registros Geral
+		cont5 = cont5 + 1												'Totalizador de Registros Tipo 05
+	Next
+	'*******************************************************************************************************************************************
+	
+	
+	'********************************* Registro Tipo 6: Totalizador de Arquivo '*********************************
+	Dim cont As Integer
+	For scan = 1 To 6
+		Select Case scan
+		Case 1	: cont = cont1
+		Case 2	: cont = cont2
+		Case 3	: cont = cont3
+		Case 4	: cont = cont4
+		Case 5	: cont = cont5
+		Case 6	: cont = cont6
+		End Select
+		If cont > 0 Then
+			Buffer = ""														'Limpando a variável
+			Buffer = Buffer + "06"											'Tipo do Registro
+			Buffer = Buffer + ConverteValor(scan, 0, 2 )					'Tipo as ser totalizado
+			If scan = 6 Then
+				Buffer = Buffer + ConverteValor(cont + 1, 0, 14 )			'Total de Registros do Tipo 01 ao Tipo 05
+			Else
+				Buffer = Buffer + ConverteValor(cont, 0, 14 )				'Total de Registros do Tipo 01 ao Tipo 05
+			End If
+			Tamanho = Len( Buffer )											'Contabiliza tamanho total do Buffer
+			If Tamanho <> 18 Then GoTo fim
+			Print #FileNumber, Buffer										'Salva registro no arquivo
+			cont0 = cont0 + 1												'Totalizador de Registros Geral
+			cont6 = cont6 + 1												'Totalizador de Registros Tipo 06
+		End If
+	Next
+	'*******************************************************************************************************************************************
+	
+	
+	MsgBox("Numero de documentos processados: " & i)
+	Close FileNumber
+	MsgBox "Arquivo gerado com sucesso: " + ArqName
+	Call uiview.Deselectall()
+	Exit Sub
+fim:
+	Close FileNumber
+	Kill ArqName
+	MsgBox "O arquivo não foi gerado"
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:RetiraSinais:1:8
+Function RetiraSinais ( texto As String) As String
+	
+	Dim i As Integer
+	Dim NovoTexto As String
+	Dim size As Long
+	Texto = UCase ( Texto )
+	Size = Len ( Texto )
+	For i = 1 To Size								'Retira caracteres inválidos
+		Select Case Mid ( Texto, i, 1 )
+		Case "."
+		Case "-"
+		Case "/"
+		Case "$"
+		Case ":"
+		Case ";"
+		'Case " "
+		Case Else
+			NovoTexto = NovoTexto + Mid ( Texto, i, 1 )
+		End Select
+	Next
+	RetiraSinais = NovoTexto
+	
+End Function
+
+'++LotusScript Development Environment:2:1:ConverteData:1:8
+Function ConverteData ( ByVal Data As Variant, ByVal Tamanho As Integer ) As String
+'Converte datas para o formato DDMM, DDMMAA ou AAAAMMDD, AAAA-MM-DD, conforme o valor Tamanho ( 4, 6, 8 ou 10 )
+	
+	Dim dia As String, mes As String, ano As String
+	dia = Day ( Data ) 
+	If Len(dia) = 1 Then
+		dia = "0" + CStr ( dia )
+	Else
+		dia = CStr ( dia )
+	End If
+	'
+	mes = Month ( Data )
+	If Len(mes) = 1 Then
+		mes = "0" + CStr ( mes )
+	Else
+		mes = CStr ( mes )
+	End If
+	'
+	ano = CStr ( Year ( Data ) )
+	If ( Tamanho = 6 ) Then
+		ano = Right ( ano, 2 )
+	End If
+	
+	If Tamanho = 4 Then
+		ConverteData = dia + mes
+	ElseIf Tamanho = 6 Then
+		ConverteData = dia + mes + ano
+	ElseIf Tamanho = 8 Then
+		ConverteData = ano + mes + dia
+	Else
+		ConverteData = ano + "-" + mes + "-" + dia
+	End If
+	
+End Function

@@ -1,0 +1,791 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Function ConverteHora ( DataHoje As Variant, tamanho As Integer ) As String
+Declare Sub BuscaRegrasFiscais (regrasFiscais As String, codEmpresa As String)
+Declare Function RetiraSinais ( texto As String) As String
+Declare Function getCodMunicipio( cidade As String, estado As String ) As String
+Declare Function getCodigo As Variant
+Declare Function ConverteTexto ( Byval Texto As String, Byval Tamanho As Integer ) As String
+Declare Function GetRegrasFiscais(docAtu As NotesDocument) As String
+Declare Function ConverteValor ( Byval Valor As Variant, Byval Casas As Integer, Byval Tamanho As Integer ) As String
+Declare Function GetDadosEmpresa(codigo As String) As Variant
+Declare Sub Entrada
+Declare Function converteCNPJ( cnpj As String, tamanho As Integer ) As String
+Declare Function ConverteData ( Byval Data As Variant, Byval Tamanho As Integer ) As String
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Dim aliquota(8) As Double
+Dim arqName As String
+Dim FileNumber As Integer
+Dim Buffer As String
+Dim DataHoje As Variant
+Dim Tamanho As Long
+Dim doc As NotesDocument
+Dim empresa As Variant, valor As Variant, codigo As Variant
+Dim msg As String
+Dim ck As Boolean, ckCodigo As Boolean
+
+'++LotusScript Development Environment:2:1:ConverteHora:1:8
+Function ConverteHora ( DataHoje As Variant, tamanho As Integer ) As String
+	'Retorna HHMMSS
+	
+	Dim data As New NotesDateTime( Cstr(DataHoje) )
+	Dim hora As String
+	hora = RetiraSinais(data.TimeOnly)
+	
+	If tamanho = 4 Then
+		ConverteHora = Left(hora, 4)
+	Else
+		ConverteHora = hora
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:2:BuscaRegrasFiscais:1:8
+Sub BuscaRegrasFiscais (regrasFiscais As String, codEmpresa As String)
+	
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase (session.CurrentDatabase.Server, "faturas.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim key(1) As String
+	key(0) = regrasFiscais
+	key(1) = codEmpresa
+	Set view = db.GetView("(RegrasFiscais)")
+	Set doc = view.GetDocumentByKey(key, True)
+	If Not doc Is Nothing Then aliquota(0) = doc.Pis(0) Else aliquota(0) = 0.0065
+	If Not doc Is Nothing Then aliquota(1) = doc.Cofins(0) Else aliquota(1) = 0.03
+	If Not doc Is Nothing Then aliquota(2) = doc.CPMF(0) Else aliquota(2) = 0.0038
+	If Not doc Is Nothing Then aliquota(3) = doc.ISS(0) Else aliquota(3) = 0.005
+	If Not doc Is Nothing Then aliquota(4) = doc.IRRF(0) Else aliquota(4) = 0.015
+	If Not doc Is Nothing Then aliquota(5) = doc.INSSRF(0) Else aliquota(5) = 0
+	If Not doc Is Nothing Then aliquota(6) = doc.IFPis(0) Else aliquota(6) = 0
+	If Not doc Is Nothing Then aliquota(7) = doc.IFCofins(0) Else aliquota(7) = 0
+	If Not doc Is Nothing Then aliquota(8) = doc.IFCSLL(0) Else aliquota(8) = 0
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:RetiraSinais:1:8
+Function RetiraSinais ( texto As String) As String
+	
+	Dim i As Integer
+	Dim NovoTexto As String
+	Dim size As Long
+	
+	Texto = Ucase ( Texto )
+	Size = Len ( Texto )
+	
+	For i = 1 To Size								'Retira caracteres inválidos
+		Select Case Mid ( Texto, i, 1 )
+		Case "."
+		Case "-"
+		Case "/"
+		Case "R"
+		Case "$"
+		Case ":"
+		Case ";"
+		Case " "
+		Case Else
+			NovoTexto = NovoTexto + Mid ( Texto, i, 1 )
+		End Select
+	Next
+	
+	RetiraSinais = NovoTexto
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getCodMunicipio:1:8
+Function getCodMunicipio( cidade As String, estado As String ) As String
+	
+	cidade = Trim(cidade)
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase(session.CurrentDatabase.Server, "faturas.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim key(1) As String
+	key(0) = cidade
+	key(1) = estado
+	Set view = db.GetView("(Configuracao/Municipio)")
+	Set doc = view.GetDocumentByKey(key, True)
+	If doc Is Nothing Then
+		If Instr(msg, cidade) = 0 Then
+			msg = msg + Chr(10) + "- " + cidade + " (" + estado + ")"
+		End If
+	Else
+		getCodMunicipio = doc.Codigo(0)
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getCodigo:1:8
+Function getCodigo As Variant
+	
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim config As NotesDocument
+	Dim key(2) As String, array(3) As String
+	
+	Set db = session.CurrentDatabase
+	key(0) = doc.TipoCompra(0)
+	key(1) = doc.Natureza(0)
+	key(2) = doc.Classificacao(0)
+	Set view = db.GetView("(Configuracao/Codigos)")
+	Set config = view.GetDocumentByKey(key, True)
+	If Not config Is Nothing Then
+		array(0) = config.Codigo(0)
+		array(1) = config.Descricao(0)
+		If empresa(4) = "SP" Then
+			array(2) = config.CodFiscal(0)
+		Else
+			array(2) = config.CodFiscal_1(0)
+		End If
+		array(3) = config.DescricaoFiscal(0)
+	Else
+		Msgbox ("Código Contábil não encontrado para " + Chr(10) + "Tipo de Compra: " + doc.TipoCompra(0) + Chr(10) + "Natureza:" + doc.Natureza(0) + Chr(10) + "Classificação: " +  doc.Classificacao(0))
+		ckCodigo = False
+	End If
+	getCodigo = array
+	
+End Function
+
+'++LotusScript Development Environment:2:1:ConverteTexto:1:8
+Function ConverteTexto ( Byval Texto As String, Byval Tamanho As Integer ) As String
+'Converte o Texto entrado, de forma que ele se adeque ao formato apropriado. Caso o Texto não possua o 
+'Tamanho entrado, espaços em branco são acrescidos ao final do Texto, até que o tamanho seja atingido
+'Remove os acentos e "tils" caso existam e retorna o Texto formatado.
+	
+	Dim i As Integer
+	Dim Size As Integer
+	
+	Texto = Trim( Texto )
+	Size = Len ( Texto )
+	
+	For i = 1 To Size								'Substitui caracteres inválidos
+		Select Case Mid ( Texto, i, 1 )
+		Case "Á"
+			Mid ( Texto, i, 1 ) = "A"
+		Case "Â"
+			Mid ( Texto, i, 1 ) = "A"
+		Case "À"
+			Mid ( Texto, i, 1 ) = "A"
+		Case "Ã"
+			Mid ( Texto, i, 1 ) = "A"
+		Case "É"
+			Mid ( Texto, i, 1 ) = "E"
+		Case "Ê"
+			Mid ( Texto, i, 1 ) = "E"
+		Case "Í"
+			Mid ( Texto, i, 1 ) = "I"
+		Case "Ó"
+			Mid ( Texto, i, 1 ) = "O"
+		Case "Ô"
+			Mid ( Texto, i, 1 ) = "O"
+		Case "Õ"
+			Mid ( Texto, i, 1 ) = "O"
+		Case "Ú"
+			Mid ( Texto, i, 1 ) = "U"
+		Case "Ç"
+			Mid ( Texto, i, 1 ) = "C"
+		Case "º"
+			Mid ( Texto, i, 1 ) = " "
+		Case "&"
+			Mid ( Texto, i, 1 ) = "E"
+		Case "$"
+			Mid ( Texto, i, 1 ) = " "
+		Case Chr(10)
+			Mid ( Texto, i, 1 ) = " "
+			Mid ( Texto, i - 1, 1 ) = " "
+		End Select
+	Next
+	
+	If Size <=Tamanho Then						'Verifica se não há estouro de tamanho
+		i = Size + 1
+		For i = i To Tamanho
+			Texto = Texto + " "	
+		Next
+		
+	Else															'Há estouro. Erro.
+		Msgbox ("Estouro. Texto entrado é maior que o tamanho especificado. -> Baixa: " + doc.DocID(0) + Texto)
+		Stop
+		ConverteTexto = ""
+		Exit Function
+	End If
+	
+	ConverteTexto = Texto
+	
+End Function
+
+'++LotusScript Development Environment:2:1:GetRegrasFiscais:1:8
+Function GetRegrasFiscais(docAtu As NotesDocument) As String
+	
+	Dim db As New NotesDatabase (docAtu.ParentDatabase.Server, "faturas.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim codigo As String
+	Set view = db.GetView("(RegrasFiscais)")
+	Set doc = view.GetLastDocument
+	
+	If Not doc Is Nothing Then
+		'Sistema Multi Empresas - LMO-19/01/04	
+		Do Until doc.CodEmpresa(0) = docAtu.CodEmpresa(0)
+			Set doc = view.GetPrevDocument(doc)
+			If doc Is Nothing Then Exit Function	
+		Loop
+		GetRegrasFiscais = doc.DocID(0)
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:1:ConverteValor:1:8
+Function ConverteValor ( Byval Valor As Variant, Byval Casas As Integer, Byval Tamanho As Integer ) As String
+	
+	Dim Saida As String									'Valor inteiro convertido
+	Dim Aux As String
+	Dim Inteira As String									'Parte inteira do valor ( antes da vírgula )
+	Dim Fracionaria As String							'Parte fracionaria do valor ( depois da vírgula )
+	Dim Pos As Integer
+	Dim i As Integer
+	
+	If Cstr(Valor) = "" Then Valor = 0
+	Valor = Round(Valor, Casas)
+	Aux = Cstr ( Valor )	
+	Pos = Instr ( 1, Valor, "," )
+	
+	If Pos > 0 Then										'Existe virgula
+		Inteira = Left ( Aux, Pos )
+		Fracionaria = Mid ( Aux, Pos + 1 )
+		
+		If (Len(Inteira) + Casas ) > Tamanho Then 
+			Msgbox ("Estouro. Possível perda de dados -> " + Aux)
+			Stop
+			ConverteValor = ""
+			Exit Function
+		End If
+		
+		If  Len ( Fracionaria ) > Casas  Then
+			Msgbox ("Estouro. Criar arredondamento ? -> Baixa: " & doc.DocID(0) & " " & Aux)
+			Stop
+			ConverteValor = ""
+			Exit Function
+		End If
+		
+		For i = 1 To Casas - Len ( Fracionaria )
+			Fracionaria = Fracionaria + Cstr ( 0 )
+		Next
+		
+	Else
+		
+		If casas = 0 Then
+			Inteira = Aux
+		Else
+			Inteira = Aux + ","
+		End If
+		
+		Fracionaria = ""
+		If (Len(Inteira) + Casas ) > Tamanho Then 
+			Msgbox ("Estouro. Possível perda de dados -> Baixa: " & doc.DocID(0) & " " & Aux)
+			Stop
+			ConverteValor = ""	
+			Exit Function
+		End If
+		
+		For i = 1 To Casas
+			Fracionaria = Fracionaria + Cstr ( 0 )
+		Next
+		
+	End If
+	
+	Saida = ""
+	For i = 1 To Tamanho - ( Len ( Inteira) + Len ( Fracionaria ) )
+		Saida = Saida + "0"
+	Next
+	Saida = Saida + Inteira + Fracionaria
+	ConverteValor = Saida
+	
+End Function
+
+'++LotusScript Development Environment:2:1:GetDadosEmpresa:1:8
+Function GetDadosEmpresa(codigo As String) As Variant
+	
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase( session.CurrentDatabase.Server, "empresas.nsf" )
+	Dim view As NotesView
+	Dim doc As notesDocument
+	Dim array(5) As String
+	Set view = db.GetView( "(Dados Cadastrais)" )
+	Set doc = view.GetDocumentByKey( codigo, True )
+	If Not doc Is Nothing Then
+		array(0) = doc.Nome(0)				'Nome
+		array(1) = doc.Inscricao(0)			'Inscrição Estadual
+		array(2) = doc.Cidade(0)			'Cidade
+		array(3) = doc.CGC(0)				'CNPJ
+		array(4) = doc.Estado(0)			'UF
+		array(5) = doc.TipoInscricao(0)		'Tipo de Inscrição (Pessoa Física ou Pessoa Jurídica)
+	End If
+	GetDadosEmpresa = array
+	
+End Function
+
+'++LotusScript Development Environment:2:2:Entrada:1:8
+Sub Entrada
+	
+	Dim ws As New NotesUIWorkspace
+	Dim uiview As NotesUIView
+	Dim dc As NotesDocumentCollection
+	Dim indice As Variant
+	Dim x As Integer, y As Integer, scan As Integer, scan2 As Integer
+	Dim regrasFiscais As String
+	Set uiview = ws.CurrentView
+	Set dc = uiview.Documents
+	Set doc = dc.GetFirstDocument
+	DataHoje = Now
+	FileNumber = Freefile( )
+	msg = ""
+	
+	If dc.Count = 0 Then
+		Msgbox "É necessário selecionar pelo menos 1 Documento"
+		Exit Sub
+	End If
+	
+	'Nome do Arquivo
+	arqName = "C:\Sintegra\" & doc.CodEmpresa(0) & "\NFE" & ConverteData( DataHoje, 6 ) & "A.TXT"
+	Open ArqName For Output As FileNumber
+	ck = True
+	ckCodigo = True
+	
+	Buffer = ""
+	'********************************* Cabeçalho ****************************************************************************************
+	Buffer = Buffer + "VERSAO LAYOUT:2011-A.1"
+	Print #FileNumber, Buffer
+	
+	'Agrupa Baixas por NFiscal do Fornecedor - LMO 11/04/08
+	Do Until doc Is Nothing
+		If doc.Form(0) = "Baixa" And doc.TipoBaixa(0) = "Compra" And doc.NFiscal(0) <> 2008 And doc.Sintegra(0) = "Sim" Then
+			If x = 0 Then
+				Redim Preserve NFiscal(x) As String
+				NFiscal(x) = doc.NFiscal(0) & doc.CodCliente(0)
+				x = x + 1
+			Else
+				indice = Arraygetindex(NFiscal, doc.NFiscal(0) & doc.CodCliente(0))
+				If Isnull(indice) Then
+					Redim Preserve NFiscal(x) As String
+					NFiscal(x) = doc.NFiscal(0) & doc.CodCliente(0)
+					x = x + 1
+				End If
+			End If
+		End If
+		Set doc = dc.GetNextDocument(doc)
+	Loop
+	If x = 0 Then Goto erro
+	
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim item As Variant, produto As Variant, partN As Variant, un As Variant, qtd As Variant, ic As Variant, ip As Variant, custo As Variant, cusTot As Variant
+	Dim valTot As Double
+	Set db = session.CurrentDatabase
+	Set view = db.GetView("(Baixas/NFiscalFornecedor)")
+	
+	For y = 0 To Ubound(NFiscal)
+		
+		'Quantidade de Desdobramentos
+		Set dc = view.GetAllDocumentsByKey(NFiscal(y), True)
+		Set doc = dc.GetFirstDocument
+		Redim array(0) As Double
+		array(0) = 0
+		valTot = 0
+		x = 0
+		
+		Do Until doc Is Nothing
+			If doc.Form(0) = "Baixa" And doc.TipoBaixa(0) = "Compra" And doc.Classificacao(0) <> "Glosa" And doc.TipoCompra(0) <> "Remessa" And doc.Sintegra(0) = "Sim" Then
+				For scan = 0 To 49
+					ic = doc.GetItemValue("IC_" & scan)
+					If Cstr(ic(0)) = "" Then Exit For
+					If x = 0 Then
+						Redim Preserve array(x) As Double
+						array(x) = ic(0) * 100
+						x = x + 1
+					Else
+						indice = Arraygetindex(array, ic(0) * 100)
+						If Isnull(indice) Then
+							Redim Preserve array(x) As Double
+							array(x) = ic(0) * 100
+							x = x + 1
+						End If
+					End If
+				Next
+				valTot = valTot + doc.Valor(0) 'Valor Total por Nota
+				'Busca Regra Fiscal Vigente
+				If doc.Natureza(0) = "Prestação de Serviços" And aliquota(0) = 0 Then
+					regrasFiscais = GetRegrasFiscais(doc)
+					Call BuscaRegrasFiscais (regrasFiscais, doc.CodEmpresa(0))
+				End If
+			End If
+			Set doc = dc.GetNextDocument(doc)
+		Loop
+		Set doc = dc.GetFirstDocument
+		
+		Buffer = ""
+		'********************************* Movimento Principal ****************************************************************************************
+		empresa = GetDadosEmpresa(doc.CodEmpresa(0))
+		Buffer = Buffer + ConverteCNPJ (empresa(3), 18)																'CNPJ
+		Buffer = Buffer + ConverteTexto ("E", 1)																				'Tipo
+		Buffer = Buffer + ConverteData ( doc.DataEmissaoNF(0), 10)												'Data Entrada
+		Buffer = Buffer + ConverteTexto ("NF", 5)																			'Espécie
+		Buffer = Buffer + ConverteTexto ("", 3)																				'Série
+		Buffer = Buffer + ConverteTexto ("", 2)																				'Sub-série
+		Buffer = Buffer + ConverteTexto (Left(doc.NFiscal(0), 6), 6)													'Número do Documento
+		Buffer = Buffer + ConverteData ( doc.DataEmissaoNF(0), 10)												'Data do Documento
+		'Buscar o Fornecedor em Empresas
+		empresa = GetDadosEmpresa(doc.CodCliente(0))
+		Buffer = Buffer + ConverteCNPJ ( empresa(3), 18)																'CNPJ
+		Buffer = Buffer + ConverteTexto (Left(empresa(0), 40) , 40)													'Nome
+		Buffer = Buffer + ConverteTexto ( empresa(1), 20)																'Inscrição Estadual
+		Buffer = Buffer + ConverteTexto ( getCodMunicipio(empresa(2),empresa(4)) , 9)					'Cód. IBGE
+		'Prestação de Serviços
+		If doc.Natureza(0) = "Prestação de Serviços" Then
+			Buffer = Buffer + ConverteValor ( valTot + Cdbl(doc.IRRF(0)) + Cdbl(doc.IF(0)), 2, 12)		'Valor Nota Fiscal
+		Else
+			Buffer = Buffer + ConverteValor ( valTot, 2, 12)																'Valor Nota Fiscal
+		End If
+		Buffer = Buffer + ConverteTexto ( "", 9)																				'Conta Banco
+		Buffer = Buffer + ConverteTexto ( "", 10)																			'Data Cheque
+		Buffer = Buffer + ConverteValor ( 0, 0, 6)																			'Numero do Cheque
+		Buffer = Buffer + ConverteValor ( 1, 0, 1)																			'Forma de pagto
+		Buffer = Buffer + ConverteTexto ( "", 12)																			'Nº Nota de Devolução
+		Buffer = Buffer + ConverteTexto ( "", 5)																				'Espécie Nota de Devolução
+		Buffer = Buffer + ConverteTexto ( "", 3)																				'Série Nota de Devolução
+		Buffer = Buffer + ConverteTexto ( "", 2)																				'Sub-Série Nota de Devolução
+		Buffer = Buffer + ConverteValor ( Ubound(array), 0, 2)														'Desdobramento
+		Buffer = Buffer + ConverteValor ( 0, 0, 1)																			'Local
+		Buffer = Buffer + ConverteTexto ( "", 40)																			'Endereço
+		Buffer = Buffer + ConverteTexto ( "", 5)																				'Número
+		Buffer = Buffer + ConverteValor ( 0, 0, 9)																			'CEP
+		Buffer = Buffer + ConverteTexto ( "", 30)																			'Bairro
+		Buffer = Buffer + ConverteTexto ( "", 2)																				'País
+		Buffer = Buffer + ConverteTexto ( "", 11)																			'Inscrição Municipal
+		Buffer = Buffer + ConverteValor ( 0, 2, 18)																			'Valor Frete
+		Buffer = Buffer + ConverteValor ( 0, 2, 18)																			'Valor Seguro
+		Buffer = Buffer + ConverteValor ( 0, 2, 18)																			'Valor Desconto
+		'Dados da Fornecedor
+		Buffer = Buffer + ConverteCNPJ ( empresa(3), 18)																'CNPJ
+		Buffer = Buffer + ConverteTexto ( Left(empresa(0), 40), 40)													'Nome
+		Buffer = Buffer + ConverteTexto ( empresa(1), 20)																'Inscrição Estadual
+		Buffer = Buffer + ConverteTexto ( getCodMunicipio(empresa(2),empresa(4)), 9)					'Cód. IBGE
+		'Dados do TDEC
+		empresa = GetDadosEmpresa(doc.CodEmpresa(0))
+		Buffer = Buffer + ConverteCNPJ ( empresa(3), 18)																'CNPJ
+		Buffer = Buffer + ConverteTexto ( Left(empresa(0), 40), 40)													'Nome
+		Buffer = Buffer + ConverteTexto ( empresa(1), 20)																'Inscrição Estadual
+		Buffer = Buffer + ConverteTexto ( getCodMunicipio(empresa(2),empresa(4)), 9)					'Cód. IBGE
+		'Dados do Transportador
+		Buffer = Buffer + ConverteTexto ( "", 18)																			'CNPJ
+		Buffer = Buffer + ConverteTexto ( "", 40)																			'Nome
+		Buffer = Buffer + ConverteTexto ( "", 20)																			'Inscrição Estadual
+		Buffer = Buffer + ConverteTexto ( "", 9)																				'Cód. IBGE
+		Buffer = Buffer + ConverteTexto ( "", 10)																			'Espécie volumes
+		Buffer = Buffer + ConverteValor ( 0, 0, 1)																			'Modalidade
+		Buffer = Buffer + ConverteTexto ( "", 7)																				'Placa 1
+		Buffer = Buffer + ConverteTexto ( "", 2)																				'UF 1
+		Buffer = Buffer + ConverteTexto ( "", 7)																				'Placa 2
+		Buffer = Buffer + ConverteTexto ( "", 2)																				'UF 2
+		Buffer = Buffer + ConverteTexto ( "", 7)																				'Placa 3
+		Buffer = Buffer + ConverteTexto ( "", 2)																				'UF 3
+		Buffer = Buffer + ConverteValor ( 0, 3, 18)																			'Peso Bruto
+		Buffer = Buffer + ConverteValor ( 0, 3, 18)																			'Peso Líquido
+		Buffer = Buffer + ConverteTexto ( "", 1)																				'Emitente da Nota Fiscal
+		Buffer = Buffer + ConverteTexto ( "", 20)																			'Insc. Estadual Secundária Fornecedor
+		Buffer = Buffer + ConverteTexto ( "", 9)																				'Município de Origem do Frete
+		Buffer = Buffer + ConverteValor ( 0, 0, 10)																			'Chave NFE
+		Buffer = Buffer + ConverteTexto ( "", 1)																				'Indicador do Título de Crédito
+		Buffer = Buffer + ConverteTexto ( "", 20)																			'Descrição do Título de Crédito
+		Buffer = Buffer + ConverteTexto ( "", 12)																			'Número do Título de Crédito
+		Buffer = Buffer + ConverteTexto ( "", 3)																				'Situação Trib. ICMS Transporte
+		Tamanho = Len( Buffer )
+		If Tamanho <> 767 Then Goto Erro
+		Print #FileNumber, Buffer
+		'*******************************************************************************************************************************************************
+		
+		
+		'Desdobramentos
+		For scan2 = 0 To Ubound(array)
+			Dim valor(5) As Double
+			valor(0) = 0														'Qtd de Itens
+			valor(1) = 0														'Valor Contabil
+			valor(2) = 0														'Base de Cálculo ICMS
+			valor(3) = 0														'Alíquota ICMS
+			valor(4) = 0														'Valor ICMS
+			valor(5) = 0														'Valor IPI
+			
+			Set doc = dc.GetFirstDocument
+			Do Until doc Is Nothing
+				For scan = 0 To 49
+					ic = doc.GetItemValue("IC_" & scan)
+					If Cstr(ic(0)) = "" Then Exit For
+					ip = doc.GetItemValue("IP_" & scan)
+					cusTot = doc.GetItemValue("CusTot_" & scan)
+					If array(scan2) = ic(0) * 100 Then
+						valor(0) = valor(0) + 1									'Qtd de Itens
+						valor(1) = valor(1) + cusTot(0)						'Valor Contabil
+						valor(2) = valor(2) + cusTot(0)						'Base de Cálculo ICMS
+						valor(3) = ic(0) * 100									'Alíquota ICMS
+						valor(4) = valor(4) + cusTot(0) * ic(0)				'Valor ICMS
+						If ip(0) > 0 Then
+							valor(5) = valor(5) + cusTot(0) * ip(0)		'Valor IPI
+							valor(1) = valor(1) + cusTot(0) * ip(0)		'Valor Contabil com IPI
+						End If
+					End If
+				Next
+				Set doc = dc.GetNextDocument(doc)
+			Loop
+			
+			Set doc = dc.GetFirstDocument
+			codigo = getCodigo
+			'If ckCodigo = False Then Goto erro:
+			empresa = GetDadosEmpresa(doc.CodCliente(0))
+			
+			Buffer = ""
+			'********************************* Complemento do Movimento ****************************************************************************************
+			Buffer = Buffer + ConverteTexto ( "", 2)																			'Brancos
+			Buffer = Buffer + ConverteTexto ( Left(doc.NFiscal(0), 6), 6)											'Nº Documento
+			Buffer = Buffer + ConverteTexto ( "", 2)																			'Centro de Custo
+			Buffer = Buffer + ConverteTexto ( codigo(0), 3)																'Cód. Contábil
+			Buffer = Buffer + ConverteTexto ( codigo(2), 6)																'Cód. Fiscal
+			Buffer = Buffer + ConverteValor ( valor(1), 2, 12)																'Valor Contábil
+			'Prestação de Serviços
+			If doc.Natureza(0) = "Prestação de Serviços" Then
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Base ICMS
+			Else
+				Buffer = Buffer + ConverteValor ( valor(2), 2, 12)															'Base ICMS
+			End If
+			Buffer = Buffer + ConverteValor ( valor(3), 4, 7)																'Alíquota ICMS
+			Buffer = Buffer + ConverteValor ( valor(4), 2, 12)																'Valor ICMS
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor Isenta ICMS
+			'Prestação de Serviços
+			If doc.Natureza(0) = "Prestação de Serviços" Then
+				Buffer = Buffer + ConverteValor ( valor(1), 2, 12)															'Valor Outas ICMS
+			Else
+				Buffer = Buffer + ConverteValor ( valor(5), 2, 12)															'Valor Outas ICMS
+			End If
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor Diversos ICMS
+			Buffer = Buffer + ConverteValor ( 0, 4, 7)																		'Alíquota Interna
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor Imposto Alíquota Interna
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor Base Subst.
+			Buffer = Buffer + ConverteValor ( 0, 4, 7)																		'Alíquota Subst.
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor Subst.
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor Base IPI
+			Buffer = Buffer + ConverteValor ( 0, 4, 7)																		'Alíquota IPI
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor IPI
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor Isento IPI
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor Outras IPI
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Valor Diversos IPI
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'PVV Cigarro
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Saída Trib.12%
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Saída Trib.25%
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Base Red.
+			Buffer = Buffer + ConverteValor ( 0, 4, 7)																		'Alíquota efetiva
+			Buffer = Buffer + ConverteValor ( 0, 0, 1)																		'Cód. Antecipação
+			Buffer = Buffer + ConverteValor ( 0, 2, 14)																		'Despesas Acessórias
+			Buffer = Buffer + ConverteValor ( 0, 0, 10)																		'Declaração de Importação
+			Buffer = Buffer + ConverteValor ( valor(0), 0, 3)																'Qtd Itens Desdobramento
+			Buffer = Buffer + ConverteTexto ( "", 2)																			'Controle Interno
+			Buffer = Buffer + ConverteTexto ( "", 13)																		'Controle Interno
+			Buffer = Buffer + ConverteTexto ( "", 19)																		'Controle Interno
+			Buffer = Buffer + ConverteValor ( 0, 2, 16)																		'Controle Interno
+			Buffer = Buffer + ConverteValor ( 0, 0, 1)																		'Modalidade do Frete
+			Buffer = Buffer + ConverteValor ( 0, 0, 3)																		'Cód. Observação
+			Buffer = Buffer + ConverteTexto ( "", 250)																		'Complemento Observação
+			Buffer = Buffer + ConverteValor ( 0, 0, 1)																		'Subst. Trib.
+			Buffer = Buffer + ConverteValor ( 0, 0, 1)																		'Controle Interno
+			Buffer = Buffer + ConverteValor ( 0, 0, 1)																		'Alíquota Cofins
+			'Prestação de Serviços
+			If doc.Natureza(0) = "Prestação de Serviços" Then
+				Buffer = Buffer + ConverteTexto ( codigo(0), 10)															'Código do Serviço
+				Buffer = Buffer + ConverteValor ( valor(1), 2, 12)															'Valor do Serviço
+				Buffer = Buffer + ConverteValor ( 0, 4, 7)																	'Alíquota ISS
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Valor do ISS Retido
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Valor do INSS Retido
+				Buffer = Buffer + ConverteValor ( doc.IRRF(0), 2, 12)													'Valor do IRRF Retido
+				Buffer = Buffer + ConverteValor ( valor(1) * aliquota(6), 2, 12)										'Valor do PIS Retido
+				Buffer = Buffer + ConverteValor ( valor(1) * aliquota(7), 2, 12)										'Valor Cofins Retido
+				Buffer = Buffer + ConverteValor ( valor(1) * aliquota(8), 2, 12)										'Valor Contrib. Soc. Retido
+			Else
+				Buffer = Buffer + ConverteTexto ( "", 10)																	'Código do Serviço
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Valor do Serviço
+				Buffer = Buffer + ConverteValor ( 0, 4, 7)																	'Alíquota ISS
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Valor do ISS Retido
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Valor do INSS Retido
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Valor do IRRF Retido
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Valor do PIS Retido
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Valor Cofins Retido
+				Buffer = Buffer + ConverteValor ( 0, 2, 12)																	'Valor Contrib. Soc. Retido
+			End If
+			'
+			empresa = GetDadosEmpresa(doc.CodCliente(0))
+			Buffer = Buffer + ConverteTexto ( empresa(4), 2)															'UF
+			Buffer = Buffer + ConverteTexto ( "", 3)																			'CFPS
+			'Prestação de Serviços
+			If doc.Natureza(0) = "Prestação de Serviços" Then
+				Buffer = Buffer + ConverteValor ( 1, 0, 2)																	'Tipo de Serviço
+			Else
+				Buffer = Buffer + ConverteValor ( 0, 0, 2)																	'Tipo de Serviço
+			End If
+			Buffer = Buffer + ConverteValor ( 0, 0, 1)																		'Serviço Tomado
+			Buffer = Buffer + ConverteValor ( 0, 0, 1)																		'Controle Interno
+			Buffer = Buffer + ConverteValor ( 0, 4, 7)																		'Alíquota ICMS (Fora do Estado)
+			Buffer = Buffer + ConverteValor ( 0, 4, 7)																		'Alíquota ICMS (Interna)
+			Buffer = Buffer + ConverteValor ( 0, 2, 6)																		'Alíquota IVS-ST
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'Preço Final
+			Buffer = Buffer + ConverteValor ( 0, 4, 7)																		'Alíquota Interna
+			Buffer = Buffer + ConverteValor ( 0, 2, 12)																		'ICMS Creditado na Nota
+			Tamanho = Len( Buffer )
+			If Tamanho <> 766 Then Goto Erro
+			Print #FileNumber, Buffer
+			
+			
+			'********************************* Itens do Complemento ****************************************************************************************
+			Set doc = dc.GetFirstDocument
+			Do Until doc Is Nothing
+				For scan = 0 To 49
+					item = doc.GetItemValue("NItem_" & scan)
+					produto = doc.GetItemValue("Produto_" & scan)
+					partN = doc.GetItemValue("PartNo_" & scan)
+					un = doc.GetItemValue("Un_" & scan)
+					qtd = doc.GetItemValue("Q_" & scan)
+					ic = doc.GetItemValue("IC_" & scan)
+					If Cstr(ic(0)) = "" Then Exit For
+					ip = doc.GetItemValue("IP_" & scan)
+					custo = doc.GetItemValue("CustoUnit_" & scan)
+					cusTot = doc.GetItemValue("CusTot_" & scan)
+					If array(scan2) = ic(0) * 100 Then
+						Buffer = ""
+						Buffer = Buffer + ConverteTexto ( "", 4)																		'Brancos
+						Buffer = Buffer + ConverteValor ( item(0), 0, 3)															'Nº do Item
+						Buffer = Buffer + ConverteTexto ( Left(partN(0),14), 14)												'Código do Produto
+						Buffer = Buffer + ConverteTexto ( Left(partN(0), 8), 8)													'NCM Produto
+						Buffer = Buffer + ConverteTexto ( Left(produto(0), 53), 53)											'Descrição Produto
+						Buffer = Buffer + ConverteTexto ( un(0), 6)																	'Unidade Produto
+						Buffer = Buffer + ConverteValor ( ip(0) * 100, 2, 6)														'Alíquota IPI
+						Buffer = Buffer + ConverteValor ( ic(0) * 100, 2, 6)														'Alíquota ICMS
+						Buffer = Buffer + ConverteTexto ( "", 45)																	'Descrição Complementar
+						Buffer = Buffer + ConverteValor ( qtd(0), 3, 18)															'Qtd
+						Buffer = Buffer + ConverteValor ( custo(0), 6, 20)														'Valor Unitário
+						Buffer = Buffer + ConverteValor ( cusTot(0), 2, 18)														'Valor Total
+						Buffer = Buffer + ConverteTexto ( "", 3)																		'Cód. Sit. Tributária
+						Buffer = Buffer + ConverteValor ( 0, 0, 1)																	'Indicador Mov. Física
+						Buffer = Buffer + ConverteValor ( 0, 2, 18)																	'Valor Desconto/Desp. Acessórias
+						Buffer = Buffer + ConverteTexto ( codigo(2), 6)															'Cód. Natureza
+						Buffer = Buffer + ConverteTexto ( codigo(3), 45)															'Descrição Natureza
+						If ic(0) = 0 Then	'Isento
+							Buffer = Buffer + ConverteValor ( 2, 0, 1)																'Indicados ICMS
+							Buffer = Buffer + ConverteValor ( 0, 2, 18)																'Base de Cálculo ICMS
+							Buffer = Buffer + ConverteValor ( 0, 2, 18)																'Valor ICMS
+						Else	'Tributado
+							Buffer = Buffer + ConverteValor ( 1, 0, 1)																'Indicados ICMS
+							Buffer = Buffer + ConverteValor ( cusTot(0), 2, 18)													'Base de Cálculo ICMS
+							Buffer = Buffer + ConverteValor ( cusTot(0) * ic(0), 2, 18)											'Valor ICMS
+						End If
+						Buffer = Buffer + ConverteValor ( 0, 2, 18)																	'Base de Cálculo ICMS ST
+						Buffer = Buffer + ConverteValor ( 0, 2, 18)																	'Valor ICMS ST
+						Buffer = Buffer + ConverteValor ( 0, 2, 13)																	'Base de Cálculo ST Origem/Destino
+						Buffer = Buffer + ConverteValor ( 0, 2, 13)																	'ICMS ST repassar/reduzir
+						Buffer = Buffer + ConverteValor ( 0, 2, 13)																	'ICMS ST Complemen. à UF Dest.
+						Buffer = Buffer + ConverteValor ( 0, 2, 13)																	'Base de Cálculo Retenção ICMS-ST
+						Buffer = Buffer + ConverteValor ( 0, 2, 13)																	'Valor Parc. Imp. Retido ICMS-ST
+						If ip(0) = 0 Then	'Isento
+							Buffer = Buffer + ConverteValor ( 2, 0, 1)																'Indicados IPI
+							Buffer = Buffer + ConverteValor ( 0, 2, 18)																'Base de Cálculo IPI
+							Buffer = Buffer + ConverteValor ( 0, 2, 18)																'Valor IPI
+						Else	'Tributado
+							Buffer = Buffer + ConverteValor ( 1, 0, 1)																'Indicados IPI
+							Buffer = Buffer + ConverteValor ( cusTot(0), 2, 18)													'Base de Cálculo IPI
+							Buffer = Buffer + ConverteValor ( cusTot(0) * ip(0), 2, 18)										'Valor IPI
+						End If
+						Buffer = Buffer + ConverteValor ( 0, 2, 13)																	'Valor Despesas Acessórias
+						Buffer = Buffer + ConverteTexto ( "", 2)																		'Tipo do Produto
+						Buffer = Buffer + ConverteTexto ( "", 20)																	'Nº Lote Fabricação-Medicamento
+						Tamanho = Len( Buffer )
+						If Tamanho <> 484 Then Goto Erro
+						Print #FileNumber, Buffer
+					End If
+				Next
+				'***************************************************************************************************************************************************
+				Set doc = dc.GetNextDocument(doc)
+			Loop
+		Next
+	Next
+	
+	
+	'Verifica se todos os Municípios estão cadastrados
+	If msg <> "" Then Goto ErroMunicipio
+	If ck = False Or ckCodigo = False Then Goto erro
+	Close FileNumber
+	Msgbox "Arquivo gerado com sucesso: " + ArqName
+	Exit Sub
+	
+erroMunicipio:
+	Msgbox "Favor cadastrar os Municípios abaixo: " + msg
+	
+erro:
+	Close FileNumber
+	Kill ArqName
+	Msgbox "Erro no Tamanho do Arquivo. O arquivo não foi gerado"
+	Exit Sub
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:converteCNPJ:1:8
+Function converteCNPJ( cnpj As String, tamanho As Integer ) As String
+	
+	If Val(cnpj) = 0 Or empresa(5) = "CPF" Then
+		cnpj = ConverteValor("0", 0, 14)
+	End If
+	
+	If Len(cnpj) <> 18 Then
+		cnpj = RetiraSinais(cnpj)
+		If Len(cnpj) <> 14 Then
+			Msgbox ("Estouro. CNPJ inválido. -> Baixa: " & doc.DocID(0))
+			converteCNPJ = ""
+			Exit Function
+		End If
+		cnpj = Left(cnpj, 2) + "." + Mid(cnpj, 3, 3) + "." + Mid(cnpj, 6, 3) + "/" + Mid(cnpj, 9, 4) + "-" + Right(cnpj, 2)
+	End If
+	converteCNPJ = cnpj
+	
+End Function
+
+'++LotusScript Development Environment:2:1:ConverteData:1:8
+Function ConverteData ( Byval Data As Variant, Byval Tamanho As Integer ) As String
+'Converte datas para o formato DDMMAA
+	
+	Dim dia As String, mes As String, ano As String
+	dia = Day ( Data ) 
+	If Len(dia) = 1 Then
+		dia = "0" + dia
+	End If
+	mes = Month ( Data )
+	If Len(mes) = 1 Then
+		mes = "0" + mes	
+	End If
+	Ano = Cstr ( Year ( Data ) )
+	If ( Tamanho = 6 ) Then
+		ano = Right ( Ano, 2 )
+	End If
+	
+	If Tamanho = 8 Then
+		ConverteData = ano + mes + dia
+	Elseif Tamanho = 10 Then
+		ConverteData = dia + "/" + mes + "/"+ ano
+	Elseif Tamanho = 42 Then
+		ConverteData = ano + mes
+	Elseif Tamanho = 224 Then
+		ConverteData = dia + mes + ano
+	Else
+		ConverteData = dia + mes + ano
+	End If
+	
+End Function

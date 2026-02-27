@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='5da' unid='D227763899C0E5EF03256DBE004B126D' sequence='30'>
+<created><datetime>20031013T103959,17-03</datetime></created>
+<modified><datetime>20230919T123115,17-03</datetime></modified>
+<revised><datetime dst='true'>20141129T102327,97-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,16-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,16-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>(PedidosPrevisaoEntrega)</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+wAIBAGAADQBkYXRhAMeNUQBzbyUAAQUABwBFbnRyZWdhAAEAAAAKAq8ANgAiAAUADABQcmF6b0Vu
+dHJlZ2EAAAAAAAAAAPA/awKuABQABQAHAEVudHJlZ2EArgAEALUDAwABAHwADABkaWEAyI1RAHNv
+JQAFAA0AZGF0YQDHjVEAc28lAAJQAVYBpgEAAAAAAAAAAPA/CgKvAEIAJAABAAEAMAAFAA0AZGF0
+YQDHjVEAc28lAAJQAVYBIgKuAB4ABQANAGRhdGEAx41RAHNvJQACUAFWAa4ABAC1AwMAAQB8AAwA
+bWVzAMmNUQBzbyUABQANAGRhdGEAx41RAHNvJQACTwFWAaYBAAAAAAAAAADwPwoCrwBCACQAAQAB
+ADAABQANAGRhdGEAx41RAHNvJQACTwFWASICrgAeAAUADQBkYXRhAMeNUQBzbyUAAk8BVgGuAAQA
+tQMDAAEAKgAMAGFubwDKjVEAc28lAAUADQBkYXRhAMeNUQBzbyUAAk4BVgEDAAIATgACACQ3BQAM
+AGRpYQDIjVEAc28lAAEAAQAvACICBQAMAG1lcwDJjVEAc28lACICAQABAC8AIgIFAAwAYW5vAMqN
+UQBzbyUAIgIDAAIAaAACACQwBQAEAEZvcm0BABUAU2hpcHBpbmcgSW5zdHJ1Y3Rpb25zAAoCrwA4
+ACIAAQAYACoqIFNoaXBwaW5nIEluc3RydWN0aW9uc64AFgAFAAkARGVzY3JpY2FvAK4ABAC1AwMA
+BQA0ADAABwACAAIAAgAGAAUACQAEACQ3UE8kMFRvdFRvdEZyZXRlJENvbmZsaWN0JFJFRgQABAAA
+ADgABQAEAEZvcm0BAAYAUGVkaWRvCgIFAAoAVGlwb0NvbXByYQEABwBSZXZlbmRhAAoCHAIDAAcA
+FgAQAAlMMVMyUzNTNFM1UzZTN1M=
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+GAACAABEAGYAAAACAABmAAIAAgAkN1BP
+</rawitemdata></item>
+<item name='$Totals' sign='true'><textlist><text>0</text><text>0</text><text
+>0</text><text>1</text><text>1</text></textlist></item>
+<item name='$ViewFormat' sign='true'>
+<rawitemdata type='5'>
+AQAFAAgAiQAAAFZDAQACAAAAUgIAAF8ABQAKCIAAAAAAAAAAAAACAAAgVkMBAAIAAAAAAAAAUgAG
+AAoIgAAAAAAAAAAAAgAAACBWQwAAAgAJAGoAAAA0AQcACgiAAAAAAAAAAAACAgAAIFZDAAAGAAUA
+AAAAAD8ACAAKCEQAAgEBAAAAAAICAAAgVkMAAAUABQAAAAAAKwAJAAoIRAACAQEAAAAAAgIAACAk
+N1ICAQBgAA0AZGF0YQDHjVEAc28lAAEFAAcARW50cmVnYQABAAAACgKvADYAIgAFAAwAUHJhem9F
+bnRyZWdhAAAAAAAAAADwP2sCrgAUAAUABwBFbnRyZWdhAK4ABAC1AwMABwAYABEACTFTMlM1UzZT
+OFMxMlMxNVMAAQB8AAwAZGlhAMiNUQBzbyUABQANAGRhdGEAx41RAHNvJQACUAFWAaYBAAAAAAAA
+AADwPwoCrwBCACQAAQABADAABQANAGRhdGEAx41RAHNvJQACUAFWASICrgAeAAUADQBkYXRhAMeN
+UQBzbyUAAlABVgGuAAQAtQMDAAcAIAAZAAkwUjFTMlMxNFMxNVMxN1MxOFMxOVMyN1MAAQB8AAwA
+bWVzAMmNUQBzbyUABQANAGRhdGEAx41RAHNvJQACTwFWAaYBAAAAAAAAAADwPwoCrwBCACQAAQAB
+ADAABQANAGRhdGEAx41RAHNvJQACTwFWASICrgAeAAUADQBkYXRhAMeNUQBzbyUAAk8BVgGuAAQA
+tQMDAAcAIAAZAAkwUjFTMlMxNFMxNVMxN1MxOFMxOVMyN1MAAQAqAAwAYW5vAMqNUQBzbyUABQAN
+AGRhdGEAx41RAHNvJQACTgFWAQMABwAOAAcACTBSMVMyUwACAE4AAgAkNwUADABkaWEAyI1RAHNv
+JQABAAEALwAiAgUADABtZXMAyY1RAHNvJQAiAgEAAQAvACICBQAMAGFubwDKjVEAc28lACICAwAH
+ABoAEwAJMFIxUzJTM1M0UzVTNlM3UzhTAFBPJDBEZXNjcmljYW9qAAIAaAACACQwBQAEAEZvcm0B
+ABUAU2hpcHBpbmcgSW5zdHJ1Y3Rpb25zAAoCrwA4ACIAAQAYACoqIFNoaXBwaW5nIEluc3RydWN0
+aW9uc64AFgAFAAkARGVzY3JpY2FvAK4ABAC1AwMAVG90VG90VmFsb3JGcmV0ZUZyZXRlJgABAAAA
+AQEACQEAAAoBAQgKAAAZAK0rAQAvAAEAAAAAAAAAAABXQwoAAAgAAAAAAAAAAAAAAAAAAAAAAQAA
+AAAAAAD//wAAAAAAAAAAAAAAAAAAV0MLAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAA
+AAAAAAAAAAAAAFdDDAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABX
+Qw0AAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAV0MOAAAIAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAEIAAAAAAAEA9/f3AAEA4OD/AAEAAAAA
+AAAAAAAAAAAAAQD39/cAAQD39/cAAAABAAAAAAABAIAAAAAAAAAAAAAAAAgAAAAAAAEA
+</rawitemdata></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text><text>6</text><text>38</text><text>Arial</text><text>7</text><text
+>38</text><text>Arial</text><text>8</text><text>38</text><text>Arial</text><text
+>9</text><text>38</text><text>Arial</text><text>10</text><text>38</text><text
+>Arial</text><text>11</text><text>38</text><text>Arial</text><text>12</text><text
+>38</text><text>Arial</text><text>13</text><text>38</text><text>Arial</text><text
+>14</text><text>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text>TipoCompra = Revenda</text></item>
+<item name='$Flags'><text/></item>
+<item name='$DesignerVersion'><text>7</text></item></note>
+

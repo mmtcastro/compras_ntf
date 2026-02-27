@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='58e' unid='22543F73F677ADCE032566C800589D81' sequence='19'>
+<created><datetime>19981126T130754,89-03</datetime></created>
+<modified><datetime>20230919T123114,98-03</datetime></modified>
+<revised><datetime>20200810T201753,46-03</datetime></revised>
+<lastaccessed><datetime>20230919T123114,97-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123114,97-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>1. Pedidos\Negócio</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+kgICAJIAAwAkMTMABQAEAEZvcm0BAAUAQmFpeGEACgKvAHAARAABAAkAQmFpeGEgPj4gAAUADQBE
+YXRhRW1pc3Nhb05GAFYBIgIBAAYAIC0gUiQgIgIFAAUAVmFsb3IAVgEiAq4ALAAFAAQARm9ybQEA
+BAAgPj4gIgIFAAcAQ3JpYWNhbwAEAFYBIgKuAAQAtQMDAAIARgACACQ5BQAEAEZvcm0BAAUAQmFp
+eGEACgKvACYAGAAFAA0ARGF0YUVtaXNzYW9ORgCuAA4ABQACAFBPrgAEALUDAwACAEAAAgAkMAUA
+BABGb3JtAQAFAEJhaXhhAAoCrwAgAAoAAQAAAK4AFgAFAAkARGVzY3JpY2FvAK4ABAC1AwMABQBG
+AEIACQADAAYABgAGAAIAAgAGAAkABAAkMTNDb2RpZ29TdGF0dXNEYXRhUE8kOSQwVG90VG90JENv
+bmZsaWN0JFJFRgQABAAAANAABQAEAEZvcm0BAA8AUGVkaWRvIE5hY2lvbmFsAAoCBQAEAGZvcm0B
+AAYAUGVkaWRvCgIdAgUABABGb3JtAQAFAEJhaXhhAAoCHQIFAAQARm9ybQEACQBEZXZvbHWHxm8A
+CgIdAgUABABGb3JtAQAMAENhbmNlbGFtZW50bwoCHQIFAAQARm9ybQEAAwBSTUEACgIdAgUABABG
+b3JtAQAHAFJlbWVzc2EACgIdAgUABABGb3JtAQAMAFRyb2NhUmVzZXJ2YQoCHQIEAAMABwBeAFcA
+CUwxUzNTNFM1UzZTN1M4UzlTMTBTMTFTMTJTMTNTMTRTMTVTMTZTMTdTMThTMTlTMjBTMjFTMjJT
+MjNTMjRTMjVTMjZTMjdTMjhTMjlTMzBTMzFTMzJTAA==
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+NgAEAABEAGYAAAAGAABmAAYABgAAZgAMAAYAAGYAEgACAENvZGlnb1N0YXR1c0RhdGFQTyQ5
+</rawitemdata></item>
+<item name='$Totals' sign='true'><textlist><text>0</text><text>0</text><text
+>0</text><text>0</text><text>0</text><text>0</text><text>1</text></textlist></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text><text>6</text><text>38</text><text>Arial</text><text>7</text><text
+>38</text><text>Arial</text><text>8</text><text>38</text><text>Arial</text><text
+>9</text><text>38</text><text>Arial</text><text>10</text><text>38</text><text
+>Arial</text><text>11</text><text>38</text><text>Arial</text><text>12</text><text
+>38</text><text>Arial</text><text>13</text><text>38</text><text>Arial</text><text
+>14</text><text>38</text><text>Arial</text><text>15</text><text>38</text><text
+>Arial</text><text>16</text><text>38</text><text>Arial</text><text>17</text><text
+>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text/></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$ViewFormat' sign='true'>
+<rawitemdata type='5'>
+AQAHAAAAiQAAAFZDkAQDAAAAwgAAAA0ABQAECAAAAAAAAAAAAAICAAAwVkMBBAYABwAAAAAAWQAG
+AQoIAAAAAAAAAAAAAgIAACBWQwEABgAAAAAAAAAzAAcBCAhCAAAAAAAAAAACAAAAIFZDAQAGAAcA
+AAAAAEAACAAACIIAAAAAAAAAAAIAAAAgVkMBAAIAAABWAAAAaQAJAAsIQAAAAAAAAAAAAgAAACBW
+QwAAAgAJAE4AAACAAAoAAAgAAAAAAAAAAAACAgAAIFZDAAAGAAUAAAAAADIACwEACEUAAgEBAAAA
+AAICAAAgJDEzwgACAJIAAwAkMTMABQAEAEZvcm0BAAUAQmFpeGEACgKvAHAARAABAAkAQmFpeGEg
+Pj4gAAUADQBEYXRhRW1pc3Nhb05GAFYBIgIBAAYAIC0gUiQgIgIFAAUAVmFsb3IAVgEiAq4ALAAF
+AAQARm9ybQEABAAgPj4gIgIFAAcAQ3JpYWNhbwAEAFYBIgKuAAQAtQMDAAcALgAnAAkzUzRTN1M4
+UzEyUzEzUzE0UzE1UzE3UzE4UzIxUzIzUzI0UzI5UwBDb2RpZ29OZWeiY2lvU3RhdHVzRGF0YVBP
+RGF0YSBQTyQ5VgACAEYAAgAkOQUABABGb3JtAQAFAEJhaXhhAAoCrwAmABgABQANAERhdGFFbWlz
+c2FvTkYArgAOAAUAAgBQT64ABAC1AwMABwAOAAcACTNTNFM2UwAkMERlc2NyaWNhb04AAgBAAAIA
+JDAFAAQARm9ybQEABQBCYWl4YQAKAq8AIAAKAAEAAACuABYABQAJAERlc2NyaWNhbwCuAAQAtQMD
+AAcADAAFAAkzUzRTAFRvdFRvdFZhbG9yJgABAAAAAQEACQEAAAoBAQIKAAA/AK0rAQABAAEAAAAA
+AAAAAABXQwEBAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAV0MMAAAI
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAFdDDQAACAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABXQw4AAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAD//wAAAAAAAAAAAAAAAAAAV0MPAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAA
+AAAAAAAAAFdDEAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABXQxEA
+AAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAQgAAAAAAAQD///8AAQDv
+7+8AAQAAAAAAAAAAAAAAAAABAP///wABAP///wAAAAEAAAAAAAEA/wAAAAEAAAAAAAAACAAAAAAA
+AQA=
+</rawitemdata></item></note>
+

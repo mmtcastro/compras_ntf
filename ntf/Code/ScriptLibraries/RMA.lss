@@ -1,0 +1,205 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+Use "Faturamento"
+Use "GeraJavaId"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub SelecionaItensRMA( uidoc As NotesUiDocument )
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Dim scan As Integer
+Dim i As Integer
+
+
+'++LotusScript Development Environment:2:2:SelecionaItensRMA:1:8
+Sub SelecionaItensRMA( uidoc As NotesUiDocument )
+	
+	Dim dbListas As New notesdatabase( uidoc.Document.ParentDatabase.Server, "listas.nsf" )
+	Dim viewListas As notesview
+	Set viewListas = dbListas.GetView( "(NegocioNItens)" )
+	Dim lista As notesdocument, doc As notesdocument
+	Set doc = uidoc.Document
+	Dim mg As Double, venda As Double, custo As Double, array As Variant, scan2 As Integer
+	
+     'Retira do RMA os ítens que não foram selecionados do documento antes do Faturamento
+	i% = 0
+	For scan% = 0 To 14
+		
+		If uidoc.Fieldgettext( "Q_"& Cstr( scan% ) ) <> "" Then
+			
+			Redim Preserve vnitem( scan% ) As String
+			Redim Preserve vq( scan% ) As String
+			Redim Preserve vpartno( scan% ) As String
+			Redim Preserve vproduto( scan% ) As String
+			Redim Preserve vvencgar( scan% ) As String
+			Redim Preserve vus( scan% ) As String
+			Redim Preserve vcustounit( scan% ) As String
+			Redim Preserve vcustot( scan% ) As String
+			Redim Preserve vicm( scan% ) As String
+			Redim Preserve vipi( scan% ) As String
+			Redim Preserve vnserie( scan% ) As String
+			
+			vnitem(scan%) = uidoc.Fieldgettext( "NItem_"& Cstr( scan% ) )
+			vq(scan%) = uidoc.Fieldgettext( "Q_"& Cstr( scan% ) )
+			vpartno(scan%) = uidoc.Fieldgettext( "PartNo_"& Cstr( scan% ) )
+			vproduto(scan%) = uidoc.Fieldgettext( "Produto_"& Cstr( scan% ) )
+			vvencgar(scan%) = uidoc.Fieldgettext( "VencGar_"& Cstr( scan% ) )
+			vus(scan%) = uidoc.FieldGetText( "Us_" & Cstr( scan% ) ) 
+			vcustounit(scan%) = uidoc.FieldGetText( "CustoUnit_" & Cstr( scan% ) ) 
+			vcustot(scan% ) = uidoc.FieldGetText( "CusTot_"& Cstr( scan% ) ) 
+			vicm(scan%) = uidoc.FieldGetText( "IC_" & Cstr( scan% ) ) 
+			vipi(scan%) = uidoc.FieldGetText("IP_" & Cstr( scan% ) )
+			vnserie(scan%) = uidoc.Fieldgettext( "NSerie_"& Cstr( scan% ) )
+			
+			If uidoc.FieldGetText( "E_" & Cstr( scan% ) ) = "S" Then
+				Redim Preserve nitem( i% ) As String
+				Redim Preserve q( i% ) As String
+				Redim Preserve partno( i% ) As String
+				Redim Preserve produto( i% ) As String
+				Redim Preserve vencgar( i% ) As String
+				Redim Preserve us( scan% ) As String
+				Redim Preserve custounit( scan% ) As String
+				Redim Preserve custot( scan% ) As String
+				Redim Preserve icm( scan% ) As String
+				Redim Preserve ipi( scan% ) As String
+				Redim Preserve nserie( scan% ) As String
+				nitem(i%) = uidoc.Fieldgettext( "NItem_"& Cstr( scan% ) )               
+				q(i%) = uidoc.Fieldgettext( "Q_"& Cstr( scan% ) )
+				Set lista = viewListas.GetDocumentByKey( uidoc.FieldGetText( "Codigo" ) & "-" & nitem( i% ), True )
+				If lista Is Nothing Then
+					Msgbox( "Erro - O ítem foi deletado da Lista de Materiais" ) 
+				Else
+					mg# = lista.Mg(0)
+					custo# = Cdbl( uidoc.Fieldgettext( "CustoUnit_"& Cstr( scan% ) ) )
+					venda# = custo# / mg#
+					custounit(i%) = Format( Cstr( venda# ), "Fixed" )
+					custot(i%) = Format( Cstr( venda# * Val( q(i%) ) ), "Fixed" )
+				End If               
+				partno(i%) = uidoc.Fieldgettext( "PartNo_"& Cstr( scan% ) )
+				produto(i%) = uidoc.Fieldgettext( "Produto_"& Cstr( scan% ) )
+				vencgar(i%) = uidoc.Fieldgettext( "VencGar_"& Cstr( scan% ) )
+				us(i%) = uidoc.Fieldgettext( "Us_"& Cstr( scan% ) )               
+				icm(i%) = uidoc.Fieldgettext( "IC_"& Cstr( scan% ) )
+				ipi(i%) = uidoc.Fieldgettext( "IP_"& Cstr( scan% ) )
+				nserie(i%) = uidoc.Fieldgettext( "NSerie_"& Cstr( scan% ) )               
+				
+				i% = i% + 1               
+			End If          
+			
+			Call uidoc.FieldSetText( "NItem_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "Q_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "PartNo_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "Produto_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "VencGar_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "Us_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "CustoUnit_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "CusTot_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "IC_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "IP_" & Cstr( scan% ), "" )
+			Call uidoc.FieldSetText( "NSerie_" & Cstr( scan% ), "" )          
+			Call uidoc.FieldSetText( "E_" & Cstr( scan% ), "" )          
+			
+			scan2% = scan2% + 1
+			
+		End If     
+		
+	Next
+	
+	If i% = 0 Then
+		Msgbox( "Não há ítens selecionados para geração do RMA" )
+		Goto RestauraItens
+	End If
+	
+	For scan% = 0 To scan2% - 1
+		array = doc.GetItemValue( "Q_" & Cstr( scan% ) ) 
+		If array(0) <> "" Then
+			
+			If scan% <=  i%-1  Then     'É necessário gravar os ítens UI para  os ítens do documento. De outra forma os saldos voltam no final da rotina                    
+				Set array = doc.ReplaceItemValue( "NItem_" & Cstr( scan% ), nitem( scan% ) )
+				Set array = doc.ReplaceItemValue( "Q_" & Cstr( scan% ), q( scan% ) )
+				Set array = doc.ReplaceItemValue( "PartNo_" & Cstr( scan% ), partno( scan% ) )
+				Set array = doc.ReplaceItemValue( "Produto_" & Cstr( scan% ), produto( scan% ) )
+				Set array = doc.ReplaceItemValue( "VencGar_" & Cstr( scan% ), vencgar( scan% ) )
+				Set array = doc.ReplaceItemValue( "Us_" & Cstr( scan% ), us( scan% ) )
+				Set array = doc.ReplaceItemValue( "CustoUnit_" & Cstr( scan% ), custounit( scan% ) )
+				Set array = doc.ReplaceItemValue( "CusTot_" & Cstr( scan% ), custot( scan% ) )
+				Set array = doc.ReplaceItemValue( "IC_" & Cstr( scan% ), icm( scan% ) )
+				Set array = doc.ReplaceItemValue( "IP_" & Cstr( scan% ), ipi( scan% ) )
+				Set array = doc.ReplaceItemValue( "NSerie_" & Cstr( scan% ), nserie( scan% ) )
+				Set array = doc.ReplaceItemValue( "E_" & Cstr( scan% ), "S" )          
+			Else 'Limpando dos campos
+				Set array = doc.ReplaceItemValue( "NItem_" & Cstr( scan% ), "" )     
+				Set array = doc.ReplaceItemValue( "Q_" & Cstr( scan% ), "" )
+				Set array = doc.ReplaceItemValue( "PartNo_" & Cstr( scan% ), "" )
+				Set array = doc.ReplaceItemValue( "Produto_" & Cstr( scan% ), "" )
+				Set array = doc.ReplaceItemValue( "VencGar_" & Cstr( scan% ), "" )
+				Set array = doc.ReplaceItemValue( "Us_" & Cstr( scan% ), "" )
+				Set array = doc.ReplaceItemValue( "CustoUnit_" & Cstr( scan% ), "" )
+				Set array = doc.ReplaceItemValue( "CusTot_" & Cstr( scan% ), "" )
+				Set array = doc.ReplaceItemValue( "IC_" & Cstr( scan% ), "" )
+				Set array = doc.ReplaceItemValue( "IP_" & Cstr( scan% ), "" )
+				Set array = doc.ReplaceItemValue( "NSerie_" & Cstr( scan% ), "" )          
+				Set array = doc.ReplaceItemValue( "E_" & Cstr( scan% ), "" )          
+			End If
+		End If     
+	Next
+	
+	
+	Dim boxType As Long, answer As Integer
+	boxType& = 4+32+256+4096
+	answer% = Messagebox( "Confirma o Envio do Fax do RMA para o Cliente dos ítens selecionados ?", boxType&, _ 
+	"Envio de de RMA" )
+	
+	If answer% = 6  Then
+		Dim session As New NotesSession
+		Dim fax As New NotesDocument( session.CurrentDatabase )     
+		Dim recipients(2) As String, success As Variant, rtitem As NotesRichTextItem
+		recipients(1) = "Marcelo Castro"
+		If answer% = 6  Then
+			If uidoc.FieldGetText( "Fax" ) <> "" Then
+				recipients(2) = uidoc.FieldGetText( "Contato" ) & " @ " & uidoc.FieldGetText( "Fax" ) & " @ fax"
+			Elseif uidoc.FieldGetText( "EMail" ) <> "" Then
+				recipients(2) = uidoc.FieldGetText( "EMail" )
+			Else
+				recipients(2) = "Marcelo Castro"
+			End If
+		End If
+		Print "Renderizando Fax de RMA"
+		Set rtitem = New NotesRichTextItem( fax, "Body" )
+		fax.Form = "RMA"
+		fax.Id = geraJavaId(fax)
+		fax.Subject = "-> Envio de RMA Nº "& uidoc.FieldGetText( "RMA") 
+		Call uidoc.Document.Save( True, True )
+		success = uidoc.Document.RenderToRTItem( rtitem )          		
+		Call fax.Save( True, True )		
+		Call fax.Send( True, recipients)
+		
+		uidoc.Document.Sit = "Aguardando Equipamento do Cliente"
+		uidoc.Document.CkEnvioFax = "1"
+		Call uidoc.Refresh
+		
+		Print
+		
+		Exit Sub
+	Else    
+		Goto RestauraItens     
+	End If
+	
+RestauraItens:
+     'Restaura os valores da lista de materiais em caso de não confirmação     
+	For scan% = 0 To scan2% - 1
+		Call uidoc.FieldSetText( "NItem_" & Cstr( scan% ), vnitem( scan% ) )
+		Call uidoc.FieldSetText( "Q_" & Cstr( scan% ), vq( scan% ) )
+		Call uidoc.FieldSetText( "PartNo_" & Cstr( scan% ), vpartno( scan% ) )
+		Call uidoc.FieldSetText( "Produto_" & Cstr( scan% ),  vproduto( scan% ) )
+		Call uidoc.FieldSetText( "VencGar_" & Cstr( scan% ),  vvencgar( scan% ) )
+		Call uidoc.FieldSetText( "Us_" & Cstr( scan% ),  vus( scan% ) )
+		Call uidoc.FieldSetText( "CustoUnit_" & Cstr( scan% ),  vcustounit( scan% ) )
+		Call uidoc.FieldSetText( "CusTot_" & Cstr( scan% ),  vcustot( scan% ) )
+		Call uidoc.FieldSetText( "IC_" & Cstr( scan% ),  vicm( scan% ) )
+		Call uidoc.FieldSetText( "IP_" & Cstr( scan% ),  vipi( scan% ) )
+		Call uidoc.FieldSetText( "NSerie_" & Cstr( scan% ), vnserie( scan% ) )
+	Next
+	
+End Sub

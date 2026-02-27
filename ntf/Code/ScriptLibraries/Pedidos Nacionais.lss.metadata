@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="526" sequence="18" unid="2EFBE24BA6455A5A032566730057EFBA">
+<created><datetime>19980902T130030,02-03</datetime></created>
+<modified><datetime>20230919T123114,76-03</datetime></modified>
+<revised><datetime dst="true">20151228T130215,04-02</datetime></revised>
+<lastaccessed><datetime>20230919T123114,75-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123114,75-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$TITLE" sign="true"><text>Pedidos Nacionais</text></item>
+<item name="$Flags" sign="true"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+
+</note>

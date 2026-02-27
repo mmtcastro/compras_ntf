@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="772" sequence="167" unid="5C362F6A89A661A38325825500677421">
+<created><datetime dst="true">20180319T164959,37-02</datetime></created>
+<modified><datetime>20230919T123116,08-03</datetime></modified>
+<revised><datetime dst="true">20180426T171151,11-02</datetime></revised>
+<lastaccessed><datetime>20230919T123116,07-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123116,07-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$TITLE" sign="true"><text>NFTS</text></item>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$DesignerVersion"><text>8.5.3</text></item>
+
+</note>

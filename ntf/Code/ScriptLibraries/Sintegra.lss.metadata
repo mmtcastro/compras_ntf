@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="566" sequence="492" unid="6412958367984B3E032572CA0060659A">
+<created><datetime>20070427T143254,66-03</datetime></created>
+<modified><datetime>20230919T123114,88-03</datetime></modified>
+<revised><datetime dst="true">20170329T192421,11-02</datetime></revised>
+<lastaccessed><datetime>20230919T123114,87-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123114,87-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$TITLE" sign="true"><text>Sintegra</text></item>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+
+</note>

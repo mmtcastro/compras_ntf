@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="7aa" sequence="1264" unid="68D7AB3AAD8E10A783257A3F006C97DE">
+<created><datetime dst="true">20120718T174607,66-02</datetime></created>
+<modified><datetime>20260210T093425,24-03</datetime></modified>
+<revised><datetime>20260209T173010,33-03</datetime></revised>
+<lastaccessed><datetime>20260210T093425,23-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123116,18-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$POID"><datetime dst="true">20080703T154736,51-02</datetime></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$TITLE" sign="true"><text>Negocios</text></item>
+<item name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<item name="$Class"><text>Template Sales Force</text></item>
+<item name="$Flags"><text>s34Q</text></item></note>

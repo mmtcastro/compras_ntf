@@ -1,0 +1,587 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library ImportaNFe
+	Created Nov 29, 2012 by Ludimila Oliveira/TDec
+	Description: Comments for Library
+%END REM
+Option Public
+Option Declare
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub LimpaCampos(doc As NotesDocument)
+Declare Sub NFeEntrada
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:LimpaCampos:5:8
+%REM
+	Sub LimpaCampos
+	Description: Comments for Sub
+%END REM
+Sub LimpaCampos(doc As NotesDocument)
+	
+	doc.Id = ""
+	doc.versao = ""
+	doc.NNF = ""
+	doc.SERIE = ""
+	doc.DEMI = ""
+	doc.DSAIENT = ""
+	doc.HSAIENT = ""
+	doc.CNF = ""
+	doc.Mod = ""
+	doc.TPIMP = ""
+	doc.INDPAG = ""
+	doc.CMUNFG = ""
+	doc.CUF = ""
+	doc.CDV = ""
+	doc.FINNFE = ""
+	doc.TPEMIS = ""
+	doc.NATOP = ""
+	doc.TPNF = ""
+	doc.PROCEMI = ""
+	doc.VERPROC = ""
+	doc.CONT = ""
+	doc.JUSCONT = ""
+	doc.XNOME = ""
+	doc.XCNPJ = ""
+	doc.XLGR = ""
+	doc.NRO = ""
+	doc.XBAIRRO = ""
+	doc.CEP = ""
+	doc.CMUN = ""
+	doc.XMUN = ""
+	doc.FONE = ""
+	doc.XUF = ""
+	doc.XPAIS = ""
+	doc.IE = ""
+	doc.CRT = ""
+	doc.XNOMEDest = ""
+	doc.CNPJDest = ""
+	doc.XLGRDest = ""
+	doc.NRODest = ""
+	doc.XBAIRRODest = ""
+	doc.CEPDest = ""
+	doc.CMUNDest = ""
+	doc.XMUNDest = ""
+	doc.FONEDest = ""
+	doc.UFDest = ""
+	doc.CPAISDest = ""
+	doc.XPAISDest = ""
+	doc.IEDest = ""
+	doc.CNPJEntr = ""
+	doc.XLGREntr = ""
+	doc.NROEntr = ""
+	doc.XBAIRROEntr = ""
+	doc.CMUNEntr = ""
+	doc.XMUNEntr = ""
+	doc.UFEntr = ""
+	doc.INFCPL = ""
+	doc.NDUP_1 = ""
+	doc.DVENC_1 = ""
+	doc.VDUP_1 = ""
+	doc.NDUP_1 = ""
+	doc.DVENC_1 = ""
+	doc.VDUP_1 = ""
+	doc.MODFRETE = ""
+	doc.NDUP_1 = ""
+	doc.DVENC_1 = ""
+	doc.VDUP_1 = ""
+	doc.NDUP_2 = ""
+	doc.DVENC_2 = ""
+	doc.VDUP_2 = ""
+	doc.NDUP_3 = ""
+	doc.DVENC_3 = ""
+	doc.VDUP_3 = ""
+	doc.NDUP_4 = ""
+	doc.DVENC_4 = ""
+	doc.VDUP_4 = ""
+	doc.NDUP_5 = ""
+	doc.DVENC_5 = ""
+	doc.VDUP_5 = ""
+	doc.XLGRTransp = ""
+	doc.XNOMETransp = ""
+	doc.XBAIRRODest = ""
+	doc.CEPDest = ""
+	doc.CMUNDest = ""
+	doc.XMUNDest = ""
+	doc.FONEDest = ""
+	doc.UFDest = ""
+	doc.CPAISDest = ""
+	doc.XPAISDest = ""
+	doc.XPAISDest = ""
+	doc.VBC = ""
+	doc.VICMS = ""
+	doc.VBCST = ""
+	doc.VST = ""
+	doc.VPROD = ""
+	doc.VFRETE = ""
+	doc.VSEG = ""
+	doc.VDESC = ""
+	doc.VII = ""
+	doc.VIPI = ""
+	doc.VPIS = ""
+	doc.VCOFINS = ""
+	doc.VOUTRO = ""
+	doc.VNF = ""
+	doc.VNF_1 = ""
+	doc.DIGVAL = ""
+		
+End Sub
+
+'++LotusScript Development Environment:2:2:NFeEntrada:5:8
+%REM
+	Sub NFeEntrada
+	Description: Comments for Sub
+%END REM
+Sub NFeEntrada
+	
+	Dim session As NotesSession
+	Dim inputStream As NotesStream
+	Dim origXML As String
+	Dim db As NotesDatabase
+	Dim domParser As NotesDOMParser
+	Dim rootElement As NotesDOMElementNode
+	Dim docList As NotesDOMNodeList
+	Dim eNode As NotesDOMElementNode
+	Dim node As NotesDOMNode,  node1 As NotesDOMNode, node2 As NotesDOMNode, node3 As NotesDOMNode
+	Dim i As Integer, j As Integer, k As Integer, x As Integer, y As Integer
+	origXML = "C:\NFeMateriais\TDECREDES\Recebido\nfe41433.xml"	'TDec
+	'origXML = "C:\Users\Ludmila\Documents\nfe41433.xml"		'HO
+	
+	
+	Dim ws As New NotesUIWorkspace
+	Dim doc As NotesDocument
+	Set doc = ws.Currentdocument.Document
+	If doc Is Nothing Then Exit Sub
+	Call LimpaCampos(doc)
+	
+	Set session = New NotesSession
+	'Open the XML file
+	Set inputStream = session.CreateStream
+	inputStream.Open (origXML)
+	Set domParser=session.CreateDOMParser(inputStream)
+	domParser.Process
+	Set rootElement = domParser.Document.DocumentElement
+	
+	Set docList = rootElement.GetElementsByTagName ("infNFe")
+	If docList.NumberOfEntries = 0 Then 
+		MessageBox "No <document> element nodes in file", , "Error"
+		Exit Sub
+	End If
+	For i = 1 To docList.NumberOfEntries
+		Set eNode = docList.GetItem(i)
+		'Visualização da NFe
+		doc.Id = eNode.GetAttribute("Id")											'Chave de Acesso
+		doc.versao = eNode.GetAttribute("versao")									'Versão do XML
+		Set node = eNode.FirstChild
+		For k = 1 To eNode.Numberofchildnodes
+			Set node1 = node.Firstchild
+			For x = 1 To node.Numberofchildnodes
+				Set node2 = node1.Firstchild
+				For y = 1 To node1.Numberofchildnodes
+					'Dados da NFE
+					If UCase(node.Nodename) = "IDE" Then
+						Select Case UCase(node1.Nodename)
+						Case "NNF"
+							doc.NNF = node2.Nodevalue								'Número
+						Case "SERIE"
+							doc.SERIE = node2.Nodevalue								'Série
+						Case "DEMI"
+							doc.DEMI = node2.Nodevalue								'Data de Emissão
+						Case "DSAIENT"
+							doc.DSAIENT = node2.Nodevalue							'Data de Saída
+						Case "HSAIENT"
+							doc.HSAIENT = node2.Nodevalue							'Hora de Saída
+						'Case "HSAIENT"
+						'	doc.HSAIENT = node2.Nodevalue							'Valor Total da Nota Fiscal
+						Case "CNF"
+							doc.CNF = node2.Nodevalue								'Código
+						Case "MOD"
+							doc.Mod = node2.Nodevalue								'Modelo
+						Case "TPIMP"
+							doc.TPIMP = node2.Nodevalue								'Formato de Impressão
+						Case "INDPAG"
+							doc.INDPAG = node2.Nodevalue							'Forma de Pagamento
+						Case "CMUNFG"
+							doc.CMUNFG = node2.Nodevalue							'Município do Fato Gerador
+						Case "CUF"
+							doc.CUF = node2.Nodevalue								'Código da UF
+						Case "CDV"
+							doc.CDV = node2.Nodevalue								'DV
+						Case "FINNFE"
+							doc.FINNFE = node2.Nodevalue							'Finalidade
+						Case "TPEMIS"
+							doc.TPEMIS = node2.Nodevalue							'Forma
+						'Case "HSAIENT"
+						'	doc.HSAIENT = node2.Nodevalue							'Digest Value da NF-e
+						Case "NATOP"
+							doc.NATOP = node2.Nodevalue								'Natureza da Operação
+						Case "TPNF"
+							doc.TPNF = node2.Nodevalue								'Tipo da Operação
+						Case "PROCEMI"
+							doc.PROCEMI = node2.Nodevalue							'Processo
+						Case "VERPROC"
+							doc.VERPROC = node2.Nodevalue							'Versão do Processo
+						Case "CONT"
+							doc.CONT = node2.Nodevalue								'Data e Hora da Entrada em Contingência
+						Case "JUSCONT"
+							doc.JUSCONT = node2.Nodevalue							'Justificativa da Entrada em Contingência
+						End Select
+					'Emitente
+					ElseIf UCase(node.Nodename) = "EMIT" Then
+						Select Case UCase(node1.Nodename)
+						Case "XNOME"
+							doc.XNOME = node2.Nodevalue								'Nome/Razão Social
+						'Case "XNOME"
+						'	doc.XNOME = node2.Nodevalue								'Nome Fantasia
+						Case "CNPJ"
+							doc.XCNPJ = node2.Nodevalue								'CPF/CNPJ
+						Case "ENDEREMIT"
+							'Endereço
+							Set node3 = node2.Firstchild
+							For j = 1 To node2.Numberofchildnodes
+								Select Case UCase(node2.Nodename)
+								Case "XLGR"
+									doc.XLGR = node3.Nodevalue						'Logradouro
+								Case "NRO"
+									doc.NRO = node3.Nodevalue						'Número
+								Case "XBAIRRO"
+									doc.XBAIRRO = node3.Nodevalue					'Bairro
+								Case "CEP"
+									doc.CEP = node3.Nodevalue						'CEP
+								Case "CMUN"
+									doc.CMUN = node3.Nodevalue						'Código do Município
+								Case "XMUN"
+									doc.XMUN = node3.Nodevalue						'Município
+								Case "FONE"
+									doc.FONE = node3.Nodevalue						'Fone/Fax
+								Case "UF"
+									doc.XUF = node3.Nodevalue						'UF
+								Case "XPAIS"
+									doc.XPAIS = node3.Nodevalue						'País
+								End Select
+								Set node3 = node3.Nextsibling
+							Next
+						Case "IE"
+							doc.IE = node2.Nodevalue								'Inscrição Estadual
+						'Case "IE"
+						'	doc.IE = node2.Nodevalue								'Inscrição Estadual do Substituto Tributário
+						'Case "IE"
+						'	doc.IE = node2.Nodevalue								'Inscrição Municipal
+						'Case "CRT"
+						'	doc.CRT = node2.Nodevalue								'CNAE Fiscal
+						Case "CRT"
+							doc.CRT = node2.Nodevalue								'CRT
+						End Select
+					'Destinatário
+					ElseIf UCase(node.Nodename) = "DEST" Then
+						Select Case UCase(node1.Nodename)
+						Case "XNOME"
+							doc.XNOMEDest = node2.Nodevalue							'Nome/Razão Social
+						Case "CNPJ"
+							doc.CNPJDest = node2.Nodevalue							'CNPJ/CPF
+						Case "ENDERDEST"
+							'Endereço
+							Set node3 = node2.Firstchild
+							For j = 1 To node2.Numberofchildnodes
+								Select Case UCase(node2.Nodename)
+								Case "XLGR"
+									doc.XLGRDest = node3.Nodevalue					'Logradouro
+								Case "NRO"
+									doc.NRODest = node3.Nodevalue					'Número
+								Case "XBAIRRO"
+									doc.XBAIRRODest = node3.Nodevalue				'Bairro/Distrito
+								Case "CEP"
+									doc.CEPDest = node3.Nodevalue					'CEP
+								Case "CMUN"
+									doc.CMUNDest = node3.Nodevalue					'Código do Município
+								Case "XMUN"
+									doc.XMUNDest = node3.Nodevalue					'Município
+								'Case "FONE"
+									'doc.FONEDest = node3.Nodevalue					'Fone/Fax
+								Case "UF"
+									doc.UFDest = node3.Nodevalue					'UF
+								Case "CPAIS"
+									doc.CPAISDest = node3.Nodevalue					'Código do País
+								Case "XPAIS"
+									doc.XPAISDest = node3.Nodevalue					'País
+								End Select
+								Set node3 = node3.Nextsibling
+							Next
+						Case "IE"
+							doc.IEDest = node2.Nodevalue							'Inscrição Estadual
+						'Case "IE"
+						'	doc.IEDest = node2.Nodevalue							'Inscrição SUFRAMA
+						'Case "IE"
+						'	doc.IEDest = node2.Nodevalue							'Email
+						End Select
+					'Local de Entrega
+					ElseIf UCase(node.Nodename) = "ENTREGA" Then
+						Select Case UCase(node1.Nodename)
+						Case "CNPJ"
+							doc.CNPJEntr = node2.Nodevalue							'CNPJ
+						Case "XLGR"
+							doc.XLGREntr = node2.Nodevalue							'Endereço
+						Case "NRO"
+							doc.NROEntr = node2.Nodevalue							'Número
+						Case "XBAIRRO"
+							doc.XBAIRROEntr = node2.Nodevalue						'Bairro
+						Case "CMUN"
+							doc.CMUNEntr = node2.Nodevalue							'Código do Município
+						Case "XMUN"
+							doc.XMUNEntr = node2.Nodevalue							'Município
+						Case "UF"
+							doc.UFEntr = node2.Nodevalue							'UF
+						End Select
+					'Informações Adicionais
+					ElseIf UCase(node.Nodename) = "INFADIC" Then
+						If UCase(node1.Nodename) = "INFCPL" Then
+							doc.INFCPL = node2.Nodevalue							'Informações Adicionais
+						End If
+					'Dados da Cobrança
+					ElseIf UCase(node.Nodename) = "COBR" Then
+						Set node3 = node2.Firstchild
+						For j = 1 To node2.Numberofchildnodes
+							Select Case UCase(node2.Nodename)
+							Case "NDUP"
+								doc.NDUP_1 = node3.Nodevalue						'Duplicata
+							Case "DVENC"
+								doc.DVENC_1 = node3.Nodevalue						'Vencimento
+							Case "VDUP"
+								doc.VDUP_1 = node3.Nodevalue						'Valor
+							End Select
+							Set node3 = node3.Nextsibling
+						Next
+					'Transporte
+					ElseIf UCase(node.Nodename) = "TRANSP" Then
+						If UCase(node1.Nodename) = "MODFRETE" Then
+							doc.MODFRETE = node2.Nodevalue							'Modalidade do Frete
+						ElseIf UCase(node1.Nodename) = "TRANSPORTA" Then
+							'Transportador
+							Set node3 = node2.Firstchild
+							For j = 1 To node2.Numberofchildnodes
+								  Select Case UCase(node2.Nodename)
+								Case "XLGR"
+									doc.XLGRDest = node3.Nodevalue					'CNPJ/CPF
+								Case "XNOME"
+									doc.XNOMETransp = node3.Nodevalue				'Razão Social/Nome
+								Case "XBAIRRO"
+									doc.XBAIRRODest = node3.Nodevalue				'Inscrição Estadual
+								Case "CEP"
+									doc.CEPDest = node3.Nodevalue					'Endereço Completo
+								Case "CMUN"
+									doc.CMUNDest = node3.Nodevalue					'Município
+								Case "XMUN"
+									doc.XMUNDest = node3.Nodevalue					'Quantidade
+								Case "FONE"
+									doc.FONEDest = node3.Nodevalue					'Volumes
+								Case "UF"
+									doc.UFDest = node3.Nodevalue					'Marca
+								Case "CPAIS"
+									doc.CPAISDest = node3.Nodevalue					'Numeração
+								Case "XPAIS"
+									doc.XPAISDest = node3.Nodevalue					'Peso Líquido
+								Case "XPAIS"
+									doc.XPAISDest = node3.Nodevalue					'Peso Bruto
+								End Select
+								Set node3 = node3.Nextsibling
+							Next
+						End If
+					'Totais
+					ElseIf UCase(node.Nodename) = "TOTAL" Then
+						Set node3 = node2.Firstchild
+						For j = 1 To node2.Numberofchildnodes
+							Select Case UCase(node2.Nodename)
+							Case "VBC"
+								doc.VBC = node3.Nodevalue							'Base de Cálculo do ICMS
+							Case "VICMS"
+								doc.VICMS = node3.Nodevalue							'Valor do ICMS
+							Case "VBCST"
+								doc.VBCST = node3.Nodevalue							'Base de Cálculo do ICMS ST
+							Case "VST"
+								doc.VST = node3.Nodevalue							'Valor do ICMS ST
+							Case "VPROD"
+								doc.VPROD = node3.Nodevalue							'Valor Total dos Produtos e Serviços
+							Case "VFRETE"
+								doc.VFRETE = node3.Nodevalue						'Valor do Frete
+							Case "VSEG"
+								doc.VSEG = node3.Nodevalue							'Valor do Seguro
+							Case "VDESC"
+								doc.VDESC = node3.Nodevalue							'Valor Total dos Descontos
+							Case "VII"
+								doc.VII = node3.Nodevalue							'Valor Total do II
+							Case "VIPI"
+								doc.VIPI = node3.Nodevalue							'Valor Total do IPI
+							Case "VPIS"
+								doc.VPIS = node3.Nodevalue							'Valor do PIS
+							Case "VCOFINS"
+								doc.VCOFINS = node3.Nodevalue						'Valor da COFINS
+							Case "VOUTRO"
+								doc.VOUTRO = node3.Nodevalue						'Outras Despesas Acessórias
+							Case "VNF"
+								doc.VNF = node3.Nodevalue							'Valor Total da NFe
+								doc.VNF_1 = node3.Nodevalue							'Valor Total da NFe
+						End Select
+							Set node3 = node3.Nextsibling
+						Next
+					End If
+					Set node2 = node2.Nextsibling
+				Next
+				Set node1 = node1.Nextsibling
+			Next
+			Set node = node.Nextsibling
+		Next
+	Next
+	
+	'DigestValue
+	Set docList = rootElement.GetElementsByTagName ("infProt")
+	If docList.NumberOfEntries = 0 Then 
+		MessageBox "No <document> element nodes in file", , "Error"
+		Exit Sub
+	End If
+	For i = 1 To docList.Numberofentries
+		Set eNode = docList.GetItem(i)
+		Set node = eNode.FirstChild
+		For j = 1 To eNode.Numberofchildnodes
+			If UCase(node.Nodename) = "DIGVAL" Then
+				Set node1 = node.Firstchild
+				doc.DIGVAL = node1.Nodevalue
+			End If
+			Set node = node.Nextsibling
+		Next
+	Next
+	
+	
+	
+%REM
+	'Dados dos produtos e serviços da NFe
+	Set docList = rootElement.GetElementsByTagName ("det")
+	If docList.NumberOfEntries = 0 Then 
+		MessageBox "No <document> element nodes in file", , "Error"
+		Exit Sub
+	End If
+	Set eNode = docList.GetItem(i)
+	Set node = eNode.FirstChild
+	For k = 1 To eNode.Numberofchildnodes
+		Set node1 = node.Firstchild
+		For x = 1 To node.Numberofchildnodes
+			 
+			If UCase(node1.Nodename) = "PROD" Then
+				MsgBox "PROD: " & node1.Nodevalue
+				'doc.DIGESTVALUE = node1.Nodevalue
+			End If
+		Next	
+	Next
+	
+	
+					ElseIf UCase(node.Nodename) = "DET" Then
+						'doc.Numero = node3.Nodevalue								'Número
+						Select Case UCase(node1.Nodename)
+						'Produto
+						Case "PROD"
+							Set node3 = node2.Firstchild
+							For j = 1 To node2.Numberofchildnodes
+								Select Case UCase(node2.Nodename)
+								Case "XPROD"
+									doc.XPROD = node3.Nodevalue						'Descrição
+								Case "QCOM"
+									doc.QCOM = node3.Nodevalue						'Qtd.
+								Case "UCOM"
+									doc.UCOM = node3.Nodevalue						'Unidade Comercial
+								Case "VPROD"
+									doc.VPROD = node3.Nodevalue						'Valor Bruto(R$)
+								Case "VUNCOM"
+									doc.VUNCOM = node3.Nodevalue					'Valor da Unidade Comercial(R$)
+								Case "VUNTRIB"
+									doc.VUNTRIB = node3.Nodevalue					'Valor da Unidade Tributável(R$)
+								Case "UTRIB"
+									doc.UTRIB = node3.Nodevalue						'Unidade Tributável
+								Case "QTRIB"
+									doc.QTRIB = node3.Nodevalue						'Qtd. Tributável
+								Case "CPROD"
+									doc.CPROD = node3.Nodevalue						'Código do Produto
+								Case "CEAN"
+									doc.CEAN = node3.Nodevalue						'Código EAN
+								Case "NCM"
+									doc.NCM = node3.Nodevalue						'Código NCM
+								Case "CFOP"
+									doc.CFOP = node3.Nodevalue						'CFOP
+								Case "INDTOT"
+									doc.INDTOT = node3.Nodevalue					'Valor Total Bruto dos Produtos no Valor Total da NFe
+								End Select
+								Set node3 = node3.Nextsibling
+							Next
+						'Imposto
+						Case "IMPOSTO"
+							Set node3 = node2.Firstchild
+							For j = 1 To node2.Numberofchildnodes
+								Select Case UCase(node2.Nodename)
+								Case "XLGR"
+									doc.XLGRDest = node2.Nodevalue					'Número
+								Case "NRO"
+									doc.NRODest = node2.Nodevalue					'Descrição
+								Case "XBAIRRO"
+									doc.XBAIRRODest = node2.Nodevalue				'Qtd.
+								Case "CEP"
+									doc.CEPDest = node2.Nodevalue					'Unidade Comercial
+								Case "CMUN"
+									doc.CMUNDest = node2.Nodevalue					'Valor Bruto(R$)
+								Case "XMUN"
+									doc.XMUNDest = node2.Nodevalue					'Valor da Unidade Comercial(R$)
+								Case "UF"
+									doc.UFDest = node2.Nodevalue					'Valor da Unidade Tributável(R$)
+								Case "CPAIS"
+									doc.CPAISDest = node2.Nodevalue					'Unidade Tributável
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Qtd. Tributável
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Código do Produto
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Código EAN
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Código NCM
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Código da EX da TIP
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'CFOP
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Gênero
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Valor do Desconto
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Valor Total do Frete
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Valor do Seguro
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Outras Despesas Acessórias
+								Case "XPAIS"
+									doc.XPAISDest = node2.Nodevalue					'Valor Total Bruto dos Produtos no Valor Total da NFe
+								End Select
+								Set node3 = node3.Nextsibling
+							Next
+					'ICMS Normal e ST
+					'Origem da Mercadoria
+					'Tributação do ICMS
+					'Modalidade Definição da BC ICMS Normal
+					'Base de Cálculo do ICMS Normal
+					'Alíquota do ICMS Normal
+					'Valor do ICMS Normal
+					'Base de Cálculo do ICMS ST
+					'Valor do ICMS ST
+					'PIS
+					'CST
+					'Base de Cálculo
+					'Alíquota
+					'Valor
+					'Cofins
+					'CST
+					'Base de Cálculo
+					'Alíquota
+					'Valor
+					'Informações Adicionais do Produto
+				End Select
+%endrem
+	'Call doc.Save(True, True)
+	
+End Sub

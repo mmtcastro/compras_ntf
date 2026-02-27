@@ -1,0 +1,164 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+Use "Planilha"
+Use "GeraJavaId"
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub CancelamentoPedido( uidoc As NotesUIDocument )
+Declare Function SaldoCancelamento(uidoc As NotesUiDocument) As Variant
+Declare Sub AtualizaStatusCotacao(uidoc As NotesUIDocument)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:CancelamentoPedido:1:8
+Sub CancelamentoPedido( uidoc As NotesUIDocument )
+	
+	'Atualiza Listas
+	On Error Resume Next
+	Dim listas As New NotesDatabase(uidoc.Document.ParentDatabase.Server, "listas.nsf")
+	Dim viewlistas As NotesView
+	Dim doc As NotesDocument
+	Dim scan As Integer, answer As String, codigo As String, baixa As Long, it As String
+	If uidoc.Fieldgettext("ClassificacaoDespesa") = "Intermediação de Vendas" Then
+		Set viewlistas = listas.GetView("(NegocioNIntermediacao)")
+	ElseIf uidoc.Fieldgettext("TipoCompra") = "Projeto" Then
+		Set viewlistas = listas.GetView("(NegocioNPlanilhas)")
+	Else
+		Set viewlistas = listas.GetView("(NegocioNItens)")
+	End If
+	codigo = uidoc.FieldGetText("Origem")
+	'Restaura Saldo de Compra em Listas
+	If uidoc.FieldGetText("TipoCompra") = "Revenda" Or uidoc.FieldGetText("TipoCompra") = "Projeto" Or (uidoc.FieldGetText("TipoCompra") = "Ativo" And uidoc.FieldGetText("TipoVenda") = "Contrato") Then
+		answer = 6
+	Else
+		answer = MessageBox("Você deseja restaurar os Saldos de Compras ?", 4+32+256+4096, "Restaura Saldos de Compras")
+		'answer = 0
+	End If
+	If answer = 6 Then
+		For scan = 0 To 49
+			baixa = Val( uidoc.FieldGetText("Q_" & scan))
+			Set doc = viewlistas.getDocumentByKey(codigo & "-" & uidoc.FieldGetText("i_" & scan), True)
+			If Not doc Is Nothing Then
+				'Compra de Cotação Financeira - LMO 14/08/18
+				If uidoc.FieldGetText("Codigo") <> uidoc.FieldGetText("Origem") Then
+					doc.Q = doc.Q(0) - baixa
+					doc.Status = "Inativa"
+				End If
+				doc.QCompra = doc.QCompra(0) - baixa
+				Call doc.Save (True, True)
+			End If
+		Next
+	End If
+	'Compras de Projetos: atualiza a Cotação Financeira e a Planilha Financeira - LMO 18/03/10
+	If uidoc.Document.TipoCompra(0) = "Projeto" Then
+		Dim db As New NotesDatabase(uidoc.Document.Parentdatabase.Server, "servicos.nsf")
+		Dim view As NotesView
+		Dim item As NotesItem
+		Dim qtd As Variant
+		Set view = db.GetView("(Cotacao/DocID)")
+		Set doc = view.Getdocumentbykey(codigo, True)
+		If Not doc Is Nothing Then
+			For scan% = 0 To 49
+				baixa = Val(uidoc.FieldGetText("Q_" & scan))
+				If baixa > 0 Then
+					it = uidoc.FieldGetText("i_" & scan)
+					qtd = doc.Getitemvalue("Q_" & (it - 1))
+					Set item = doc.ReplaceItemValue("Q_" & (it - 1), qtd(0) - baixa)
+				End If
+			Next
+			Call CalcCotacaoDoc(doc)
+			Call doc.Save(True, True)
+			'Planilha Financeira
+			Set view = db.GetView("(Planilha/Codigo)")
+			Set doc = view.GetDocumentByKey(uidoc.Document.Codigo(0), True)
+			If Not doc Is Nothing Then
+				Call CalcPlanilha(doc)
+				Call doc.Save(True, True)
+			End If
+		End If
+	End If
+	Call uidoc.FieldSetText( "CkCancelamento", "1" )
+	Call uidoc.Refresh
+	If uidoc.FieldGetText("TipoCompra") = "Revenda" Or uidoc.FieldGetText("TipoCompra") = "Projeto" Or (uidoc.FieldGetText("TipoCompra") = "Ativo" And uidoc.FieldGetText("TipoVenda") = "Contrato") Then
+		MsgBox "Itens Cancelados - Saldo para Compras Restaurado.", 64, "Aviso"
+	Else
+		MsgBox "Itens Cancelados.", 64, "Aviso"
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:SaldoCancelamento:1:8
+Function SaldoCancelamento(uidoc As NotesUiDocument) As Variant
+	
+	On Error Resume Next
+	SaldoCancelamento = True
+	If uidoc.FieldGetText("CkCancelamento") = "1" Then
+		Exit Function
+	End If
+	Dim db As New NotesDatabase(uidoc.Document.ParentDatabase.Server, "listas.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim scan As Integer, saldo As Long, item As String
+	If uidoc.Fieldgettext("ClassificacaoDespesa") = "Intermediação de Vendas" Then
+		Set view = db.GetView("(NegocioNIntermediacao)")
+	ElseIf uidoc.Fieldgettext("TipoCompra") = "Projeto" Then
+		Set view = db.GetView("(NegocioNPlanilhas)")
+	Else
+		Set view = db.GetView("(NegocioNItens)")
+	End If
+	For scan = 0 To 49
+		If uidoc.FieldGetText("i_" & scan) <> "" Then
+			Set doc = view.getDocumentByKey(uidoc.FieldGetText("Origem") & "-" & uidoc.FieldGetText("i_" & scan), True)
+			If Not (doc Is Nothing) Then
+				item = uidoc.FieldGetText("NItem_" & scan)
+				'Simples Faturamento
+				saldo = doc.Q(0) - Val(doc.QSimplesFaturamento(0))
+				If Val(uidoc.FieldGetText("Q_" & scan)) > saldo Then
+					MsgBox "O ítem " & item & " já teve Simples Faturamento." & Chr(10) & "Saldo de Cancelamento: " & saldo, 16, "Erro"
+					SaldoCancelamento = False
+					Exit Function
+				End If
+				'Pré-Baixa
+				saldo = doc.Q(0) - doc.QPreBaixa(0)
+				If Val(uidoc.FieldGetText("Q_" & scan)) > saldo Then
+					MsgBox "O ítem " & item & " já teve Pré-Baixa." & Chr(10) & "Saldo de Cancelamento: " & saldo, 16, "Erro"
+					SaldoCancelamento = False
+					Exit Function
+				End If
+				'Baixa
+				saldo = doc.Q(0) - doc.QBaixa(0)
+				If Val(uidoc.FieldGetText("Q_" & scan)) > saldo Then
+					MsgBox "O ítem " & item & " já teve Baixa." & Chr(10) & "Saldo de Cancelamento: " & saldo, 16, "Erro"
+					SaldoCancelamento = False
+					Exit Function
+				End If
+			End If
+		End If
+	Next
+	
+End Function
+
+'++LotusScript Development Environment:2:2:AtualizaStatusCotacao:5:8
+%REM
+	Sub AtualizaStatusCotacao
+	Description: Comments for Sub
+%END REM
+Sub AtualizaStatusCotacao(uidoc As NotesUIDocument)
+	
+	On Error Resume Next
+	Dim db As New NotesDatabase(uidoc.Document.Parentdatabase.Server, "compras.nsf")
+	Dim view As NotesView
+	Dim dc As NotesDocumentCollection
+	Dim doc As NotesDocument
+	Set view = db.Getview("(Cotacoes/Codigo)")
+	Set dc = view.Getalldocumentsbykey(uidoc.Document.Codigo(0), True)
+	Set doc = dc.GetFirstDocument      
+	Do Until doc Is Nothing
+		Call CkStatusCotacao(doc)
+		Call doc.Save(False, False)
+		Set doc = dc.GetNextDocument( doc )
+	Loop
+	
+End Sub

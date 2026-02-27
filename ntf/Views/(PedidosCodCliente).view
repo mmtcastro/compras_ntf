@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='7ba' unid='3CF0D8B448A3C39883257B570074D097' sequence='4'>
+<created><datetime dst='true'>20130424T191555,75-02</datetime></created>
+<modified><datetime>20240425T165123,57-03</datetime></modified>
+<revised><datetime>20240425T120648,85-03</datetime></revised>
+<lastaccessed><datetime>20240425T165123,56-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123116,22-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>(PedidosCodCliente)</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+2gACAGgAAgAkMAUABABGb3JtAQAVAFNoaXBwaW5nIEluc3RydWN0aW9ucwAKAq8AOAAiAAEAGAAq
+KiBTaGlwcGluZyBJbnN0cnVjdGlvbnOuABYABQAJAERlc2NyaWNhbwCuAAQAtQMDAAUARABAAAgA
+CgACAAYAAgAGAAUACQAEAENvZENsaWVudGVQT0RhdGFQbyQwVG90VG90RnJldGUkQ29uZmxpY3Qk
+UkVGBAAEAAAAGgAFAAQARm9ybQEABgBQZWRpZG8KAgMABwAOAAgACUwxUzJTM1M=
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+FwABAABEAGYAAAAKAENvZENsaWVudGU=
+</rawitemdata></item>
+<item name='$Totals' sign='true'><textlist><text>0</text><text>0</text><text
+>0</text><text>0</text><text>1</text><text>1</text></textlist></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQAGAAcAiQAAAFZDAQAKAAAAAAAAAFIABQAKCIAAAAAAAAAAAAIAAAAgVkMAAAIAAAAAAAAAUgAG
+AAoIgAAAAAAAAAAAAgAAACBWQwAABgAEAAAAAAA7AAcACgiAAAAAAAAAAAAAAgAAIFZDAAACAAkA
+agAAADQBCAAKCIAAAAAAAAAAAAICAAAgVkMAAAYABQAAAAAAPwAJAAoIRAACAQEAAAAAAgIAACBW
+QwAABQAFAAAAAAArAAoACghEAAIBAQAAAAACAgAAIENvZENsaWVudGVQT0RhdGFQb0RhdGEkMERl
+c2NyaWNhb2oAAgBoAAIAJDAFAAQARm9ybQEAFQBTaGlwcGluZyBJbnN0cnVjdGlvbnMACgKvADgA
+IgABABgAKiogU2hpcHBpbmcgSW5zdHJ1Y3Rpb25zrgAWAAUACQBEZXNjcmljYW8ArgAEALUDAwBU
+b3RUb3RWYWxvckZyZXRlRnJldGUmAAEAAAABAQAJAQAACgEBCAoAABkArSsBAC8AAQAAAAAAAAAA
+AFdDCwAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABXQwwAAAgAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAV0MNAAAIAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAFdDDgAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//
+AAAAAAAAAAAAAAAAAABXQw8AAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAA
+AAAAV0MQAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAEIAEAAAAAEA
+9/f3AAEA4OD/AAEAAAAAAAAAAAAAAAAAAQD39/cAAQD39/cAAAABAAAAAAABAIAAAAABAAAAAAAA
+AAgAAAAAAAEA
+</rawitemdata></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text><text>6</text><text>38</text><text>Arial</text><text>7</text><text
+>38</text><text>Arial</text><text>8</text><text>38</text><text>Arial</text><text
+>9</text><text>38</text><text>Arial</text><text>10</text><text>38</text><text
+>Arial</text><text>11</text><text>38</text><text>Arial</text><text>12</text><text
+>38</text><text>Arial</text><text>13</text><text>38</text><text>Arial</text><text
+>14</text><text>38</text><text>Arial</text><text>15</text><text>38</text><text
+>Arial</text><text>16</text><text>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text>Usado pelo Empresas para ver se o fornecedor pode ser deletado</text></item>
+<item name='$Flags'><text/></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$V5ACTIONS' sign='true'>
+<rawitemdata type='1'>
+vRw/AAAAAQABAAAAAQAAAAAAAAAAAAAACAACAHn/bAABAPDw8AABAAAAAAAJAAAAAAABAPDw8AAA
+AB8AAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAPz/OgAAAAAAAQAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAEAAAAAAAAAAAAAAAAAAAC+/yYAAAAFAAAAnQEAAAsAAAAAAAAAQ2F0ZWdvcmlfemUa
+AQBOfL7/KAAAAAUAAACdAQAADgAAAAAAAABfRWRpdCBEb2N1bWVudAIAAgq+/ygAAAAFAAAAnQEA
+AA4AAAAAAAAAX1NlbmQgRG9jdW1lbnQDAAMKvv8iAAAABQAAAJ0BAAAIAAAAAAAAAF9Gb3J3YXJk
+BAAECr7/LAAAAAUAAACdAQAAEgAAAAAAAABfTW92ZSBUbyBGb2xkZXIuLi4FAD18vv8uAAAABQAA
+AJ0BAAATAAAAAAAAAF9SZW1vdmUgRnJvbSBGb2xkZXIaBgA+fL7/IAAAAAUAAACdAQAABQAAAAAA
+AABfUmVhZBsHAF58vv8iAAAABQAAAJ0BAAAHAAAAAAAAAF9VbnJlYWRLCABufL7/LgAAAAUAAACd
+AQAAEwAAAAAAAABfT3BlbiBpbiBOZXcgV2luZG93DgkAfny+/yQAAAAFAAAAnQEAAAkAAAAAAAAA
+X1ByaW50Li4uDgoAjny+/yIAAAAFAAAAnQEAAAcAAAAAAAAAX0RlbGV0ZdcLAJ58vv8uAAAABQAA
+AJ0BAAAUAAAAAAAAAF9Eb2N1bWVudCBQcm9wZXJ0aWVzDACufL7/HgAAAAUAAACdAQAABAAAAAAA
+AABDX3V0DQC+fL7/IAAAAAUAAACdAQAABQAAAAAAAABfQ29weR8OAM58vv8wAAAABQAAAJ0BAAAW
+AAAAAAAAAENvcHkgYXMgRG9jdW1lbnQgX0xpbmsPAN58vv8oAAAABQAAAJ0BAAAOAAAAAAAAAENv
+cHkgYXMgX1RhYmxlEADufL7/IAAAAAUAAACdAQAABgAAAAAAAABQX2FzdGURAP58vv8gAAAABQAA
+AJ0BAAAFAAAAAAAAAF9PcGVuUhIADn2+/yIAAAAFAAAAnQEAAAgAAAAAAAAAQm9va21hcmsTAB59
+</rawitemdata></item></note>
+

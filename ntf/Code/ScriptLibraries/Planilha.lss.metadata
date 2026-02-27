@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="7a6" sequence="259" unid="7384396C6406DFF68325797A003ECBD1">
+<created><datetime dst="true">20120103T092554,09-02</datetime></created>
+<modified><datetime>20250804T121307,38-03</datetime></modified>
+<revised><datetime>20250731T050025,46-03</datetime></revised>
+<lastaccessed><datetime>20250804T121307,37-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123116,17-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$TITLE" sign="true"><text>Planilha</text></item>
+<item name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
+<item name="$POID"><datetime dst="true">20171206T191509,92-02</datetime></item>
+
+
+
+
+
+
+<item name="$Class"><text>Template Servicos</text></item>
+<item name="$Flags"><text>s34Q</text></item></note>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="7a2" sequence="20" unid="6A2FCC93572ADAC383257FE700523D90">
+<created><datetime dst="true">20160705T125817,12-02</datetime></created>
+<modified><datetime>20250827T160135,53-03</datetime></modified>
+<revised><datetime>20250827T110832,90-03</datetime></revised>
+<lastaccessed><datetime>20250827T160135,52-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123116,16-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name><name>CN=Rodrigo Trida/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name><name>CN=Hugo Borges/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name><name>CN=Hugo Borges/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$TITLE" sign="true"><text>ccDespesa</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+
+
+<item name="$Class"><text>Template Despesas</text></item>
+<item name="$Flags"><text>s34Q</text></item></note>

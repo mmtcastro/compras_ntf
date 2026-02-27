@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='822' unid='1082BF840D276D32032586FE0047A1AD' sequence='5'>
+<created><datetime>20210624T100224,45-03</datetime></created>
+<modified><datetime>20230919T123116,50-03</datetime></modified>
+<revised><datetime>20210624T100507,18-03</datetime></revised>
+<lastaccessed><datetime>20230919T123116,49-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123116,49-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name='$FormatNote' summary='true' sign='true'>
+<rawitemdata type='4'>
+AQD7WiqqhldMqcaxbQDGZiUD
+</rawitemdata></item>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>(Fornecedor)</text></item>
+<item name='$Index' sign='true'><text>/C</text></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+WAAFACYAIgAEAAYAAwAJAAQAQ29kaWdvTkZlJENvbmZsaWN0JFJFRgQABAAAAB4ABQAEAEZvcm0B
+AAoARm9ybmVjZWRvcgoCAwAHAA4ACAAJTDFTMlMzUw==
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+EwABAABEgGYAAAAGAENvZGlnbw==
+</rawitemdata></item>
+<item name='$Collation1' summary='true'>
+<rawitemdata type='2'>
+EAABAABEgGYAAAADAE5GZQ==
+</rawitemdata></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQACABkAiUgAAFZDAQAGAAYAAAAAAHgABQAACAAAAAAAAAAAAAICAAAAVkMAAQMAAwAAAAAAUAAG
+AAAIAAAAAAAAAAAAAgIAAABDb2RpZ29DomRpZ29ORmVORmUmAAEAAAABAQAJAQAACgEBAgoAAD8A
+rSsJAAEAAQAAAAAAAAAAAFdDBwAACAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAP//AAAAAAAAAAAA
+AAAAAABXQwgAAAgAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAD//wAAAAAAAAAAAAAAAAAAQgAAAAAA
+AQD///8AAQDv7+8AAQAAAAAAAAAAAAAAAAABAP///wABAP///wAAAAEAAAAAAAEA/wAAAAEAAAAA
+AAAACAAAAAAAAQA=
+</rawitemdata></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text><text>6</text><text>38</text><text>Arial</text><text>7</text><text
+>38</text><text>Arial</text><text>8</text><text>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text>Y</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$V5ACTIONS' sign='true'>
+<rawitemdata type='1'>
+vRwPAAAAAQABAAAAgAAAAAAAAAAAAAAACAAAAHn/bAABAMDAwAABAAAAAAABAAAAAAABAMDAwAAA
+AB8AAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAPz/OgAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAEAAAAAAAAAAAAAAAAAAAC+/yYAAAAFAAAAnQEAAAsAAAAAAAAAQ2F0ZWdvcmlfemUA
+AQBOfL7/KAAAAAUAAACdAQAADgAAAAAAAABfRWRpdCBEb2N1bWVudAIAAgq+/ygAAAAFAAAAnQEA
+AA4AAAAAAAAAU2VuZCBEb2N1X21lbnQDAAMKvv8iAAAABQAAAJ0BAAAIAAAAAAAAAF9Gb3J3YXJk
+BAAECr7/LAAAAAUAAACdAQAAEgAAAAAAAABfTW92ZSBUbyBGb2xkZXIuLi4FAD18vv8uAAAABQAA
+AJ0BAAATAAAAAAAAAF9SZW1vdmUgRnJvbSBGb2xkZXIABgA+fA==
+</rawitemdata></item>
+<item name='$ACTIONS' sign='true'>
+<rawitemdata type='1'>
+vRwPAAAAAQABAAAAgAAAAAAAAAAAAAAACAAAAL7/JgAAAAUAAACdAQAACwAAAAAAAABDYXRlZ29y
+aV96ZQABAE58vv8oAAAABQAAAJ0BAAAOAAAAAAAAAF9FZGl0IERvY3VtZW50AgACCr7/KAAAAAUA
+AACdAQAADgAAAAAAAABTZW5kIERvY3VfbWVudAMAAwq+/yIAAAAFAAAAnQEAAAgAAAAAAAAAX0Zv
+cndhcmQEAAQKvv8sAAAABQAAAJ0BAAASAAAAAAAAAF9Nb3ZlIFRvIEZvbGRlci4uLgUAPXy+/y4A
+AAAFAAAAnQEAABMAAAAAAAAAX1JlbW92ZSBGcm9tIEZvbGRlcgAGAD58
+</rawitemdata></item></note>
+

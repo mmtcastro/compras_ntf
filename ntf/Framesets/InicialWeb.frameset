@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='form' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='662' unid='F71B46670A7A433B032568C60060AE7C' sequence='7'>
+<created><datetime>20000419T143601,24-03</datetime></created>
+<modified><datetime>20230919T123115,51-03</datetime></modified>
+<revised><datetime dst='true'>20141129T102326,87-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,50-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,50-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Hugo Borges/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name><name
+>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name='$Class'><text>Template Compras</text></item>
+<item name='$TITLE' sign='true'><text>InicialWeb</text></item>
+<item name='$Comment' sign='true'><text>FrameSet para web</text></item>
+<item name='$FrameSet' sign='true'>
+<rawitemdata type='1'>
+7/8YAAIAAwAAAAAAAAAAAAAAAAAAAAAA8P8+AAAAAAABAAAAAAALAAsAAAAAAAUAAAAAAAUAAAAA
+AAEAAgAAAAAABQAAAAAAAAADAAEAAQClAAIATgDx/0EAAQAAAABAAAADAAEAAQAAAAAACQAAAAQA
+AQAAAAAAAABOYXZlZ2FjYW9NYWluAQD///94AQAACQEA////eD/2/ywAAAAAAAMABAAKAAAAAAAA
+AAAAAAAAAAAAAAAAAAAASW5pY2lhbFdlYvH/PAAAAAAAAEABAAMAAQABAAAAAAAEAAAABAABAAAA
+AAAAAE1haW5NYWluAQD///94AQAACQEA////ePb/MwAAAAAAAwACABEAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAxLiBQZWRpZG9zXFN0YXR1cz8=
+</rawitemdata></item>
+<item name='$Flags'><text>#34CQ</text></item>
+<item name='$DesignerVersion'><text>7</text></item></note>
+

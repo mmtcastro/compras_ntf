@@ -1,0 +1,608 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+Use "GeraJavaId"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub LinkFaturas( uidoc As NotesUiDocument )
+Declare Sub GeraMovimento (uidoc As NotesuiDocument, tipo As String)
+Declare Sub Faturar( uidoc As NotesUiDocument, tipo As String )
+Declare Function ConsisteCampos (uidoc As NotesuiDocument) As Variant
+Declare Sub FaturaDevolucao( uidoc As NotesUiDocument, tipo As String )
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:LinkFaturas:1:8
+Sub LinkFaturas( uidoc As NotesUiDocument )
+	
+	If uidoc.isnewdoc Then
+		Exit Sub
+	End If
+	Dim server As String
+	server$ = uidoc.Document.ParentDatabase.Server
+	Dim db As New notesDatabase( server$, "faturas.nsf" )
+	Dim view As notesview
+	Set view = db.GetView( "(IDOrigem)" )
+	Dim doc As NotesDocument
+	Dim dc As NotesDocumentCollection
+	Dim a As String
+	a$ = uidoc.Document.UNIVERSALID
+	Set dc = view.GetAllDocumentsByKey( a$, True )
+	
+	If dc.Count = 0 Then
+		Exit Sub
+	End If
+	
+	Set doc = dc.GetFirstDocument   
+	
+	Call uidoc.Document.RemoveItem( "LinkFaturas" )
+	Dim session As New notessession
+	Dim richStyle As notesrichtextstyle
+	Dim rtitem As notesrichtextitem
+	Set richStyle = session.CreateRichTextStyle
+	richStyle.NotesFont = FONT_ROMAN
+	richStyle.FontSize = 8
+	richStyle.NotesColor = COLOR_BLUE
+	Set rtitem = uidoc.Document.CreateRichTextItem( "LinkFaturas" )
+	Call rtitem.AppendStyle( richStyle )
+	
+	If rtitem.Type = RICHTEXT Then
+		While Not ( doc Is Nothing )                         
+			Call rtitem.AppendDocLink( doc, "Link com Pedido de Compra" )
+			Call rtitem.AppendText( doc.DataEmissaoNF(0) )
+			Call rtitem.AppendText( doc.PO(0) )
+			Call rtitem.AppendText( " " )
+			richStyle.NotesColor = COLOR_RED
+			Call rtitem.AppendStyle(richStyle)
+			Call rtitem.AppendText( doc.Sit(0)  )
+			richStyle.NotesColor = COLOR_BLUE
+			Call rtitem.AppendStyle(richStyle)
+			Call rtitem.AddNewLine( 1 )
+			Set doc = dc.GetNextDocument( doc )
+		Wend
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:GeraMovimento:1:8
+Sub GeraMovimento (uidoc As NotesuiDocument, tipo As String)
+	
+	Print "Gerando Movimento de Entrada no Estoque Main"
+	Dim session As New NotesSession
+	Dim db As New NotesDatabase ( uidoc.document.ParentDatabase.server, "estoquemain.nsf" )
+	Dim view As NotesView, catalogo As NotesView
+	Dim doc As NotesDocument, equipamento As NotesDocument
+	Dim us As String, fator As Double
+	Dim i As Integer, explode As Integer
+	Dim scan As Integer
+	
+	Set view = db.GetView("(MovimentoBaixa)")
+	Set catalogo = db.GetView("(Catalogo/PartNumber)")
+	
+	For scan% = 0 To 14
+		
+		If uidoc.FieldGetText("E_" + Cstr(scan%)) = "S" Then	
+			
+			explode% = Val( uidoc.FieldGetText( "Q_" & Cstr( scan%) ) )
+			
+			Set doc = view.GetDocumentByKey(uidoc.FieldGetText("DocId") & "/" & uidoc.FieldGetText("NItem_" & Cstr(scan%)),True)
+			If doc Is Nothing Then
+				
+				For i% = 1 To explode%	
+					
+					Dim entrada As New NotesDocument (db) 
+					entrada.Form = "Movimento"
+					entrada.Id = geraJavaId(entrada)
+					entrada.Autor = session.CommonUserName
+					entrada.Criacao = entrada.Created
+					entrada.Tipo = "Entrada"  'Tipo de Movimento
+					
+					If tipo = "Serv Retorno" Then
+						entrada.EntradaTipo = "Retorno de Serviços"
+					Elseif tipo = "Demo Retorno" Then
+						entrada.EntradaTipo = "Retorno de Demonstração"
+					Elseif tipo = "Cons Retorno" Then
+						entrada.EntradaTipo = "Retorno de Conserto"
+					Elseif tipo = "Expo Retorno" Then
+						entrada.EntradaTipo = "Retorno de Exposição"
+					Elseif tipo = "Como Retorno" Then
+						entrada.EntradaTipo = "Retorno de Comodato"
+					End If
+					
+					entrada.T = "HW"
+					entrada.TipoCompra = uidoc.FieldGetText("TipoCompra")  '("Consumo", "Ativo", "Revenda", "Estoque")
+					entrada.PartNo = uidoc.FieldGetText("PartNo_" + Cstr(scan%))
+					entrada.Produto = uidoc.FieldGetText("Produto_" + Cstr(scan%))
+					entrada.Custo = Cdbl(uidoc.FieldGetText("CustoUnit_" + Cstr(scan%)))
+					entrada.IC = Cdbl(uidoc.FieldGetText("IC_" + Cstr(scan%)))
+					entrada.IPI = Cdbl(uidoc.FieldGetText("IP_" + Cstr(scan%)))
+					entrada.Un = ""
+					entrada.DataEntrega = Cdat(uidoc.document.DataEntrega(0))
+					entrada.Responsavel = session.CommonUserName
+					entrada.CreditoICMS = "Sim"
+					entrada.CodCliente = uidoc.FieldGetText("CodCliente")
+					entrada.NFiscalEntrada = uidoc.FieldGetText("NFiscal")
+					entrada.DataEmissaoNF = Cdat(uidoc.document.DataEmissaoNF(0))
+					entrada.Codigo = uidoc.FieldGetText("Codigo")
+					entrada.PO = uidoc.FieldGetText("PO")
+					entrada.Baixa = uidoc.FieldGetText("DocID")
+					entrada.NItem = uidoc.FieldGetText("NItem_" + Cstr(scan%))
+					entrada.Reserva = "Sim"
+					entrada.NegocioReserva = uidoc.FieldGetText("Codigo")
+					entrada.Moeda = "R$"
+					entrada.Cotacao = 1
+					entrada.CustoUnit = uidoc.FieldGetText("CustoUnit_" + Cstr(scan%))
+					entrada.NSerie = uidoc.FieldGetText("NSerie_" + Cstr(scan%))
+					entrada.Q = 1 	'A quantidade será sempre 1 (cada equipamento gera 1 movimento)
+					entrada.VencGarantia = Cdat(uidoc.FieldGetText("VencGarantia"))
+					
+					'Criando docLink com a Remessa
+					Dim ligacao As NotesRichTextItem
+					Set ligacao = entrada.CreateRichTextItem( "LinkBaixa" )
+					Call ligacao.AppendDocLink( uidoc.Document, "Link com a Remessa" )
+					
+					Call entrada.save(True, True)
+					
+				Next i%		
+				
+			End If
+			
+		End If
+		
+	Next
+	
+	Print 
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:Faturar:1:8
+Sub Faturar( uidoc As NotesUiDocument, tipo As String )
+     REM opções para "tipo"
+     REM ===============
+     REM Devolução     
+     REM RMA Remessa Conserto
+     REM RMA Remessa Troca (Existe destaque de ICMS)
+     REM RMA Retorno Conserto
+     REM RMA Retorno Troca (Existe destaque de ICMS)
+     REM Demo Remessa
+     REM Demo Retorno (Devolução)
+	REM Serv Remessa (Remessa para Prestação de Serviços - Ex. Roteadores Pretroflex)
+	
+	If uidoc.FieldGetText( "Descricao" ) = "" Then
+		If tipo$ = "Devolução" Then 
+			Msgbox( "Entre com o motivo da devolução no campo de descrição" )
+		Elseif tipo$ = "Demo Remessa" Or tipo$ = "Demo Retorno"  Or tipo$ = "Expo Remessa" Or tipo$ = "Expo Retorno" Or tipo$ = "Tran Remessa" Then
+			Msgbox( "Entre com uma descrição para esta Remessa" )
+		Elseif tipo$ = "RMA Remessa" Or tipo$ = "RMA Retorno" Or tipo$ = "Cons Remessa" Or tipo$ = "Cons Retorno" Then
+			Msgbox( "Entre com a descrição do Defeito" )
+		Elseif  tipo$ = "Serv Remessa" Or tipo$ = "Como Remessa" Then
+			Msgbox( "Entre com a Motivo da Remessa" )
+		Else
+			Msgbox( "O Campo de Descrição não pode estar vazio" )
+		End If
+		Exit Sub
+	End If
+	
+	Dim scan As Integer, i As Integer, msg As String
+	
+	For scan% = 0 To 14
+		If uidoc.FieldGetText( "E_"& Cstr( scan% ) ) = "S" Then
+			Redim Preserve nitem( i ) As String
+			Redim Preserve q( i ) As Integer
+			Redim Preserve partno( i ) As String
+			Redim Preserve produto( i ) As String
+			Redim Preserve custounit( i ) As Double
+			Redim Preserve custot( i ) As Double
+			Redim Preserve ic( i ) As Double
+			Redim Preserve ip( i ) As Double
+			Redim Preserve nserie( i ) As String
+			q( i ) = Val( uidoc.FieldGettext( "Q_" & Cstr( scan% ) ) )
+			nitem( i ) = uidoc.FieldGettext( "NItem_" & Cstr( scan% ) )
+			partno( i ) = uidoc.FieldGettext( "PartNo_" & Cstr( scan% ) )
+			produto( i ) = uidoc.FieldGettext( "Produto_" & Cstr( scan% ) )
+			custounit( i ) = Cdbl( uidoc.FieldGettext( "CustoUnit_" & Cstr( scan% ) ) )
+			custot( i ) = Cdbl( uidoc.FieldGettext( "CusTot_" & Cstr( scan% ) ) )
+			ic( i ) = Cdbl( uidoc.FieldGettext( "IC_" & Cstr( scan% ) ) )
+			ip( i ) = Cdbl( uidoc.FieldGettext( "IP_" & Cstr( scan% ) ) )
+			nserie( i ) = uidoc.FieldGettext( "NSerie_" & Cstr( scan% ) ) 
+			i = i + 1
+		End If
+	Next
+	
+	If i = 0 Then
+		Msgbox( "Nenhum ítem selecionado para Faturamento" )
+		Exit Sub
+	End If
+	
+	Dim session As New NotesSession
+	Dim server As String
+	server$ = uidoc.Document.ParentDatabase.Server
+	
+	Dim dbempresas As New NotesDatabase( server$, "empresas.nsf" )
+	Dim viewEmpresas As NotesView
+	Set viewempresas = dbempresas.GetView( "(Dados Cadastrais)" )
+	Dim empresa As notesDocument
+	Dim codEmpresa As String
+	If tipo$ = "Devolução" Or tipo$ = "RMA Remessa Conserto" Or tipo$ = "RMA Remessa Troca" Or tipo$ = "RMA Remessa Garantia" Then     
+		codEmpresa$ = uidoc.FieldGetText( "CodCliente" ) 'Emissão de Fatura para o Fornecedor
+	Elseif tipo$ = "RMA Retorno Conserto" Or tipo$ = "RMA Retorno Troca"  Or tipo$ = "RMA Retorno Garantia" Then
+		codEmpresa$ = uidoc.FieldGetText( "CodCli" ) 'Emissão de Fatura para o Cliente
+		Elseif tipo$ = "Serv Remessa" Or tipo$ = "Demo Remessa" Or tipo$ = "Cons Remessa" Or tipo$ = "Expo Remessa"  Or tipo$ = "Como Remessa"_
+	Or tipo$ = "Serv Retorno" Or tipo$ = "Demo Retorno" Or tipo$ = "Cons Retorno"  Or tipo$ = "Expo Retorno" Or tipo$ = "Como Retorno" Then
+		codEmpresa$ = uidoc.FieldGetText( "CodCliente" ) 'Emissão de Fatura para as Remessas
+	End If     
+	
+	Set empresa = viewempresas.GetDocumentByKey( codEmpresa$, True )
+	If empresa Is Nothing Then
+		Msgbox( "A Empresa, por algum motivo, não está em nossa base de dados" )
+		Exit Sub
+	End If     
+	
+	If tipo$ <> "Demo Retorno" And tipo$ <> "Serv Retorno" And tipo$ <> "Cons Retorno" And tipo$ <> "Expo Retorno" And tipo$ <> "Como Retorno" Then
+		
+		Dim it As notesitem
+		Dim dbfaturas As New NotesDatabase( server$, "faturas.nsf" )
+		Dim fatura As New NotesDocument( dbfaturas )
+		fatura.Form = "Espelho"	
+		fatura.Id = geraJavaId(fatura)	
+		fatura.Tipo = "Hardware" 
+		fatura.Codigo = uidoc.FieldGetText( "Codigo" )
+		fatura.CodCliente  = codEmpresa$
+		fatura.Autor = session.commonusername
+		fatura.Criacao = Now
+		fatura.IDOrigem = uidoc.Document.UniversalID  
+		fatura.Vencimento = Now
+		fatura.Valor = 0
+		fatura.Sit = "A Emitir"
+		fatura.Descricao = uidoc.FieldGetText( "Descricao" )
+		fatura.Area = uidoc.FieldGetText( "Area" )
+		fatura.GerenteConta = uidoc.FieldGetText( "Responsavel" )
+		fatura.IRRF = 0
+		fatura.INSSRF = 0
+		fatura.TipoCompra = uidoc.FieldGetText ( "TipoCompra" )
+		
+		If tipo$ = "Devolução" Then
+			fatura.Natureza = "Devolução de Compra"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.32" Else fatura.CodNatureza = "6.32"
+			fatura.DadosAdicionais_1 = "Devolução de Mercadoria ref à Nota Fiscal Nº " & uidoc.FieldGetText( "NFiscal") & " emitida em " & uidoc.FieldGetText( "DataEmissaoNF" )
+		Elseif tipo$ = "RMA Remessa Conserto" Or tipo$ = "Cons Remessa"  Then
+			fatura.Natureza = "Remessa para Conserto"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			fatura.DadosAdicionais_1 = "Material de nossa propriedade, segue para conserto, devendo retornar à sua origem, isento de ICMS, conforme lei em vigor. Valor para efeito de trânsito." 
+		Elseif tipo$ = "RMA Remessa Troca" Then
+			fatura.Natureza = "Remessa para Troca"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			'fatura.DadosAdicionais_1 = "Material de nossa propriedade, segue para conserto, devendo retornar à sua origem, isento de ICMS, conforme lei em vigor. Valor para efeito de trânsito." 
+		Elseif tipo$ = "RMA Retorno Conserto" Or tipo$ = "RMA Retorno Troca"  Or tipo$ = "RMA Retorno Garantia" Or tipo$ = "Cons Retorno" Then                   
+			fatura.Natureza = "Retorno de Conserto"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			fatura.DadosAdicionais_1 = "Emitida nos termos do Ítem 7 do Inciso I do Art. 54 do RICMS. Alterado pela Lei 9278/95 em seu Art.1º" 
+		Elseif tipo$ = "Demo Retorno" Then                   
+			fatura.Natureza = "Retorno de Demonstração"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			fatura.DadosAdicionais_1 = "ICMS suspenso conforme art. 286 do Decreto nº 33.118/91"
+		Elseif tipo$ = "Serv Remessa" Then
+			fatura.Natureza = "Remessa para Serviços"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			fatura.DadosAdicionais_1 = "Segue(m) Material(s) de nossa propriedade devendo retornar no final do Contrato. Não Incidência de ICMS conf. Art 7º Inciso 9."
+		Elseif tipo$ = "Demo Remessa" Then
+			fatura.Natureza = "Remessa para Demonstração"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			fatura.DadosAdicionais_1 = "ICMS suspenso conforme art. 286 do Decreto nº 33.118/91"
+		Elseif tipo$ = "Expo Remessa" Then
+			fatura.Natureza = "Remessa para Exposição"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			fatura.DadosAdicionais_1 = "ICMS suspenso conforme art. 286 do Decreto nº 33.118/91"
+		Elseif tipo$ = "Expo Retorno" Then
+			fatura.Natureza = "Retorno de Exposição"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			fatura.DadosAdicionais_1 = "ICMS suspenso conforme art. 286 do Decreto nº 33.118/91"
+		Elseif tipo$ = "Tran Remessa" Then
+			fatura.Natureza = "Remessa para Transporte"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			fatura.DadosAdicionais_1 = "ICMS suspenso conforme art. 286 do Decreto nº 33.118/91"
+		Elseif tipo$ = "Como Remessa" Then
+			fatura.Natureza = "Remessa em Comodato"
+			If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+			fatura.DadosAdicionais_1 = "ICMS suspenso conforme art. 286 do Decreto nº 33.118/91"
+		End If
+		
+		fatura.Cliente = empresa.Nome
+		fatura.Endereco = empresa.Endereco
+		fatura.Cidade = empresa.Cidade
+		fatura.Estado = empresa.Estado
+		fatura.Bairro = empresa.Bairro
+		fatura.Inscricao = empresa.Inscricao
+		fatura.CGC = empresa.CGC
+		scan% = 0
+		For scan% = 0 To ( i - 1 )
+			Set it = fatura.ReplaceItemValue( "itNota_" & Cstr( scan% ), nitem( scan% ) )
+			Set it = fatura.ReplaceItemValue( "PartNo_" & Cstr( scan% ), partno( scan% ) ) 
+			Set it = fatura.ReplaceItemValue( "Produto_" & Cstr( scan% ), produto( scan% ) ) 
+         		'set it = fatura.ReplaceItemValue( "Un_" & cstr( scan% ), un( scan% ) ) 
+			Set it = fatura.ReplaceItemValue( "Q_" & Cstr( scan% ), q( scan% ) ) 
+			Set it = fatura.ReplaceItemValue( "CustoUnit_" & Cstr( scan% ), custounit( scan% ) ) 
+			Set it = fatura.ReplaceItemValue( "CusTot_" & Cstr( scan% ), custot( scan% ) ) 
+			Set it = fatura.ReplaceItemValue( "IC_" & Cstr( scan% ) , ic( scan% ) )
+			Set it = fatura.ReplaceItemValue( "IP_" & Cstr( scan% ), ip(scan% ) )
+		Next
+		
+		Dim ligacao As NotesRichTextItem
+		Set ligacao = fatura.CreateRichTextItem( "LinkNegocio" )
+		Call ligacao.AppendDocLink( uidoc.document, "Link com Origem da Nota "+ uidoc.FieldgetText( "PO" ) )
+		Call fatura.Save(True, True )
+		
+		'Envia email para Adm.
+		Dim memo As notesdocument, rtitem As notesRichTextItem
+		Set memo = New notesdocument( session.CurrentDatabase )
+		memo.Form = "Memo"
+		memo.From = session.CommonUserName
+		memo.SendTo = "Administracao"
+		memo.Subject = "Favor Emitir Fatura de Remessa do Negócio " & uidoc.FieldGetText( "Codigo" )
+		Set rtitem = memo.CreateRichTextItem( "Body" )
+		Call rtitem.AppendText( "Favor Emitir Fatura -> " )	
+		Call rtitem.AppendDocLink( fatura, "Link com Fatura")
+		Call rtitem.AddNewLine( 1 )
+		Call rtitem.AppendText( "Descrição: " & uidoc.FieldGettext( "Descricao" ) )
+		Call memo.Send( True )     
+	End If
+	Stop
+	'Abrindo a base de Listas para restauracao dos saldos para compras
+	Dim dbListas As New notesdatabase( server$, "listas.nsf" )
+	Dim viewListas As notesview
+	Set viewListas = dbListas.GetView( "(NegocioNItens)" )
+	Dim lista As notesdocument
+	
+     'Atualizando os dados dos documentos  ítens - marcando estes ítens como devolvidos
+	Dim db As notesdatabase
+	Set db = session.currentdatabase
+	Dim viewItens As notesview
+	Set viewItens = db.GetView( "(ComprasPONitem)" )
+	Dim dc As notesdocumentcollection
+	Dim item As notesdocument
+	scan% = 0
+	
+	For scan% = 0 To ( i -1 )
+		Set dc = viewItens.GetAllDocumentsByKey( uidoc.FieldGetText( "PO" ) & "/" & nitem( scan% ) , True )
+		Set item = dc.GetFirstDocument
+		Do While Not ( item Is Nothing )
+			If item.NSerie(0) = nserie( scan% ) Then
+				If tipo$ = "Devolução"  Or tipo$ = "Serv Retorno" Or tipo$ = "Demo Retorno" Or tipo$ = "Cons Retorno"  Or tipo$ = "Expo Retorno" Or tipo$ = "Como Retorno"  Then
+					item.Sit = "Devolvido"         
+				Elseif tipo$ = "RMA Remessa" Or tipo$ = "RMA Remessa Conserto" Or tipo$ = "Cons Remessa" Then
+					item.Sit = "Enviado para Conserto"
+				Elseif tipo$ = "RMA Retorno" Or tipo$ = "RMA Retorno Conserto" Then
+					item.Sit = "Consertado e Devolvido para o Cliente"
+				Elseif tipo$ = "Serv Remessa" Or tipo$ = "Como Remessa" Then
+					item.Sit = "Enviado para Prestação de Serviços"
+				Elseif tipo$ = "RMA Remessa Troca" Then	
+					item.Sit = "Enviado para Troca"
+				Elseif tipo$ = "RMA Retorno Troca"Then                   
+					item.Sit = "Trocado"
+				Elseif tipo$ = "Demo Remessa"Then                   
+					item.Sit = "Enviado para Demonstração"
+				Elseif tipo$ = "Expo Remessa" Then
+					item.Sit = "Enviado para Exposição"
+				End If
+				Call item.save( True, True )
+				
+                    'Restaurando os saldos para compras na base de dados LISTAS
+				Set lista = viewListas.GetDocumentByKey( uidoc.FieldGetText( "Codigo" ) & "-" & nitem( scan% ), True )
+				If lista Is Nothing Then Msgbox( "Alguém alterou o Negócio depois das compras serem efetuadas" )
+				Dim compra As Integer
+				compra% = lista.QCompra(0)
+				lista.QCompra = lista.QCompra(0) - q( scan% ) 
+				lista.QBaixa = lista.QBaixa(0) - q( scan% )
+				Call lista.Save( True, True )
+			End If
+			Set item = dc.GetNextDocument( item )                    
+		Loop          
+	Next
+	
+	
+	If tipo$ = "Demo Retorno" Or tipo$ = "Serv Retorno" Or tipo$ = "Cons Retorno" Or tipo$ = "Expo Retorno" Or tipo$ = "Como Retorno" Then
+		Call GeraMovimento (uidoc, tipo)
+		uidoc.Document.CkDevolucao = 1
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:ConsisteCampos:1:8
+Function ConsisteCampos (uidoc As NotesuiDocument) As Variant
+	
+	ConsisteCampos = True
+	If uidoc.FieldGetText("NFiscal") = "" Then
+		Msgbox "É necessário informar a Nota Fiscal da Remessa de Retorno", 16, "Erro"	
+		ConsisteCampos = False
+	Elseif uidoc.FieldGetText("DataEmissaoNF") = "" Then
+		Msgbox "É necessário informar a Data de Emissão da Nota Fiscal da Remessa de Retorno", 16, "Erro"	
+		ConsisteCampos = False
+	Elseif uidoc.FieldGetText("DataEntrega") = "" Then
+		Msgbox "É necessário informar a Data de Entrega", 16, "Erro"	
+		ConsisteCampos = False
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:2:FaturaDevolucao:1:8
+Sub FaturaDevolucao( uidoc As NotesUiDocument, tipo As String )
+	
+	Dim server As String
+	server$ = uidoc.Document.ParentDatabase.Server
+	
+	If uidoc.FieldGetText( "Descricao" ) = "" Then
+		If tipo$ = "Devolução" Then
+			Msgbox( "Entre com o motivo da devolução no campo de descrição" )
+		Elseif tipo$ = "RMA Remessa" Or tipo$ = "RMA Devolução" Then
+			Msgbox( "Entre com a descrição do Defeito" )
+		End If
+		Exit Sub
+	End If
+	
+	Dim scan As Integer, i As Integer, msg As String
+	
+	For scan% = 0 To 14
+		If uidoc.FieldGetText( "E_"& Cstr( scan% ) ) = "S" Then
+			Redim Preserve nitem( i ) As String
+			Redim Preserve q( i ) As Integer
+			Redim Preserve partno( i ) As String
+			Redim Preserve produto( i ) As String
+			Redim Preserve custounit( i ) As Double
+			Redim Preserve custot( i ) As Double
+			Redim Preserve ic( i ) As Double
+			Redim Preserve ip( i ) As Double
+			Redim Preserve nserie( i ) As String
+			q( i ) = Val( uidoc.FieldGettext( "Q_" & Cstr( scan% ) ) )
+			nitem( i ) = uidoc.FieldGettext( "NItem_" & Cstr( scan% ) )
+			partno( i ) = uidoc.FieldGettext( "PartNo_" & Cstr( scan% ) )
+			produto( i ) = uidoc.FieldGettext( "Produto_" & Cstr( scan% ) )
+			custounit( i ) = Cdbl( uidoc.FieldGettext( "CustoUnit_" & Cstr( scan% ) ) )
+			custot( i ) = Cdbl( uidoc.FieldGettext( "CusTot_" & Cstr( scan% ) ) )
+			ic( i ) = Cdbl( uidoc.FieldGettext( "IC_" & Cstr( scan% ) ) )
+			ip( i ) = Cdbl( uidoc.FieldGettext( "IP_" & Cstr( scan% ) ) )
+			nserie( i ) = uidoc.FieldGettext( "NSerie_" & Cstr( scan% ) ) 
+			i = i + 1
+		End If
+	Next
+	
+	If i = 0 Then
+		Msgbox( "Nenhum ítem selecionado para Faturamento" )
+		Exit Sub
+	End If
+	
+	Dim dbempresas As New NotesDatabase( server$, "empresas.nsf" )
+	Dim viewEmpresas As NotesView
+	Set viewempresas = dbempresas.GetView( "(Dados Cadastrais)" )
+	Dim empresa As notesDocument
+	Set empresa = viewempresas.GetDocumentByKey( uidoc.FieldGetText( "CodCliente" ), True )
+	If empresa Is Nothing Then
+		Msgbox( "A Empresa, por algum motivo, não está em nossa base de dados" )
+		Exit Sub
+	End If
+	
+	Dim session As New NotesSession
+	Dim it As notesitem
+	Dim dbfaturas As New NotesDatabase( server$, "faturas.nsf" )
+	Dim fatura As New NotesDocument( dbfaturas )
+	fatura.Form = "Espelho"
+	fatura.Id = geraJavaId(fatura)
+	If tipo$ = "Devolução" Then
+		fatura.DadosAdicionais_1 = "Devolução de Mercadoria ref à Nota Fiscal Nº " & uidoc.FieldGetText( "NFiscal") & " emitida em " & uidoc.FieldGetText( "DataEmissaoNF" )
+	Elseif tipo$ = "RMA Remessa" Then
+		fatura.DadosAdicionais_1 = "Devolução de Mercadoria ref à Nota Fiscal Nº " & uidoc.FieldGetText( "NFiscal") & " emitida em " & uidoc.FieldGetText( "DataEmissaoNF" )
+	Elseif tipo$ = "RMA Devolução" Then
+		fatura.DadosAdicionais_1 = "Devolução de Mercadoria ref à Nota Fiscal Nº " & uidoc.FieldGetText( "NFiscal") & " emitida em " & uidoc.FieldGetText( "DataEmissaoNF" )
+	End If
+	
+	If uidoc.FieldGetText( "Natureza" ) <> "Licenciamento de Uso" Then 
+		fatura.Tipo = "Hardware" 
+	Else
+		fatura.Tipo = "Software"
+	End If
+	fatura.Codigo = uidoc.FieldGetText( "Codigo" )
+	fatura.CodCliente  = uidoc.FieldGetText( "CodCliente" )
+	fatura.Autor = session.commonusername
+	fatura.Criacao = Now
+	fatura.Vencimento = Now
+	fatura.Valor = 0
+	fatura.Sit = "A Emitir"
+	fatura.Descricao = uidoc.FieldGetText( "Descricao" )
+	fatura.Area = uidoc.FieldGetText( "Area" )
+	fatura.GerenteConta = uidoc.FieldGetText( "Responsavel" )
+	fatura.Natureza = "Devolução de Compra"
+	If tipo$ = "Devolução" Then
+		If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.32" Else fatura.CodNatureza = "6.32"
+	Elseif tipo$ = "RMA Remessa" Or tipo$ = "RMA Devolução" Then
+		If empresa.Estado(0) = "SP" Then fatura.CodNatureza = "5.99" Else fatura.CodNatureza = "6.99"
+	End If
+	fatura.Cliente = empresa.Nome
+	fatura.Endereco = empresa.Endereco
+	fatura.Cidade = empresa.Cidade
+	fatura.Estado = empresa.Estado
+	fatura.Bairro = empresa.Bairro
+	fatura.Inscricao = empresa.Inscricao
+	fatura.CGC = empresa.CGC
+	scan% = 0
+	For scan% = 0 To ( i - 1 )
+		Set it = fatura.ReplaceItemValue( "itNota_" & Cstr( scan% ), nitem( scan% ) )
+		Set it = fatura.ReplaceItemValue( "PartNo_" & Cstr( scan% ), partno( scan% ) ) 
+		Set it = fatura.ReplaceItemValue( "Produto_" & Cstr( scan% ), produto( scan% ) ) 
+		'set it = fatura.ReplaceItemValue( "Un_" & cstr( scan% ), un( scan% ) ) 
+		Set it = fatura.ReplaceItemValue( "Q_" & Cstr( scan% ), q( scan% ) ) 
+		Set it = fatura.ReplaceItemValue( "CustoUnit_" & Cstr( scan% ), custounit( scan% ) ) 
+		Set it = fatura.ReplaceItemValue( "CusTot_" & Cstr( scan% ), custot( scan% ) ) 
+		Set it = fatura.ReplaceItemValue( "IC_" & Cstr( scan% ) , ic( scan% ) )
+		Set it = fatura.ReplaceItemValue( "IP_" & Cstr( scan% ), ip(scan% ) )
+	Next
+	
+	Dim ligacao As NotesRichTextItem
+	Set ligacao = fatura.CreateRichTextItem( "LinkNegocio" )
+	Call ligacao.AppendDocLink( uidoc.document, "Link Devolução de Compra "+ uidoc.FieldgetText( "PO" ) )
+	
+	Call fatura.Save(True, True )
+	
+	'Envia email para Adm.
+	Dim memo As notesdocument, rtitem As notesRichTextItem
+	Set memo = New notesdocument( session.CurrentDatabase )
+	memo.Form = "Memo"
+	memo.From = session.CommonUserName
+	memo.SendTo = "Administracao"
+	memo.Subject = "Favor Emitir Fatura da Devolução de Compra do Negócio " & uidoc.FieldGetText( "Codigo" )
+	Set rtitem = memo.CreateRichTextItem( "Body" )
+	Call rtitem.AppendText( "Favor Emitir Fatura -> " )	
+	Call rtitem.AppendDocLink( fatura, "Link com Fatura")
+	Call rtitem.AddNewLine( 1 )
+	Call rtitem.AppendText( "Descrição: " & uidoc.FieldGettext( "Descricao" ) )
+	Call memo.Send( True )     
+	
+	'Abrindo a base de Listas para restauracao dos saldos para compras
+	Dim dbListas As New notesdatabase( server$, "listas.nsf" )
+	Dim viewListas As notesview
+	Set viewListas = dbListas.GetView( "(NegocioNItens)" )
+	Dim lista As notesdocument
+	'Atualizando os dados dos documentos  ítens - marcando estes ítens como devolvidos
+	Dim db As notesdatabase
+	Set db = session.currentdatabase
+	Dim viewItens As notesview
+	Set viewItens = db.GetView( "(ComprasPONitem)" )
+	Dim dc As notesdocumentcollection
+	Dim item As notesdocument
+	scan% = 0
+	For scan% = 0 To ( i -1 )
+		Set dc = viewItens.GetAllDocumentsByKey( uidoc.FieldGetText( "PO" ) & "/" & nitem( scan% ) , True )
+		Set item = dc.GetFirstDocument
+		Do While Not ( item Is Nothing )
+			If item.NSerie(0) = nserie( scan% ) Then
+				If tipo$ = "Devolução" Then
+					item.Sit = "Devolvido"         
+				Elseif tipo$ = "RMA Remessa" Then
+					item.Sit$ = "Enviado para Conserto"
+				Elseif tipo$ = "RMA Devolução" Then
+					item.Sit$ = "Consertado e Devolvido para o Cliente"
+				End If
+				' item.Q = 0 
+				Call item.save( True, True )
+				'Restaurando os saldos para compras na base de dados LISTAS
+				Set lista = viewListas.GetDocumentByKey( uidoc.FieldGetText( "Codigo" ) & "-" & nitem( scan% ), True )
+				If lista Is Nothing Then Msgbox( "Alguém alterou o Negócio depois das compras serem efetuadas" )
+				Dim compra As Integer
+				compra% = lista.QCompra(0)
+				lista.QCompra = lista.QCompra(0) - q( scan% ) 
+				lista.QBaixa = lista.QBaixa(0) - q( scan% )
+				Call lista.Save( True, True )
+			End If
+			Set item = dc.GetNextDocument( item )                    
+		Loop
+		
+	Next
+	
+	
+	If tipo$ = "Devolução" Or tipo$ = "RMA Devolução" Then
+		Call uidoc.FieldSetText( "CkDevolucao", "1" )
+	Elseif  tipo$ = "RMA Remessa" Then
+		Call uidoc.FieldSetText( "CkRemessa", "1" )
+	End If
+	
+	Call uidoc.RefreshHideFormulas          
+	
+End Sub

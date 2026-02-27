@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='292e' unid='B5A93BA30EFB019103258D93005FA719' sequence='6'>
+<created><datetime>20260203T142446,97-03</datetime></created>
+<modified><datetime>20260203T144055,28-03</datetime></modified>
+<revised><datetime>20260203T144055,27-03</datetime></revised>
+<lastaccessed><datetime>20260203T144055,27-03</datetime></lastaccessed>
+<addedtofile><datetime>20260203T142446,98-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name='$FormatNote' summary='true'>
+<rawitemdata type='4'>
+AQA3poVk8CKYta3zawDGZiUD
+</rawitemdata></item>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>(PedidosGrupoEconomico)</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+/AACAEoAAgAkOQUABABGb3JtAQAFAEJhaXhhAAoCrwAqABgABQANAERhdGFFbWlzc2FvTkYArgAS
+AAUABgBDb2RpZ2+uAAQAtQMDAAIAQAACACQwBQAEAEZvcm0BAAUAQmFpeGEACgKvACAACgABAAAA
+rgAWAAUACQBEZXNjcmljYW8ArgAEALUDAwAFAEIAPQAHAA4ABgACAAIABgAJAAQAR3J1cG9FY29u
+b21pY29TdGF0dXMkOSQwVG90VG90JENvbmZsaWN0JFJFRgAEAAQAAAAaAAUABABGb3JtAQAGAFBl
+ZGlkbwoCAwAHABAACgAJTDFTMlMzUzJF
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+GwABAABEAGYAAAAOAEdydXBvRWNvbm9taWNv
+</rawitemdata></item>
+<item name='$Totals' sign='true'><textlist><text>0</text><text>0</text><text
+>0</text><text>0</text><text>1</text></textlist></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQAFAAAAiQAAAFZDAQAOAAQAAAAAAFkABQEKCAAAAAAAAAAAAAICAAAgVkMAAAYAAAAAAAAAMwAG
+AQgIQgAAAAAAAAAAAgAAACBWQwAAAgAAAFoAAABpAAcACwhAAAAAAAAAAAACAAAAIFZDAAACAAkA
+TgAAAIAACAAACAAAAAAAAAAAAAICAAAgVkMAAAYABQAAAAAAMgAJAQAIRQACAQEAAAAAAgIAACBH
+cnVwb0Vjb25vbWljb1BPICNTdGF0dXMkOVoAAgBKAAIAJDkFAAQARm9ybQEABQBCYWl4YQAKAq8A
+KgAYAAUADQBEYXRhRW1pc3Nhb05GAK4AEgAFAAYAQ29kaWdvrgAEALUDAwAHAA4ABwAJM1M0UzZT
+ACQwRGVzY3JpY2FvTgACAEAAAgAkMAUABABGb3JtAQAFAEJhaXhhAAoCrwAgAAoAAQAAAK4AFgAF
+AAkARGVzY3JpY2FvAK4ABAC1AwMABwAMAAUACTNTNFMAVG90VG90VmFsb3ImAAEAAAABAQAJAQAA
+CgEBAgoAABgArSsBAAEAAQAAAAAAAAAAAFdDCgAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//
+AAAAAAAAAAAAAAAAAABXQwsAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAA
+AAAAV0MMAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAFdDDQAACAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABXQw4AAAgAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAQgAAAAAAAQD///8AAQDg8f8AAQAAAAAAAAAAAAAA
+AAABAP///wABAP///wAAAAEAAAAAAAEA/wAAAAEAAAAAAAAACAAAAAAAAQA=
+</rawitemdata></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text><text>6</text><text>38</text><text>Arial</text><text>7</text><text
+>38</text><text>Arial</text><text>8</text><text>38</text><text>Arial</text><text
+>9</text><text>38</text><text>Arial</text><text>10</text><text>38</text><text
+>Arial</text><text>11</text><text>38</text><text>Arial</text><text>12</text><text
+>38</text><text>Arial</text><text>13</text><text>38</text><text>Arial</text><text
+>14</text><text>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text>PY</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$DesignerBuild'><text>Build V1451_11212025</text></item></note>
+

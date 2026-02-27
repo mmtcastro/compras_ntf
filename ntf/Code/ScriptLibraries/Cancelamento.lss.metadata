@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="53e" sequence="228" unid="C6E1AFE3A662A66903256DBF006FA33B">
+<created><datetime>20031014T171922,83-03</datetime></created>
+<modified><datetime>20240430T151022,01-03</datetime></modified>
+<revised><datetime>20240430T142153,64-03</datetime></revised>
+<lastaccessed><datetime>20240430T151022,00-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123114,80-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$TITLE" sign="true"><text>Cancelamento</text></item>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+
+</note>

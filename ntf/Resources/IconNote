@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note default='true' class='icon' xmlns='http://www.lotus.com/dxl' version='14.5'
+ maintenanceversion='1.0' replicaid='032566520063B93A'>
+<noteinfo noteid='126' unid='C1C018FCBD3474B3032566520063B9A4' sequence='0'>
+<created><datetime>19980731T150915,88-03</datetime></created>
+<modified><datetime>20241213T113056,91-03</datetime></modified>
+<revised><datetime>20241211T165239,63-03</datetime></revised>
+<lastaccessed><datetime>20241213T113056,90-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T103159,15-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name><name>CN=develop.tdec.com.br/O=TDec</name><name
+>CN=Hugo Borges/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name><name
+>CN=Marcelo Castro/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name><name
+>CN=Marcelo Castro/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<item name='IconBitmap' summary='true'>
+<rawitemdata type='6'>
+AiAgAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAADhERERERERERERERERERER4zMzMzMzMwAzADMzMzMzMeMzMzMz
+MzD/AP8DMzMzMzHjMzMzMzAA//D/AAMzMzMx4zMzMzMP8P//AQ/wMzMzMeMzMzMAD/8P//D/8DMz
+MzHjMzMw/w//8B/w//AAMzMx4zMzMP/w//8BEPEP/wMzMeMzMwD//w//8A8Q//8DMzHjMzD/D//w
+Hx/xD/8QAzMx4zMw//D//wEPEP/xD/AzMeMzMP//Af8Q8Q//EP/wMzHjMzAP//ARD/D/8Q//8DMx
+4zMw8B/xAP///xD/8QAzMeMzMP8BEP////EP/xDwMzHjMw//8A/////w//EP8DMx4zD/////////
+//8Q//8DMeMP///////////xD///8DHg//8P////////EP////8B7///////////8Q//////8e//
+/////////xD///////Hv//////AAAAAP///////x7/////8P////////////8e//////D///////
+//////Hv/////wERERERH//////x7//////wAAAAAAH/////8e//////8RERERAwH/////Hv////
+/xAAAAADMwH////x7/////EDMzMzMzMwH///8e////8QMzMzMzMzMwH///Hv///xAzMzMzMzMzMw
+H//x7u7u7u7u7u7u7u7u7u7u4Q==
+</rawitemdata></item>
+<item name='$DefaultNavigator'><text>Inicial</text></item>
+<item name='$TemplateServerName'><text>CN=Ludimila Oliveira/O=TDec</text></item>
+<item name='$TemplateFileName'><text>CN=zoloft.tdec.com.br/O=TDec!!TesteCompras.nsf</text></item>
+<item name='$TemplateModTime'><datetime>20041222T084133,28-03</datetime></item>
+<item name='$DefaultWebFrameset'><text>Inicial</text></item>
+<item name='$DefaultFrameset'><text>Inicial</text></item>
+<item name='$DefaultXPage'><text>form_home.xsp</text></item>
+<item name='$LargeSummary'><text>0</text></item>
+<item name='$Flags'><text>JF7!</text></item>
+<item name='$LaunchXPageRunOnServer'><text>0</text></item>
+<item name='$FlagsNoRefresh'><text/></item>
+<item name='$TITLE'><text>Template Compras
+#1Template Compras</text></item>
+<item name='$Daos'><text>0</text></item></note>
+

@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='filter' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='756' unid='13DB25FC653C86A3832581A9004825C5' sequence='2'>
+<created><datetime dst='true'>20170928T110802,61-02</datetime></created>
+<modified><datetime>20230919T123116,04-03</datetime></modified>
+<revised><datetime dst='true'>20170926T172133,13-02</datetime></revised>
+<lastaccessed><datetime>20230919T123116,03-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123116,03-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name='$TITLE' sign='true'><text>JavaId</text></item>
+<item name='$PublicAccess'><text>1</text></item>
+<item name='$FILE' summary='true' sign='true' seal='true'><object><file hosttype='msdos'
+ compression='none' flags='sign' encoding='none' name='%%source%%.jar' size='295'>
+<created><datetime dst='true'>20170925T124100,47-02</datetime></created>
+<modified><datetime dst='true'>20170925T124100,47-02</datetime></modified><filedata
+>
+UEsDBBQACAgIAB1dOUsAAAAAAAAAAAAAAAALAAAASmF2YUlkLmphdmGVjzEOgzAMRecgcQePsOQC
+qFsXulYcICURdQUJchyWirs3Iaiiqjp0s+z/3//GaXbE8FCLkoFxlF3XnpuyKIs53EbsoR+V93CJ
+91bDMx3ETLgoNnBlQjsA6iavsyFLqzqJhUANJ0hMScpqN6WxqiW7bK7q6BXr0b9TB2MNxZRPHBkO
+ZP8DLi6W8IYj5d14x/Edvdwqbk/8KMJf+Qf1+gJQSwcI1l/Z9J8AAABCAQAAUEsBAhQAFAAICAgA
+HV05S9Zf2fSfAAAAQgEAAAsAAAAAAAAAAAAAAAAAAAAAAEphdmFJZC5qYXZhUEsFBgAAAAABAAEA
+OQAAANgAAAAAAA==
+</filedata></file></object></item>
+<item name='$FILE' summary='true' sign='true' seal='true'><object><file hosttype='msdos'
+ compression='none' flags='sign' encoding='none' name='%%object%%.jar' size='470'>
+<created><datetime dst='true'>20170925T124100,47-02</datetime></created>
+<modified><datetime dst='true'>20170925T124100,48-02</datetime></modified><filedata
+>
+UEsDBBQACAgIACBdOUsAAAAAAAAAAAAAAAAMAAAASmF2YUlkLmNsYXNzbVDLTsJQFJxb+oBSeQm+
+kegKakI/QONGY4IhukDcF7hpaqAktfhdmviKCz/AjzJOW8D42Mw5d86dOZPz8fn2DqCNhgkdVRM1
+rMWwnoOGDQObBrYEFH8kUOneuHeuM3YDz+lFoR94hwL6kR/40bFAptm6FlBPpiMpUOz6gbyYTQYy
+vHIHYzIFTwYydCN5To8O3arN1n9+2q2M4nGt+XcaL9C8dG72prNwKM/82DyfmrZjhYUcTAPbFnZQ
+t7CLggUDWSZdbC59G18ObuQwYrqEmkX+2On3O6e0D91gNJ2kj8oi6vIDg2ajaRoLe7yUzhvyTPEm
+dip7piDm+XLIC9ai/QJhv0J5RuYJ6kMisYgFZIgGZVn2ObIrrKm4wRqLjVR3vxTpCW0RiyjNP+9z
+kxLP7IMfC8yELTFnmUx5aV6fm2v2I9Tf1lVihVXB6hdQSwcIfFSniEwBAAAlAgAAUEsBAhQAFAAI
+CAgAIF05S3xUp4hMAQAAJQIAAAwAAAAAAAAAAAAAAAAAAAAAAEphdmFJZC5jbGFzc1BLBQYAAAAA
+AQABADoAAACGAQAAAAA=
+</filedata></file></object></item>
+<item name='$AssistAction' sign='true'>
+<rawitemdata type='10'>
+k/9lAA8AJQAfAAAAAAAAAAAASmF2YUFnZW50LmNsYXNzYzpcUHJvZ3JhbSBGaWxlcyAoeDg2KVxJ
+Qk1cTm90ZXNcRGF0YSUlc291cmNlJSUuamFyACUlb2JqZWN0JSUuamFyAAAA
+</rawitemdata></item>
+<item name='$JavaCompilerSource' sign='true'><text>1.3</text></item>
+<item name='$JavaCompilerTarget' sign='true'><text>1.2</text></item>
+<item name='$Class'><text>Template Politica de Seguranca</text></item>
+<item name='$Flags'><text>34Qsj</text></item></note>
+

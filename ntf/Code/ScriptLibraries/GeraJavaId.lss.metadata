@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="796" sequence="6" unid="E177CDF5350CFA18832581A9004825C4">
+<created><datetime dst="true">20170928T110802,60-02</datetime></created>
+<modified><datetime>20230919T123116,15-03</datetime></modified>
+<revised><datetime dst="true">20180117T100329,31-02</datetime></revised>
+<lastaccessed><datetime>20230919T123116,14-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123116,14-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$TITLE" sign="true"><text>GeraJavaId</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$DesignerVersion"><text>8.5.3</text></item>
+
+
+<item name="$Class"><text>Template Politica de Seguranca</text></item>
+<item name="$Flags"><text>s34Q</text></item></note>

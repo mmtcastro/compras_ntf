@@ -1,0 +1,55 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library GeraJavaId
+	Created Sep 25, 2017 by Marcelo Castro/TDec
+	Description: Comments for Library
+%END REM
+Option Public
+Option Declare
+UseLSX "*javacon"
+Use "JavaId"
+
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare  Sub setJavaId(doc As NotesDocument, id As String)
+Declare Function geraJavaId(doc As NotesDocument)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:setJavaId:5:8
+%REM
+	Sub setJavaId
+	Description: Comments for Sub
+%END REM
+ Sub setJavaId(doc As NotesDocument, id As String)
+ 	
+	 If Not( doc.HasItem("Id")) Then
+		 Call doc.ReplaceItemValue("Id",id)
+	 Else
+	 	 If doc.Id(0) = "" Then
+			 Call doc.ReplaceItemValue("Id",id) 
+		 End If
+	 End If
+	 	
+ End Sub
+
+'++LotusScript Development Environment:2:1:geraJavaId:1:8
+Function geraJavaId(doc As NotesDocument)
+	
+	Dim mySession  As JavaSession
+	Dim myClass As JavaClass
+	Dim javaId As JavaObject
+	Set mySession = New JavaSession()
+	Set myClass = mySession.GetClass("JavaId")
+	
+	Dim id As String
+	Dim dbName As String
+	dbName = doc.Parentdatabase.Filename
+	dbName = Left(dbName,Len(dbName)-4)
+	dbName = StrConv(dbName, 2) 'SC_LowerCase
+	Set javaId = myClass.CreateObject()
+	id = dbName + "_" + doc.Form(0) + "_" + javaId.getId()		
+	geraJavaId = id
+		
+ End Function

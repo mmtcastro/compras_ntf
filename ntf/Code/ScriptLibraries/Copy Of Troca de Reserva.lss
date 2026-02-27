@@ -1,0 +1,1678 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+Use "ccDespesa"
+Use "Baixas"
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub AtualizaMovimentoTroca (troca As NotesDocument)
+Declare Sub AtualizaCotacaoOrigem(baixa As NotesDocument)
+Declare Sub CalcTotal (doc As NotesDocument)
+Declare Function ConsisteCamposTroca(uidoc As NotesuiDocument) As Variant
+Declare Function CkFechamentoMensalTroca (uidoc As NotesUIDocument) As Variant
+Declare Sub TrocaReserva(uidoc As NotesuiDocument)
+Declare Sub AlteraListas (uidoc As NotesuiDocument)
+Declare Function qtdBaixaTroca(doc As NotesDocument, nItem As String) As Long
+Declare Function SaldoReserva (uidoc As NotesUiDocument) As Variant
+Declare Sub CkStatusCotacaoTroca(cotacao As NotesDocument)
+Declare Sub SyncDespesasTroca(Baixa As NotesDocument)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Dim series As Variant
+
+'++LotusScript Development Environment:2:2:AtualizaMovimentoTroca:1:8
+Sub AtualizaMovimentoTroca (troca As NotesDocument)
+	
+	On Error Resume Next
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim dc As NotesDocumentCollection
+	Dim doc As NotesDocument
+	Dim scan As Integer, i As Integer, x As Integer, y As Integer, z As Integer, qtdB As Long, saldo As Long, qSaida As Long, j As Integer, cont As Integer
+	Dim nSerie As String
+	Dim rtitem As NotesRichTextItem
+	Dim qtd As Variant, nItem As Variant
+	Dim key(4) As String
+	If troca.TipoCompra(0) = "Ativo" Then
+		Set db = New NotesDatabase (troca.ParentDatabase.Server, "ativo.nsf")
+	ElseIf troca.TipoCompra(0) = "Projeto" Then
+		Set db = New NotesDatabase (troca.ParentDatabase.Server, "estoquecps.nsf")
+	ElseIf troca.TipoCompra(0) = "Consumo" Then
+		Set db = New NotesDatabase (troca.ParentDatabase.Server, "consumo.nsf")
+	Else
+		Set db = New NotesDatabase (troca.ParentDatabase.Server, "estoquemain.nsf")
+	End If
+	Set view = db.GetView ("(Movimento/Entrada)")
+	j = 65
+	For scan = 0 To 49
+		qtd = troca.GetItemValue("B_" + CStr(scan))
+		If IsNumeric(qtd(0)) Then
+			nItem = troca.GetItemValue("NItem_" + CStr(scan))
+			qtdB = qtdBaixaTroca(troca, nItem(0))
+			If qtd(0) - qtdB >= 0 Then
+				key(0) = troca.GetItemValue("PartNo_" & scan)(0)
+				key(1) = troca.CodEmpresa(0)
+				key(2) = troca.UFCompra(0)
+				If troca.TipoBaixa(0) = "Troca de Importação" Then key(3) = "Importado"	Else key(3) = "Nacional"
+				key(4) = troca.GetItemValue("Negocio_" & scan)(0)
+				Set dc = view.GetAllDocumentsByKey(key, True)
+				Set doc = dc.GetFirstDocument
+				'Popula Código, Tipo, Classificação e Área de Compra - Campos utilizados na geração de Despesas
+				ReDim Preserve codigo(y) As String
+				ReDim Preserve tipo(y) As String
+				ReDim Preserve classificacao(y) As String
+				ReDim Preserve area(y) As String
+				If Not doc Is Nothing Then
+					codigo(y) = doc.NegocioReserva(0)
+					tipo(y) = doc.TipoCompra(0)
+					If doc.TipoCompra(0) = "Revenda" Or doc.TipoCompra(0) = "Estoque" Then
+						If doc.Origem(0) = "Importação" Then
+							classificacao(y) = "Importação"
+						Else
+							classificacao(y) = "CMV"
+						End If 
+					ElseIf doc.TipoCompra(0) = "Projeto" Then
+						classificacao(y) = "CPS"
+					Else
+						classificacao(y) = doc.TipoCompra(0)
+					End If
+					area(y) = doc.AreaCompra(0)
+					y = y + 1
+				End If
+				'Atualiza Movimentos
+				x = 0
+				If Not doc Is Nothing Then
+					Do Until x => qtd(0) - qtdB
+						saldo = Val(doc.Saldo(0))
+						qSaida = Val(doc.QSaida(0))
+						If qSaida > 0 Or saldo > (qtd(0) - qtdB) Or doc.Q(0) > saldo Then
+							'Gera Movimento Resposta de Saída na Origem - LMO 01/10/15
+							%REM - LMO 13/09/24
+							Dim movimentoResposta As New NotesDocument(db)
+							movimentoResposta.Form = "MovimentoResposta"
+							movimentoResposta.Id = geraJavaId(movimentoResposta)
+							movimentoResposta.Autor = session.Commonusername
+							movimentoResposta.Criacao = Today
+							movimentoResposta.PartNo = doc.PartNo(0)
+							movimentoResposta.Produto = doc.Produto(0)
+							movimentoResposta.Movimento = "Saída"
+							movimentoResposta.Tipo = "Troca de Reserva"
+							If saldo > (qtd(0) - qtdB) Then
+								movimentoResposta.Q = (qtd(0) - qtdB) * -1
+							Else
+								movimentoResposta.Q = saldo * -1
+							End If
+							movimentoResposta.Data = Today
+							movimentoResposta.Responsavel = session.CommonUserName
+							movimentoResposta.ST = doc.ST(0)
+							movimentoResposta.UF = doc.UFCompra(0)
+							movimentoResposta.Moeda = doc.Moeda(0)
+							movimentoResposta.Valor = doc.CustoUnit(0)
+							movimentoResposta.Cotacao = doc.Cotacao(0)
+							movimentoResposta.ValorReal = doc.Custo(0)
+							movimentoResposta.IC = doc.IC(0)
+							movimentoResposta.ICST = doc.DifIC(0)
+							movimentoResposta.IP = doc.IPI(0)
+							movimentoResposta.II = doc.II(0)
+							movimentoResposta.ValorCompra = doc.ValorCompra(0)
+							movimentoResposta.ValorVenda = ""
+							movimentoResposta.Margem = ""
+							movimentoResposta.Codigo = doc.Codigo(0)
+							movimentoResposta.NItem = doc.NItem(0)
+							movimentoResposta.CodEmpresa = doc.CodEmpresa(0)
+							movimentoResposta.RegrasFiscais = doc.RegrasFiscais(0)
+							Call movimentoResposta.Makeresponse(doc)
+							Call movimentoResposta.save (True, True)
+							'Atualiza Saldo do Movimento Origem
+							doc.Saldo = saldo + movimentoResposta.Q(0)
+							If doc.Saldo(0) = 0 Then
+								doc.Tipo = "Saída"
+								doc.Status = doc.SaidaTipo(0)
+							Else
+								doc.Tipo = "Entrada"
+								doc.Status = doc.EntradaTipo(0)
+							End If
+							Call doc.save (True, True)
+							%END REM
+							'Gera Movimento de Entrada no Destino
+							Dim entrada As New NotesDocument(db)
+							entrada.Form = "Movimento"
+							entrada.Id = geraJavaId(entrada)
+							entrada.Tipo = "Entrada"
+							entrada.Autor = session.Commonusername
+							entrada.Criacao = entrada.Created
+							entrada.Propriedade = "Sim"
+							entrada.Posse = "Sim"
+							If saldo > (qtd(0) - qtdB) Then
+								entrada.Q = qtd(0) - qtdB
+							Else
+								entrada.Q = saldo
+							End If
+							entrada.Saldo = entrada.Q(0)
+							entrada.QSaida = 0
+							'entrada.EntradaTipo = "Troca de Reserva"
+							entrada.EntradaTipo = doc.EntradaTipo(0)
+							'entrada.Status = "Troca de Reserva"
+							entrada.Status = doc.Status(0)
+							entrada.CodEmpresa = doc.CodEmpresa(0)
+							entrada.RegrasFiscaisE = doc.RegrasFiscais(0)
+							entrada.ValorCompra = doc.ValorCompra(0)
+							entrada.ValorVenda = ""
+							entrada.Margem = ""
+							entrada.Fabricante = doc.Fabricante(0)
+							entrada.T = doc.T(0)
+							entrada.TipoCompra = doc.TipoCompra(0)
+							entrada.Origem = doc.Origem(0)
+							entrada.PartNo = doc.PartNo(0)
+							entrada.Produto = doc.Produto(0)
+							entrada.Custo = doc.Custo(0)
+							entrada.ValorIPI = doc.ValorIPI(0)
+							entrada.ICMSST = doc.ICMSST(0)
+							entrada.Un = doc.Un(0)
+							entrada.CF = doc.CF(0)
+							entrada.ST = doc.ST(0)
+							entrada.UFCompra = doc.UFCompra(0)
+							entrada.AreaCompra = doc.AreaCompra(0)
+							entrada.AreaServicos = doc.AreaServicos(0)
+							entrada.IC = doc.IC(0)
+							entrada.DifIC = doc.DifIC(0)
+							entrada.IPI = doc.IPI(0)
+							entrada.II = doc.II(0)
+							entrada.DataEntrega = doc.DataEntrega(0)
+							entrada.Responsavel = session.Commonusername
+							entrada.CodCliente = doc.CodCliente(0)
+							entrada.CodClienteFaturamento = doc.CodClienteFaturamento(0)
+							entrada.NFiscalEntrada = doc.NFiscalEntrada(0)
+							entrada.DataEmissaoNF = doc.DataEmissaoNF(0)
+							entrada.Codigo = doc.Codigo(0)
+							entrada.Moeda = doc.Moeda(0)
+							entrada.Cotacao = doc.Cotacao(0)
+							entrada.CustoUnit = doc.CustoUnit(0)
+							entrada.FI = doc.FI(0)
+							entrada.CustoFinal = doc.CustoFinal(0)
+							entrada.VencGarantia = doc.VencGarantia(0)
+							entrada.PO = doc.PO(0)
+							entrada.Processo = doc.Processo(0)
+							entrada.Baixa = doc.Baixa(0)
+							entrada.NItem = doc.NItem(0)
+							'Link para a Baixa
+							If doc.Hasitem("LinkBaixa") Then
+								Dim item As NotesItem
+								Set item = doc.GetFirstItem("LinkBaixa")
+								Call item.CopyItemToDocument(entrada, "LinkBaixa")
+							End If
+							'Troca de Reserva
+							entrada.Troca = troca.DocID(0)
+							entrada.POTroca = troca.PO(0)
+							entrada.NItemTroca = nItem(0)
+							entrada.AreaTroca = troca.Area(0)
+							entrada.DataTroca = Today
+							entrada.Reserva = "Sim"
+							entrada.NegocioReserva = troca.Origem(0)
+							entrada.UFReserva = troca.UFVenda(0)
+							'Link para a Troca de Reserva
+							Set rtitem = entrada.CreateRichTextItem("LinkTroca")
+							Call rtitem.AppendDocLink(troca, "Link para a Troca de Reserva")
+							If doc.NSerie(0) <> "" Then entrada.NSerie = doc.NSerie(0) & Right(troca.DocID(0), 1)
+							If doc.Chave(0) <> "" Then entrada.Chave = doc.Chave(0) & Right(troca.DocID(0), 1)
+							Call entrada.save(True, True)
+							'Atualiza Quantidade e Saldo do Movimento Origem - LMO 13/09/24
+							doc.Q = doc.Q(0) - entrada.Q(0)
+							doc.Saldo = doc.Saldo(0) - entrada.Q(0)
+							If doc.Saldo(0) = 0 Then
+								doc.Tipo = "Saída"
+								doc.Status = doc.SaidaTipo(0)
+							Else
+								doc.Tipo = "Entrada"
+								doc.Status = doc.EntradaTipo(0)
+							End If
+							Call doc.save(True, True)
+						Else
+							doc.CodClienteFaturamento = troca.CodClienteFaturamento(0)
+							doc.Troca = troca.DocID(0)
+							doc.POTroca = troca.PO(0)
+							doc.NItemTroca = nItem(0)
+							doc.AreaTroca = troca.Area(0)
+							doc.DataTroca = Today
+							doc.NegocioReserva = troca.Origem(0)
+							doc.TipoCompra = troca.TipoCompra(0)
+							'Link para a Troca de Reserva
+							If doc.HasItem("LinkTroca") Then
+								Call doc.RemoveItem("LinkTroca")
+							End If
+							Set rtitem = doc.CreateRichTextItem("LinkTroca")
+							Call rtitem.AppendDocLink(troca, "Link para a Troca de Reserva")
+							Call doc.Save (True, True)
+						End If
+						'Popula NSerie/Chave na Troca de Reservas
+						nSerie = doc.NSerie(0)
+						If nSerie <> "" Then
+							ReDim Preserve serie(z) As String	
+							serie(z) = nSerie
+							z = z + 1
+						Else
+							nSerie = doc.Chave(0)
+							If nSerie = "" Then
+								nSerie = Year(Now) & Month(Now) & Day(Now) & Hour(Now) & Minute(Now) & Second(Now) & Chr(j) & cont
+								j = j + 1
+								cont = cont + 1
+								If j > 90 Then
+									j = 65
+								End If
+								doc.Chave = nSerie
+							End If
+						End If
+						ReDim Preserve chave(i) As String	
+						chave(i) = nSerie
+						i = i + 1
+						x = x + saldo
+						Set doc = dc.GetNextDocument(doc)
+					Loop
+				End If
+			End If
+		End If
+	Next
+	If z > 0 Then troca.NSerie = serie
+	If i > 0 Then troca.Chave = chave
+	troca.Negocios = codigo
+	troca.Tipos = tipo
+	troca.Classificacoes = classificacao
+	troca.AreasTroca = area
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:AtualizaCotacaoOrigem:5:8
+%REM
+	Sub AtualizaCotacao
+	Description: Comments for Sub
+%END REM
+Sub AtualizaCotacaoOrigem(baixa As NotesDocument)
+	
+	Dim scan As Integer, i As Integer
+	Dim indice As Variant, qtd As Variant, codigo As Variant
+	For scan = 0 To 49
+		qtd = baixa.GetItemValue("B_" & scan)
+		If Val(qtd(0)) > 0 Then
+			codigo = baixa.GetItemValue("Negocio_" & scan)
+			If i = 0 Then
+				ReDim Preserve negocio(i) As String	
+				negocio(i) = codigo(0)
+				i = i + 1
+			Else
+				indice = ArrayGetIndex(negocio, codigo(0))
+				If IsNull(indice) Then
+					ReDim Preserve negocio(i) As String		
+					negocio(i) = codigo(0)
+					i = i + 1
+				End If
+			End If
+		End If
+	Next
+	
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim cotacao As NotesDocument
+	If baixa.TipoCompra(0) = "Projeto" Then
+		Set db = New NotesDatabase(baixa.ParentDatabase.Server, "servicos.nsf")
+		Set view = db.Getview("(Cotacao/Codigo)")
+	Else
+		Set db = session.CurrentDatabase
+		Set view = db.Getview("(Cotacoes/Codigo)")
+	End If
+	For scan = 0 To UBound(negocio)
+		Set cotacao = view.Getdocumentbykey(negocio(scan), True)
+		If Not cotacao Is Nothing Then
+			Call CkStatusCotacaoTroca(cotacao)
+			Call cotacao.Save(False, False)
+		End If
+	Next
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:CalcTotal:1:8
+Sub CalcTotal (doc As NotesDocument)
+	
+	On Error Resume Next
+	Call BuscaRegrasFiscais(doc) 'Alíquotas
+	Dim scan As Integer
+	Dim valor As Double, valorST As Double, icms As Double, icmsST As Double, icmsOE As Double, ipi As Double, icc As Double, icmsTotal As Double
+	Dim qtd As Variant, custo As Variant, ic As Variant, icST As Variant, ip As Variant
+	For scan = 0 To 49
+		qtd = doc.GetItemValue("B_" & scan)
+		If Isnumeric(qtd(0)) Then 
+			custo = doc.GetItemValue("CustoUnit_" & scan)
+			ic = doc.GetItemValue("IC_" & scan)
+			icST = doc.GetItemValue("ICMSST_" & scan)
+			ip = doc.GetItemValue("IP_" & scan)
+			valor = valor + ( custo(0) * qtd(0) )
+			icms = icms + ( custo(0) * qtd(0) * ic(0))
+			If doc.TipoBaixa(0) = "Troca de Importação" And doc.Tipo(0) = "ICMS" Then
+				ipi = ipi + (custo(0) * 0.64 * qtd(0) * ip(0))	'BC é o ValorCIF + ValorII - LMO 14/06/16
+			Else
+				ipi = ipi + (custo(0) * qtd(0) * ip(0))
+			End If
+			If CStr(icST(0)) <> "" Then valorST = icST(0) Else valorST = 0
+			'Substituição Tributária
+			If doc.UFCompra(0) = "SP" Then
+				'Compras de SP
+				icmsST = icmsST + (valorST * qtd(0))
+			Else
+				'Compras de Fora de SP
+				If Right(doc.GetItemValue("ST_" & scan)(0), 2) = "00" Or Right(doc.GetItemValue("ST_" & scan)(0), 2) = "60" Or Right(doc.GetItemValue("ST_" & scan)(0), 2) = "90" Then
+					'ICMS Outros Estados
+					icmsOE = icmsOE + (valorST * qtd(0))
+				Else
+					icmsST = icmsST + (valorST * qtd(0))
+				End If
+			End If
+			'BC Pis/Cofins abatendo o ICMS - LMO 31/05/23
+			If doc.GetItemValue("ICC_" & scan)(0) <> "" Then icc = doc.GetItemValue("ICC_" & scan)(0) Else icc = 0
+			icmsTotal = icmsTotal + (custo(0) * qtd(0) * icc)
+		End If
+	Next
+	doc.Valor = Round(valor + ipi + icmsST, 2)
+	doc.CreditoIPI = Round(ipi, 2)
+	doc.ICMSST = Round(icmsST, 2)
+	doc.ICMSOE = Round(icmsOE, 2)
+	doc.CreditoICMS = Round(icms, 2)
+	If doc.TipoCompra(0) <> "Consumo" And doc.TipoCompra(0) <> "Ativo" Or (doc.TipoCompra(0) = "Ativo" And valor < 390 ) Then
+		'Tipo de Regime: Lucro Real
+		If aliquotas(9) = 0 Then
+			If doc.TipoBaixa(0) = "Troca de Importação" And doc.Tipo(0) = "ICMS" Then
+				doc.CreditoPIS = valor * 0.55 * aliquotas(0)	'BC é o ValorCIF - LMO 14/06/16
+				doc.CreditoCOFINS = valor * 0.55 * aliquotas(1)	'BC é o ValorCIF - LMO 14/06/16
+			Else
+				doc.CreditoPIS = (doc.Valor(0) - icmsTotal) * aliquotas(0)
+				doc.CreditoCOFINS = (doc.Valor(0) - icmsTotal) * aliquotas(1)
+			End If
+		Else
+			doc.CreditoPIS = 0
+			doc.CreditoCOFINS = 0
+		End If
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:ConsisteCamposTroca:1:8
+Function ConsisteCamposTroca(uidoc As NotesuiDocument) As Variant
+	
+	ConsisteCamposTroca = False
+	If uidoc.FieldGetText("DataEntrega") = "" Then
+		Msgbox "É necessário informar a Data da Troca de Reserva.", 16, "Erro"
+		Exit Function	
+	Elseif	uidoc.FieldGetText("Descricao") = "" Then
+		Msgbox "É necessário informar a Descrição.", 16, "Erro"
+		Exit Function
+	End If
+	'Verifica se foi preenchida qtd de troca
+	Dim scan As Integer
+	For scan = 0 To 49
+		If Val(uidoc.FieldGetText("B_" & scan)) <> 0 Then
+			ConsisteCamposTroca = True
+		End If
+	Next
+	If Not ConsisteCamposTroca Then
+		Msgbox "Precisa ser informada a Qtd de Troca de Reserva para algum Negócio", 16, "Erro"
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:1:CkFechamentoMensalTroca:1:8
+Function CkFechamentoMensalTroca (uidoc As NotesUIDocument) As Variant
+	
+	CkFechamentoMensalTroca = True
+	Dim db As New NotesDatabase (uidoc.Document.ParentDatabase.Server, "faturas.nsf")
+	Dim view As NotesView
+	Dim dc As NotesDocumentCollection
+	Dim doc As NotesDocument
+	Dim data As New NotesDateTime (uidoc.FieldGetText("DataEntrega"))
+	Dim periodo As String, descricao As String
+	periodo = Cstr(Year(data.DateOnly)) + "-" + Cstr(Month(data.DateOnly))
+	
+	Set view = db.GetView("(FechamentoMensal/Periodo)")
+	Set dc = view.GetAllDocumentsByKey(periodo, True)
+	Set doc = dc.GetFirstDocument
+	
+	Do Until doc Is Nothing
+		If doc.Sit(0) <> "Aberto" Then	
+			descricao = getMes(data.DateOnly) + " de " + Cstr(Year(data.DateOnly))
+			Msgbox "Já foi feito o Fechamento Mensal de " + descricao + Chr(10) + "Solicitar abertura do mês para Diretoria", 16, "Erro"
+			CkFechamentoMensalTroca = False
+			Exit Function	
+		End If	
+		
+		Set doc = dc.GetNextDocument(doc)
+	Loop
+	
+End Function
+
+'++LotusScript Development Environment:2:2:TrocaReserva:1:8
+Sub TrocaReserva(uidoc As NotesuiDocument)
+	
+	'Altera Listas
+	Call AlteraListas (uidoc)
+	'Altera Movimento para a Nova Reserva
+	Call AtualizaMovimentoTroca(uidoc.Document)
+	'Avisa Gerente do Negócio e Inside sobre a Baixa de Compra
+	Call AvisoBaixa(uidoc.Document)
+	'Atualiza Cotação de Origem
+	Call AtualizaCotacaoOrigem(uidoc.Document)
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:AlteraListas:1:8
+Sub AlteraListas (uidoc As NotesuiDocument)
+	
+	On Error Resume Next
+	Dim db As New NotesDatabase (uidoc.document.ParentDatabase.Server, "listas.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim scan As Integer, qtd As Long, bcICMSST As Double, valorICMSST As Double
+	Dim codigoBarras As String
+	If uidoc.Fieldgettext("TipoCompra") = "Projeto" Then
+		Set view = db.GetView("(NegocioNPlanilhas)")
+	Else
+		Set view = db.GetView("(NegocioNItens)")
+	End If
+	For scan = 0 To 49
+		qtd = Val(uidoc.FieldGetText("B_" & scan))
+		If qtd > 0 Then
+			'Restaura a Quantidade, Saldo de Compra e Saldo de Baixa do Negócio Original
+			Set doc = view.GetDocumentByKey(uidoc.FieldGetText("Negocio_" & scan) & "-" & uidoc.FieldGetText("i_" & scan), True)
+			If Not doc Is Nothing Then
+				doc.QCompra = doc.QCompra(0) - qtd
+				doc.QBaixa = doc.QBaixa(0) - qtd
+				'Dados do XML - LMO 27/05/19
+				If CStr(doc.BCICMSSTC(0)) <> "" then bcICMSST = doc.BCICMSSTC(0) Else bcICMSST = 0
+				If CStr(doc.ValorICMSSTC(0)) <> "" Then valorICMSST = doc.ValorICMSSTC(0) Else valorICMSST = 0
+				codigoBarras = doc.CodigoBarras(0)
+				'Restaura o saldo da Pré-Beixa - LMO 12/11/10
+				If doc.QPreBaixa(0) <> 0 Then
+					doc.QPreBaixa = doc.QPreBaixa(0) - qtd
+				End If
+				'Se for GERDAUSA-84 ou Compra Administrativa, restaura a quantidade do item - LMO 12/11/10
+				If InStr(uidoc.FieldGetText("Negocio_" & scan), "GERDAUSA-84") Or InStr(uidoc.FieldGetText("Negocio_" & scan), "TDEC-") Then
+					doc.Q = doc.Q(0) - qtd
+				End If
+				Call doc.Save (True, True)
+			Else
+				MsgBox "O ítem " & uidoc.FieldGetText( "NItem_" & scan )_
+				& " não foi encontrado em Listas. Não é possível efetuar a Troca de Reserva.", 16, "Erro"
+			End If
+			'Baixa do ítem em Listas
+			Set doc = view.GetDocumentByKey(uidoc.FieldGetText("Origem") & "-" & uidoc.FieldGetText("NItem_" & scan), True)
+			If Not doc Is Nothing Then
+				doc.QBaixa = doc.QBaixa(0) + qtd
+				'Dados do XML - LMO 27/05/19
+				doc.BCICMSSTC = bcICMSST
+				doc.ValorICMSSTC = valorICMSST
+				doc.CodigoBarras = codigoBarras
+				Call doc.Save (True, True)
+			Else
+				Msgbox "O ítem " & uidoc.FieldGetText( "NItem_" & scan )_
+				& " não foi encontrado em Listas. Não é possível efetuar a Troca de Reserva.", 16, "Erro"
+			End If
+		End If
+	Next
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:qtdBaixaTroca:1:8
+Function qtdBaixaTroca(doc As NotesDocument, nItem As String) As Long
+	
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim dc As NotesDocumentCollection
+	Dim movimento As NotesDocument
+	If doc.TipoCompra(0) = "Ativo" Then
+		Set db = New NotesDatabase (doc.ParentDatabase.Server, "ativo.nsf")
+	ElseIf doc.TipoCompra(0) = "Projeto" Then
+		Set db = New NotesDatabase (doc.ParentDatabase.Server, "estoquecps.nsf")
+	ElseIf doc.TipoCompra(0) = "Consumo" Then
+		Set db = New NotesDatabase (doc.ParentDatabase.Server, "consumo.nsf")
+	Else
+		Set db = New NotesDatabase (doc.ParentDatabase.Server, "estoquemain.nsf")
+	End If
+	Set view = db.GetView("(MovimentoBaixaItem)")
+	Set dc = view.GetAllDocumentsByKey(doc.DocID(0) + "/" + nItem, True)
+	Set movimento = dc.GetFirstDocument
+	Do Until movimento Is Nothing
+		qtdBaixaTroca = qtdBaixaTroca + movimento.Q(0)
+		Set movimento = dc.GetNextDocument(movimento)
+	Loop
+	
+End Function
+
+'++LotusScript Development Environment:2:1:SaldoReserva:1:8
+Function SaldoReserva (uidoc As NotesUiDocument) As Variant
+	'Verifica o saldo a ser baixado em Listas
+	
+	SaldoReserva = True
+	If uidoc.FieldGetText("CkBaixa") = "1" Then
+		Exit Function
+	End If
+	Dim server As String
+	Dim listas As New NotesDatabase(uidoc.Document.ParentDatabase.Server,"listas.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim scan As Integer, scan2, saldoBaixa As Long, qtdTroca As Long
+	Dim codigo As String, item As String
+	codigo$ = uidoc.FieldGetText("Origem")
+	If uidoc.Fieldgettext("TipoCompra") = "Projeto" Then
+		Set view = listas.GetView("(NegocioNPlanilhas)")
+	Else
+		Set view = listas.GetView("(NegocioNItens)")
+	End If
+	For scan = 0 To 49
+		If Val(uidoc.FieldGetText("B_" & scan)) <> 0 Then
+			item = uidoc.FieldGetText("NItem_" & scan)
+			'Verifica se a qtd p/ Troca de Reserva não é maior que a quantidade disponível
+			If Val(uidoc.FieldGetText("B_" & scan)) > Val(uidoc.FieldGetText("Q_" & scan)) Then
+				Msgbox "No ítem " + uidoc.FieldGetText( "NItem_" & scan) + ", Negócio " +_
+				uidoc.FieldGetText("Negocio_" & scan) + " a Qtd Troca é maior do que a Qtd Estoque.", 16, "Erro"
+				SaldoReserva = False
+				Exit Function
+			End If
+			'Verifica Quantidade de Troca em todos os Itens - LMO 05/02/13
+			qtdTroca = 0
+			For scan2 = 0 To 49
+				If item = uidoc.FieldGetText("NItem_" & scan2) Then
+					qtdTroca = qtdTroca + Val(uidoc.FieldGetText("B_" & scan2))
+				End If
+			Next
+			'Verifica Saldo em Listas
+			Set doc = view.getDocumentByKey( codigo$ & "-" & item ) 
+			If Not doc Is Nothing Then
+				saldoBaixa = doc.QCompra(0) - doc.QBaixa(0)
+				If qtdTroca > saldoBaixa Then
+					Msgbox "No ítem " + uidoc.FieldGetText( "NItem_" & scan) + ", Negócio " +	uidoc.FieldGetText("Negocio_" & scan)_
+					+ " a quantidade é maior do que o saldo a ser baixado." + Chr(10) + "Saldo: " + Cstr(saldoBaixa), 16, "Erro"
+					SaldoReserva = False
+					Exit Function
+				End If	
+			Else
+				Msgbox "O ítem " + uidoc.FieldGetText( "NItem_" & scan) + " não foi encontrado em Listas. Não é possível efetuar a Troca de Reserva.", 16, "Erro"
+				SaldoReserva = False
+			End If
+		End If
+	Next
+	
+End Function
+
+'++LotusScript Development Environment:2:2:CkStatusCotacaoTroca:1:8
+Sub CkStatusCotacaoTroca(cotacao As NotesDocument)
+	
+	Dim listas As New NotesDatabase( cotacao.ParentDatabase.Server,"listas.nsf")
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim codigo As String
+	Dim scan As Integer, comprar As Long, comprado As Long
+	Dim produto As Variant, item As Variant
+	If cotacao.TipoCompra(0) = "Projeto" Then
+		Set view = listas.GetView( "(NegocioNPlanilhas)" )
+		codigo = cotacao.DocID(0)
+	Else
+		Set view = listas.GetView( "(NegocioNItens)" )
+		codigo = cotacao.Codigo(0)
+	End If
+	For scan = 0 To 49    
+		produto = cotacao.GetItemValue("Produto_" & scan)
+		If produto(0) <> "" Then
+			item = cotacao.GetItemValue("i_" & scan)
+			Set doc = view.getDocumentByKey(codigo & "-" & item(0))
+			If Not ( doc Is Nothing )  Then
+				comprar = comprar + doc.Q(0)
+				comprado = comprado + doc.QCompra(0) 
+				Call cotacao.ReplaceItemValue("S_" & scan, doc.Q(0) - doc.QCompra(0))
+			End If 
+		End If
+	Next
+	If comprado = 0 Then
+		cotacao.Status = "Pendente"
+	ElseIf comprar = comprado Then
+		cotacao.Status = "OK" 		
+	Else
+		cotacao.Status = "Parcial"
+	End If
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:SyncDespesasTroca:1:8
+Sub SyncDespesasTroca(Baixa As NotesDocument)
+	
+	On Error Resume Next
+	Dim ws As NotesUiWorkSpace
+	Dim session As New NotesSession
+	Dim db As NotesDatabase, DbDespesas As NotesDatabase
+	Dim viewOrigem As NotesView
+	Dim dc As NotesDocumentCollection
+	Dim Despesa As NotesDocument
+	Dim ccDespesa As Variant, MudouDespesa As Variant, Achou As Variant, indice As Variant
+	Dim codigo As String, tipoCompra As String, tipoVenda As String
+	Dim novaDespesa As CCDespesa
+	Set ws = New NotesUiWorkSpace ( )
+	Set db = session.CurrentDatabase
+	Set DbDespesas = New NotesDatabase( db.Server, "caixa.nsf" )	
+	Set viewOrigem = DbDespesas.GetView ( "(Origem)" )
+	MudouDespesa = False
+	'***************************** Cria/Atualiza as Despesas do Novo Negócio *****************************
+	Set dc = viewOrigem.GetAllDocumentsByKey ( Baixa.DocID(0) + "-1" )
+	Set Despesa = dc.GetFirstDocument ( )
+	Achou = False
+	'Procura por despesas que não estejam canceladas		
+	If Cstr(Baixa.Valor(0)) <> "0" And Cstr(Baixa.Valor(0)) <> "" Then	
+		Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+			If ( Despesa.Sit (0) <> "Cancelada" ) And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+				Achou = True
+			Else	
+				Set Despesa = dc.GetNextDocument ( Despesa )
+			End If
+		Loop
+		If ( Not ( Despesa Is Nothing ) ) Then
+			'A despesa existe. Verifica se os campos estão corretos.
+			If ( Despesa.ClassificacaoDespesa(0) <> Baixa.Classificacao(0) ) _
+			Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+			Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+			Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+			Or ( Despesa.VencimentoDespesa(0) <> Baixa.DataEntrega(0) ) _
+			Or ( Despesa.TotTot(0) <> Cdbl(Baixa.Valor(0)) )_
+			Or ( Despesa.Sit(0) <> "OK" )_
+			Then
+				Despesa.Classificacao = Baixa.Classificacao(0)
+				Despesa.Area = Baixa.Area(0) 
+				Despesa.Responsavel = Baixa.Responsavel(0)
+				Despesa.TipoCompra = Baixa.TipoCompra(0)
+				Despesa.TipoVenda = Baixa.TipoVenda(0)
+				Despesa.Areas = Baixa.Areas
+				Despesa.Overhead = Baixa.Overhead
+				Despesa.DataDespesa = Baixa.DataEntrega(0)
+				Despesa.DataNF = Baixa.DataEntrega(0)
+				Despesa.VencimentoDespesa = Baixa.DataEntrega(0)
+				Despesa.Descricao = Baixa.Descricao(0)
+				Despesa.TotTot = Cdbl(Baixa.Valor(0))
+				Despesa.Saida_0 = Cdbl(Baixa.Valor(0))
+				Despesa.Sit = "OK"
+				Despesa.Sit_1 = "OK"
+				Call Despesa.Save ( True, True )
+				MudouDespesa = True
+			End If
+		Else
+		'A despesa não existe, é preciso criá-la
+			Set novaDespesa = New ccDespesa( Baixa )
+			novaDespesa.Origem = Baixa.DocID(0) + "-1"
+			novaDespesa.Codigo = Baixa.Codigo(0)
+			novaDespesa.Sit = "OK"
+			novaDespesa.Classificacao = Baixa.Classificacao(0)
+			novaDespesa.Area = Baixa.Area(0)
+			novaDespesa.Responsavel = Baixa.Responsavel(0)
+			novaDespesa.Data = Baixa.DataEntrega(0)
+			novaDespesa.Vencimento = Baixa.DataEntrega(0)
+			novaDespesa.Adianta = True
+			novaDespesa.Descricao = Baixa.Descricao(0)
+			novaDespesa.Valor = Cdbl(Baixa.Valor(0))
+			novaDespesa.TipoCompra = Baixa.TipoCompra(0)
+			novaDespesa.TipoVenda = Baixa.TipoVenda(0)
+			novaDespesa.Areas = Baixa.Areas
+			novaDespesa.Overhead = Baixa.Overhead
+			Call novaDespesa.Save
+			MudouDespesa = True
+			'Atualiza Status das Despesas
+			Call viewOrigem.Refresh
+			Set dc = viewOrigem.GetAllDocumentsByKey ( Baixa.DocID(0) + "-1" )
+			Set Despesa = dc.GetFirstDocument ( )
+			Do until Despesa Is Nothing
+				If Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+					Despesa.Sit = "OK"
+					Despesa.Sit_1 = "OK"
+					Call Despesa.Save ( True, True )
+				End If
+				Set Despesa = dc.GetNextDocument ( Despesa )
+			Loop
+		End If
+	End If
+	'Geração de Crédito de ICMS
+	Dim venc As NotesDateTime
+	Set venc = New notesdatetime( "20/" & Cstr( Month( Baixa.DataEntrega(0) ) ) & "/" & Cstr( Year( Baixa.DataEntrega(0) ) ) )
+	Call venc.Adjustmonth ( 1 )
+	If Cstr(Baixa.CreditoICMS(0)) <> "0" And Cstr(Baixa.CreditoICMS(0)) <> "" Then	
+		Set dc = viewOrigem.GetAllDocumentsByKey ( "Pedido " + Baixa.PO(0) + "/" + Baixa.Codigo(0) + "-1" )
+		Set Despesa = dc.GetFirstDocument ( )
+		Achou = False
+		'Procura por despesas que não estejam canceladas		
+		Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+			If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - ICMS" _
+			And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+				Achou = True
+			Else	
+				Set Despesa = dc.GetNextDocument ( Despesa )
+			End If
+		Loop
+		If ( Not ( Despesa Is Nothing ) ) Then
+			If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - ICMS" ) _
+			Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+			Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+			Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+			Or ( Despesa.TotTot(0) <> Cdbl(Baixa.CreditoICMS(0)) * -1 ) _
+			Or ( Despesa.Sit(0) <> "OK" ) _
+			Then
+				Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1"
+				Despesa.ClassificacaoDespesa = "Imposto - ICMS"
+				Despesa.AreaDespesa = Baixa.Area(0)
+				Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+				Despesa.TipoCompra = Baixa.TipoCompra(0)
+				Despesa.TipoVenda = Baixa.TipoVenda(0)
+				Despesa.Areas = Baixa.Areas
+				Despesa.Overhead = Baixa.Overhead
+				Despesa.DataDespesa = Baixa.DataEntrega(0)
+				Despesa.VencimentoDespesa = Datevalue( venc.DateOnly )
+				Despesa.Descricao = Baixa.Descricao(0)
+				Despesa.TotTot = Cdbl(Baixa.CreditoICMS(0)) * -1
+				Despesa.Saida_0 = Cdbl(Baixa.CreditoICMS(0)) * -1
+				Despesa.Sit = "OK"
+				Despesa.Sit_1 = "OK"
+				Call Despesa.Save ( True, True )
+				MudouDespesa = True
+			End If
+		Else
+			'A despesa não existe, é preciso criá-la
+			Set novaDespesa = New ccDespesa ( Baixa )
+			novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1"
+			novaDespesa.Codigo = Baixa.Codigo(0)
+			novaDespesa.Sit = "OK"
+			novaDespesa.Classificacao = "Imposto - ICMS"
+			novaDespesa.Area = Baixa.Area(0)
+			novaDespesa.Responsavel = Baixa.Responsavel(0)
+			novaDespesa.Data = Baixa.DataEntrega(0)
+			novaDespesa.Vencimento = Datevalue( venc.DateOnly )
+			novaDespesa.Adianta = True
+			novaDespesa.Descricao = Baixa.Descricao(0)
+			novaDespesa.Valor = Cdbl(Baixa.CreditoICMS(0)) * -1
+			novaDespesa.TipoCompra = Baixa.TipoCompra(0)
+			novaDespesa.TipoVenda = Baixa.TipoVenda(0)
+			novaDespesa.Areas = Baixa.Areas
+			novaDespesa.Overhead = Baixa.Overhead
+			Call novaDespesa.Save
+			'Atualiza Status das Despesas
+			Call viewOrigem.Refresh			
+			Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1", True )
+			Set Despesa = dc.GetFirstDocument
+			Do Until Despesa Is Nothing
+				If Despesa.ClassificacaoDespesa(0) = "Imposto - ICMS" Then
+					Despesa.Sit = "OK"
+					Despesa.Sit_1 = "OK"
+					Call Despesa.Save ( True, True )
+				End If
+				Set Despesa = dc.GetNextDocument(Despesa)
+			Loop
+			MudouDespesa = True
+		End If
+	End If
+	'ICMS Outros Estados
+	Dim vencICMSOE As New NotesDateTime(Today)
+	If CDbl(Baixa.ICMSOE(0)) <> 0 Then
+		Set dc = viewOrigem.GetAllDocumentsByKey("Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0), True)
+		Set Despesa = dc.GetFirstDocument ( )
+		Achou = False
+		'Procura por despesas que não estejam canceladas		
+		Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+			If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - ICMS OUTROS ESTADOS" _
+			And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+				Achou = True
+			Else	
+				Set Despesa = dc.GetNextDocument ( Despesa )
+			End If
+		Loop
+		If ( Not ( Despesa Is Nothing ) ) Then
+			If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - ICMS OUTROS ESTADOS" ) _
+			Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+			Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+			Or ( Despesa.DataDespesa(0) <> Baixa.DataEmissaoNF(0) ) _
+			Or ( Despesa.TotTot(0) <> CDbl(Baixa.ICMSOE(0)) ) _
+			Then
+				Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0)
+				Despesa.ClassificacaoDespesa = "Imposto - ICMS OUTROS ESTADOS"
+				Despesa.AreaDespesa = Baixa.Area(0)
+				Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+				Despesa.Areas = Baixa.Areas
+				Despesa.Overhead = Baixa.Overhead
+				If ( Despesa.Sit(0) = "Pendente" And Despesa.NCheque(0) = "" ) Then
+					Despesa.DataDespesa = Baixa.DataEmissaoNF(0)
+					Despesa.DataNF = Baixa.DataEmissaoNF(0)
+					Despesa.VencimentoDespesa = DateValue( vencICMSOE.DateOnly )
+					Despesa.Descricao = "ICMS antecipado ref. Compra de Fora de SP"
+					Despesa.TotTot = CDbl(Baixa.ICMSOE(0))
+					MudouDespesa = True
+				End If
+				Call Despesa.save ( True, True )
+			End If
+		Else
+			Set novaDespesa = New ccDespesa ( Baixa )
+			novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0)
+			novaDespesa.Codigo = Baixa.Codigo(0)
+			novaDespesa.Sit = "OK" 
+			novaDespesa.Classificacao = "Imposto - ICMS OUTROS ESTADOS"
+			novaDespesa.Area = Baixa.Area(0)
+			novaDespesa.Responsavel = Baixa.Responsavel(0)
+			novaDespesa.Data = Baixa.DataEmissaoNF(0)
+			novaDespesa.Vencimento = DateValue( vencICMSOE.DateOnly )
+			novaDespesa.Adianta = True
+			novaDespesa.Descricao = "ICMS antecipado ref. Compra de Fora de SP"
+			novaDespesa.Valor = CDbl(Baixa.ICMSOE(0))
+			novaDespesa.TipoCompra = Baixa.TipoCompra(0)
+			novaDespesa.TipoVenda = Baixa.TipoVenda(0)
+			novaDespesa.Areas = Baixa.Areas
+			novaDespesa.Overhead = Baixa.Overhead
+			Call novaDespesa.Save
+			'Atualiza Status das Despesas
+			Call viewOrigem.Refresh
+			Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0), True )
+			Set Despesa = dc.GetFirstDocument
+			Do Until Despesa Is Nothing
+				If Despesa.ClassificacaoDespesa(0) = "Imposto - ICMS OUTROS ESTADOS" Then
+					Despesa.Sit = "OK"
+					Despesa.Sit_1 = "OK"
+					Call Despesa.Save ( True, True )
+				End If
+				Set Despesa = dc.GetNextDocument(Despesa)
+			Loop
+			MudouDespesa = True
+		End If
+	End If
+	'Geração de Crédito de PIS
+	Dim vencPis As New notesdatetime( "25/" & Cstr( Month( Baixa.DataEntrega(0) ) ) & "/"_
+	& Cstr( Year( Baixa.DataEntrega(0) ) ) )
+	Call vencPIS.Adjustmonth ( 1 )
+	If Cstr(Baixa.CreditoPIS(0)) <> "0" And Cstr(Baixa.CreditoPIS(0)) <> "" Then	
+		Set dc = viewOrigem.GetAllDocumentsByKey ( "Pedido " + Baixa.PO(0) + "/" + Baixa.Codigo(0) + "-1" )
+		Set Despesa = dc.GetFirstDocument ( )
+		Achou = False
+		'Procura por despesas que não estejam canceladas		
+		Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+			If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - PIS" _
+			And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+				Achou = True
+			Else	
+				Set Despesa = dc.GetNextDocument ( Despesa )
+			End If
+		Loop
+		
+		If ( Not ( Despesa Is Nothing ) ) Then
+			If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - PIS" ) _
+			Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+			Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+			Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+			Or ( Despesa.TotTot(0) <> Cdbl(Baixa.CreditoPIS(0)) * -1 ) _
+			Or ( Despesa.Sit(0) <> "OK" ) _
+			Then
+				Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1"
+				Despesa.ClassificacaoDespesa = "Imposto - PIS"
+				Despesa.AreaDespesa = Baixa.Area(0)
+				Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+				Despesa.TipoCompra = Baixa.TipoCompra(0)
+				Despesa.TipoVenda = Baixa.TipoVenda(0)
+				Despesa.Areas = Baixa.Areas
+				Despesa.Overhead = Baixa.Overhead
+				Despesa.DataDespesa = Baixa.DataEntrega(0)
+				Despesa.VencimentoDespesa = Datevalue( vencPis.DateOnly )
+				Despesa.Descricao = Baixa.Descricao(0)
+				Despesa.TotTot = Cdbl(Baixa.CreditoPIS(0)) * -1
+				Despesa.Saida_0 = Cdbl(Baixa.CreditoPIS(0)) * -1
+				Despesa.Sit = "OK"
+				Despesa.Sit_1 = "OK"
+				Call Despesa.Save ( True, True )
+				MudouDespesa = True
+			End If
+		Else
+			'A despesa não existe, é preciso criá-la
+			Set novaDespesa = New ccDespesa ( Baixa )
+			novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1"
+			novaDespesa.Codigo = Baixa.Codigo(0)
+			novaDespesa.Sit = "OK"
+			novaDespesa.Classificacao = "Imposto - PIS"
+			novaDespesa.Area = Baixa.Area(0)
+			novaDespesa.Responsavel = Baixa.Responsavel(0)
+			novaDespesa.Data = Baixa.DataEntrega(0)
+			novaDespesa.Vencimento = Datevalue( vencPis.DateOnly )
+			novaDespesa.Adianta = True
+			novaDespesa.Descricao = Baixa.Descricao(0)
+			novaDespesa.Valor = Cdbl(Baixa.CreditoPIS(0)) * -1
+			novaDespesa.TipoCompra = Baixa.TipoCompra(0)
+			novaDespesa.TipoVenda = Baixa.TipoVenda(0)
+			novaDespesa.Areas = Baixa.Areas
+			novaDespesa.Overhead = Baixa.Overhead
+			Call novaDespesa.Save
+			'Atualiza Status das Despesas
+			Call viewOrigem.Refresh			
+			Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1", True )
+			Set Despesa = dc.GetFirstDocument
+			Do Until Despesa Is Nothing
+				If Despesa.ClassificacaoDespesa(0) = "Imposto - PIS" Then
+					Despesa.Sit = "OK"
+					Despesa.Sit_1 = "OK"
+					Call Despesa.Save ( True, True )
+				End If
+				Set Despesa = dc.GetNextDocument(Despesa)
+			Loop
+			MudouDespesa = True
+		End If
+	End If		
+	'Geração de Crédito de COFINS
+	Dim vencCofins As New notesdatetime( "25/" & Cstr( Month( Baixa.DataEntrega(0) ) ) & "/"_
+	& Cstr( Year( Baixa.DataEntrega(0) ) ) )
+	Call vencCofins.Adjustmonth ( 1 )
+	If Cstr(Baixa.CreditoCOFINS(0)) <> "0" And Cstr(Baixa.CreditoCOFINS(0)) <> "" Then	
+		Set dc = viewOrigem.GetAllDocumentsByKey ( "Pedido " + Baixa.PO(0) + "/" + Baixa.Codigo(0) + "-1" )
+		Set Despesa = dc.GetFirstDocument ( )
+		Achou = False
+		'Procura por despesas que não estejam canceladas		
+		Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+			If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - FINSOCIAL" _
+			And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+				Achou = True
+			Else	
+				Set Despesa = dc.GetNextDocument ( Despesa )
+			End If
+		Loop
+		
+		If ( Not ( Despesa Is Nothing ) ) Then
+			If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - FINSOCIAL" ) _
+			Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+			Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+			Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+			Or ( Despesa.TotTot(0) <> Cdbl(Baixa.CreditoCOFINS(0)) * -1 ) _
+			Or ( Despesa.Sit(0) <> "OK" ) _
+			Then
+				Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1"
+				Despesa.ClassificacaoDespesa = "Imposto - FINSOCIAL"
+				Despesa.AreaDespesa = Baixa.Area(0)
+				Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+				Despesa.TipoCompra = Baixa.TipoCompra(0)
+				Despesa.TipoVenda = Baixa.TipoVenda(0)
+				Despesa.Areas = Baixa.Areas
+				Despesa.Overhead = Baixa.Overhead
+				Despesa.DataDespesa = Baixa.DataEntrega(0)
+				Despesa.VencimentoDespesa = Datevalue( vencCofins.DateOnly )
+				Despesa.Descricao = Baixa.Descricao(0)
+				Despesa.TotTot = Cdbl(Baixa.CreditoCOFINS(0)) * -1
+				Despesa.Saida_0 = Cdbl(Baixa.CreditoCOFINS(0)) * -1
+				Despesa.Sit = "OK"
+				Despesa.Sit_1 = "OK"
+				Call Despesa.Save ( True, True )
+				MudouDespesa = True
+			End If
+		Else
+			'A despesa não existe, é preciso criá-la
+			Set novaDespesa = New ccDespesa ( Baixa )
+			novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1"
+			novaDespesa.Codigo = Baixa.Codigo(0)
+			novaDespesa.Sit = "OK"
+			novaDespesa.Classificacao = "Imposto - FINSOCIAL"
+			novaDespesa.Area = Baixa.Area(0)
+			novaDespesa.Responsavel = Baixa.Responsavel(0)
+			novaDespesa.Data = Baixa.DataEntrega(0)
+			novaDespesa.Vencimento = Datevalue( vencCofins.DateOnly )
+			novaDespesa.Adianta = True
+			novaDespesa.Descricao = Baixa.Descricao(0)
+			novaDespesa.Valor = Cdbl(Baixa.CreditoCOFINS(0)) * -1
+			novaDespesa.TipoCompra = Baixa.TipoCompra(0)
+			novaDespesa.TipoVenda = Baixa.TipoVenda(0)
+			novaDespesa.Areas = Baixa.Areas
+			novaDespesa.Overhead = Baixa.Overhead
+			Call novaDespesa.Save
+			'Atualiza Status das Despesas
+			Call viewOrigem.Refresh			
+			Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1", True )
+			Set Despesa = dc.GetFirstDocument
+			Do Until Despesa Is Nothing
+				If Despesa.ClassificacaoDespesa(0) = "Imposto - FINSOCIAL" Then
+					Despesa.Sit = "OK"
+					Despesa.Sit_1 = "OK"
+					Call Despesa.Save ( True, True )
+				End If
+				Set Despesa = dc.GetNextDocument(Despesa)
+			Loop
+			MudouDespesa = True
+		End If
+	End If
+	'Geração de Crédito de IPI
+	If Baixa.TipoBaixa(0) = "Troca de Importação" Then
+		Dim vencIPI As New NotesDateTime( "25/" & CStr( Month( Baixa.DataEntrega(0) ) ) & "/"_
+		& CStr( Year( Baixa.DataEntrega(0) ) ) )
+		Call vencIPI.Adjustmonth ( 1 )
+		If CStr(Baixa.CreditoIPI(0)) <> "0" And CStr(Baixa.CreditoIPI(0)) <> "" Then	
+			Set dc = viewOrigem.GetAllDocumentsByKey ( "Pedido " + Baixa.PO(0) + "/" + Baixa.Codigo(0) + "-1" )
+			Set Despesa = dc.GetFirstDocument ( )
+			Achou = False
+			'Procura por despesas que não estejam canceladas		
+			Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+				If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - IPI" _
+				And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+					Achou = True
+				Else	
+					Set Despesa = dc.GetNextDocument ( Despesa )
+				End If
+			Loop
+			
+			If ( Not ( Despesa Is Nothing ) ) Then
+				If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - IPI" ) _
+				Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+				Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+				Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+				Or ( Despesa.TotTot(0) <> CDbl(Baixa.CreditoIPI(0)) * -1 ) _
+				Or ( Despesa.Sit(0) <> "OK" ) _
+				Then
+					Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1"
+					Despesa.ClassificacaoDespesa = "Imposto - IPI"
+					Despesa.AreaDespesa = Baixa.Area(0)
+					Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+					Despesa.TipoCompra = Baixa.TipoCompra(0)
+					Despesa.TipoVenda = Baixa.TipoVenda(0)
+					Despesa.Areas = Baixa.Areas
+					Despesa.Overhead = Baixa.Overhead
+					Despesa.DataDespesa = Baixa.DataEntrega(0)
+					Despesa.VencimentoDespesa = DateValue( vencIPI.DateOnly )
+					Despesa.Descricao = Baixa.Descricao(0)
+					Despesa.TotTot = CDbl(Baixa.CreditoIPI(0)) * -1
+					Despesa.Saida_0 = CDbl(Baixa.CreditoIPI(0)) * -1
+					Despesa.Sit = "OK"
+					Despesa.Sit_1 = "OK"
+					Call Despesa.Save ( True, True )
+					MudouDespesa = True
+				End If
+			Else
+				'A despesa não existe, é preciso criá-la
+				Set novaDespesa = New ccDespesa ( Baixa )
+				novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1"
+				novaDespesa.Codigo = Baixa.Codigo(0)
+				novaDespesa.Sit = "OK"
+				novaDespesa.Classificacao = "Imposto - IPI"
+				novaDespesa.Area = Baixa.Area(0)
+				novaDespesa.Responsavel = Baixa.Responsavel(0)
+				novaDespesa.Data = Baixa.DataEntrega(0)
+				novaDespesa.Vencimento = DateValue( vencIPI.DateOnly )
+				novaDespesa.Adianta = True
+				novaDespesa.Descricao = Baixa.Descricao(0)
+				novaDespesa.Valor = CDbl(Baixa.CreditoIPI(0)) * -1
+				novaDespesa.TipoCompra = Baixa.TipoCompra(0)
+				novaDespesa.TipoVenda = Baixa.TipoVenda(0)
+				novaDespesa.Areas = Baixa.Areas
+				novaDespesa.Overhead = Baixa.Overhead
+				Call novaDespesa.Save
+				'Atualiza Status das Despesas
+				Call viewOrigem.Refresh			
+				Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & Baixa.Codigo(0) + "-1", True )
+				Set Despesa = dc.GetFirstDocument
+				Do Until Despesa Is Nothing
+					If Despesa.ClassificacaoDespesa(0) = "Imposto - IPI" Then
+						Despesa.Sit = "OK"
+						Despesa.Sit_1 = "OK"
+						Call Despesa.Save ( True, True )
+					End If
+					Set Despesa = dc.GetNextDocument(Despesa)
+				Loop
+				MudouDespesa = True
+			End If
+		End If		
+	End If
+	
+	
+	'***************************** Cria/Atualiza despesas dos Negócios de Origem *****************************
+	Dim scan As Integer, i As Integer
+	Dim qtd As Variant, cod As Variant, ic As Variant, icST As Variant, ip As Variant, custoUnit As Variant
+	Dim icmsST As Double, icmsOE As Double
+	'Contabiliza Total da Despesa por Negócio
+	For scan = 0 To 49
+		qtd = baixa.GetItemValue("B_" & scan)
+		If Val(qtd(0)) <> 0 Then
+			cod = baixa.GetItemValue("Negocio_" & scan)
+			ic = baixa.GetItemValue("IC_" & scan)
+			ip = baixa.GetItemValue("IP_" & scan)
+			custoUnit = baixa.GetItemValue("CustoUnit_" & scan)
+			indice = ArrayGetIndex(baixa.Negocios, cod(0))
+			If IsNull(indice) Then tipoCompra = "" Else tipoCompra = baixa.Tipos(indice)
+			If tipoCompra = "Projeto" Then codigo = StrLeftBack(cod(0), "-") Else codigo = cod(0)
+			If tipoCompra = "Ativo" And InStr(codigo, "TDEC") = 0 Then tipoVenda = "Contrato" Else tipoVenda = baixa.TipoVenda(0)
+			If CStr(baixa.GetItemValue("ICMSST_" & scan)(0)) = "" Then
+				icST(0) = 0
+			Else
+				icST = baixa.GetItemValue("ICMSST_" & scan)
+			End If	
+			'Substituição Tributária
+			If baixa.UFCompra(0) = "SP" Then
+				'Compras de SP
+				icmsST = icST(0)
+			Else
+				'Compras de Fora de SP
+				If Right(baixa.GetItemValue("ST_" & scan)(0), 2) = "00" Or Right(baixa.GetItemValue("ST_" & scan)(0), 2) = "60" Or Right(baixa.GetItemValue("ST_" & scan)(0), 2) = "90" Then
+					'ICMS Outros Estados
+					icmsOE = icST(0)
+				Else
+					icmsST = icST(0)
+				End If
+			End If
+			If i = 0 Then
+				ReDim Preserve negocio(i) As String
+				ReDim Preserve icm(i) As Double
+				ReDim Preserve icmOE(i) As Double
+				ReDim Preserve ipi(i) As Double
+				ReDim Preserve pis(i) As Double
+				ReDim Preserve cofins(i) As Double
+				ReDim Preserve valor(i) As Double
+				negocio(i) = codigo
+				icm(i) = custoUnit(0) * qtd(0) * ic(0)
+				icmOE(i) = icmsOE * qtd(0)
+				If baixa.TipoBaixa(0) = "Troca de Importação" And baixa.Tipo(0) = "ICMS" Then
+					ipi(i) = custoUnit(0) * 0.64 * qtd(0) * ip(0)			'BC é o ValorCIF + ValorII - LMO 14/06/16
+				Else
+					ipi(i) = custoUnit(0) * qtd(0) * ip(0)
+				End If
+				valor(i) = (custoUnit(0) + icmsST) * qtd(0) + ipi(i)
+				If baixa.TipoBaixa(0) = "Troca de Importação" And baixa.Tipo(0) = "ICMS" Then
+					pis(i) = custoUnit(0) * 0.55 * qtd(0) * aliquotas(0)	'BC é o ValorCIF - LMO 14/06/16
+					cofins(i) = custoUnit(0) * 0.55 * qtd(0) * aliquotas(1)	'BC é o ValorCIF - LMO 14/06/16
+				Else
+					pis(i) = valor(i) * aliquotas(0)
+					cofins(i) = valor(i) * aliquotas(1)
+				End If
+				i = i + 1
+			Else
+				indice = Arraygetindex(negocio, codigo)
+				If Isnull(indice) Then
+					ReDim Preserve negocio(i) As String
+					ReDim Preserve icm(i) As Double
+					ReDim Preserve icmOE(i) As Double
+					ReDim Preserve ipi(i) As Double
+					ReDim Preserve pis(i) As Double
+					ReDim Preserve cofins(i) As Double
+					ReDim Preserve valor(i) As Double
+					negocio(i) = codigo
+					icm(i) = custoUnit(0) * qtd(0) * ic(0)
+					icmOE(i) = icmsOE * qtd(0)
+					If baixa.TipoBaixa(0) = "Troca de Importação" And baixa.Tipo(0) = "ICMS" Then
+						ipi(i) = custoUnit(0) * 0.64 * qtd(0) * ip(0)			'BC é o ValorCIF + ValorII - LMO 14/06/16
+					Else
+						ipi(i) = custoUnit(0) * qtd(0) * ip(0)
+					End If
+					valor(i) = (custoUnit(0) + icmsST) * qtd(0) + ipi(i)
+					If baixa.TipoBaixa(0) = "Troca de Importação" And baixa.Tipo(0) = "ICMS" Then
+						pis(i) = custoUnit(0) * 0.55 * qtd(0) * aliquotas(0)	'BC é o ValorCIF - LMO 14/06/16
+						cofins(i) = custoUnit(0) * 0.55 * qtd(0) * aliquotas(1)	'BC é o ValorCIF - LMO 14/06/16
+					Else
+						pis(i) = valor(i) * aliquotas(0)
+						cofins(i) = valor(i) * aliquotas(1)
+					End If
+					i = i + 1
+				Else
+					icm(indice) = icm(indice) + custoUnit(0) * qtd(0) * ic(0)
+					icmOE(indice) = icmOE(indice) + (icmsOE * qtd(0))
+					If baixa.TipoBaixa(0) = "Troca de Importação" And baixa.Tipo(0) = "ICMS" Then
+						ipi(indice) = ipi(indice) + custoUnit(0) * 0.64 * qtd(0) * ip(0)				'BC é o ValorCIF + ValorII - LMO 14/06/16
+						pis(indice) = pis(indice) + custoUnit(0) * 0.55 * qtd(0) * aliquotas(0)			'BC é o ValorCIF - LMO 14/06/16
+						cofins(indice) = cofins(indice) + custoUnit(0) * 0.55 * qtd(0) * aliquotas(1)	'BC é o ValorCIF - LMO 14/06/16
+						valor(indice) = valor(indice) + (custoUnit(0) + icmsST) * qtd(0) + (custoUnit(0) * 0.64 * qtd(0) * ip(0))
+					Else
+						ipi(indice) = ipi(indice) + custoUnit(0) * qtd(0) * ip(0)
+						pis(indice) = pis(indice) + ((custoUnit(0) + icmsST) * qtd(0) + (custoUnit(0) * qtd(0) * ip(0))) * aliquotas(0)
+						cofins(indice) = cofins(indice) + ((custoUnit(0) + icmsST) * qtd(0) + (custoUnit(0) * qtd(0) * ip(0))) * aliquotas(1)
+						valor(indice) = valor(indice) + (custoUnit(0) + icmsST) * qtd(0) + (custoUnit(0) * qtd(0) * ip(0))
+					End If
+				End If
+			End If
+		End If
+	Next
+	
+	Dim classificacoes As Variant, index As Variant, y As Integer
+	classificacoes = Baixa.Classificacoes
+	y = 2
+	For scan = 0 To UBound(negocio)
+		Set dc = viewOrigem.GetAllDocumentsByKey ( Baixa.DocID(0) + "-" + Cstr(y), True )
+		Set Despesa = dc.GetFirstDocument ( )
+		Achou = False
+		'Procura por despesas que não estejam canceladas		
+		Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+			If ( Despesa.Sit (0) <> "Cancelada" ) Then
+				Achou = True
+			Else	
+				Set Despesa = dc.GetNextDocument ( Despesa )
+			End If
+		Loop
+		If ( Not ( Despesa Is Nothing ) ) Then
+			'A despesa existe. Verifica se os campos estão corretos.
+			If ( Despesa.ClassificacaoDespesa(0) <> classificacoes(scan) ) _
+			Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+			Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+			Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+			Or ( Despesa.VencimentoDespesa(0) <> Baixa.DataEntrega(0) ) _
+			Or ( Despesa.TotTot(0) <> Round(valor(scan), 2)  * -1 ) _
+			Or ( Despesa.Sit(0) <> "OK" ) _
+			Then
+				Despesa.Codigo = negocio(scan)
+				Despesa.TipoCompra = Baixa.Tipos(scan)
+				Despesa.TipoVenda = tipoVenda
+				Despesa.ClassificacaoDespesa = classificacoes(scan)
+				Despesa.AreaDespesa = Baixa.Area(0) 
+				Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+				Despesa.Areas = Baixa.Areas
+				Despesa.Overhead = Baixa.Overhead
+				Despesa.DataDespesa = Baixa.DataEntrega(0)
+				Despesa.DataNF = Baixa.DataEntrega(0)
+				Despesa.VencimentoDespesa = Baixa.DataEntrega(0)
+				Despesa.Descricao = Baixa.Descricao(0)
+				Despesa.Valor = Round(valor(scan), 2) * -1
+				Despesa.TotTot = Round(valor(scan), 2) * -1
+				Despesa.Saida_0 = Round(valor(scan), 2) * -1
+				Despesa.Sit = "OK"
+				Despesa.Sit_1 = "OK"
+				Call Despesa.Save ( True, True )
+				MudouDespesa = True
+			End If
+		Else
+			'A despesa não existe, é preciso criá-la
+			Set novaDespesa = New ccDespesa( Baixa )
+			novaDespesa.Origem = Baixa.DocID(0) + "-" + Cstr(y)
+			novaDespesa.Codigo = negocio(scan)
+			novaDespesa.Sit = "OK"
+			novaDespesa.Classificacao = classificacoes(scan)
+			novaDespesa.Area = Baixa.Area(0)
+			novaDespesa.Responsavel = Baixa.Responsavel(0)
+			novaDespesa.Data = Baixa.DataEntrega(0)
+			novaDespesa.Vencimento = Baixa.DataEntrega(0)
+			novaDespesa.Descricao = Baixa.Descricao(0)
+			novaDespesa.Valor = Round(valor(scan), 2) * -1
+			novaDespesa.TipoCompra = Baixa.Tipos(scan)
+			novaDespesa.TipoVenda = tipoVenda
+			novaDespesa.Areas = Baixa.Areas
+			novaDespesa.Overhead = Baixa.Overhead
+			Call novaDespesa.Save
+			'Atualiza Status das Despesas
+			Call viewOrigem.Refresh	
+			Set Despesa = viewOrigem.GetDocumentByKey( Baixa.DocID(0) + "-" + Cstr(y), True )
+			If Not Despesa Is Nothing Then
+				Despesa.Sit = "OK"
+				Despesa.Sit_1 = "OK"
+				Call Despesa.Save ( True, True )
+			End If
+			MudouDespesa = True
+		End If
+	 	'Dédito de ICMS
+		If Cstr(Baixa.CreditoICMS(0)) <> "0" And Cstr(Baixa.CreditoICMS(0)) <> "" Then
+			Set venc = New notesdatetime( "20/" & Cstr( Month( Baixa.DataEntrega(0) ) ) & "/" & Cstr( Year( Baixa.DataEntrega(0) ) ) )
+			Call venc.Adjustmonth ( 1 )
+			Set dc = viewOrigem.GetAllDocumentsByKey ( "Pedido " + Baixa.PO(0) + "/" + negocio(scan) + "-" + Cstr(y), True )
+			Set Despesa = dc.GetFirstDocument ( )
+			Achou = False
+			'Procura por despesas que não estejam canceladas		
+			Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+				If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - ICMS" _
+				And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+					Achou = True
+				Else	
+					Set Despesa = dc.GetNextDocument ( Despesa )
+				End If
+			Loop
+			If ( Not ( Despesa Is Nothing ) ) Then
+				If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - ICMS" ) _
+				Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+				Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+				Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+				Or ( Despesa.TotTot(0) <> Round(icm(scan), 2) ) _
+				Or ( Despesa.Sit(0) <> "OK" ) _
+				Then
+					Despesa.Codigo = negocio(scan)
+					Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + Cstr(y)
+					Despesa.ClassificacaoDespesa = "Imposto - ICMS"
+					Despesa.TipoCompra = Baixa.Tipos(scan)
+					Despesa.TipoVenda = tipoVenda
+					Despesa.AreaDespesa = Baixa.Area(0)
+					Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+					Despesa.Areas = Baixa.Areas
+					Despesa.Overhead = Baixa.Overhead
+					Despesa.DataDespesa = Baixa.DataEntrega(0)
+					Despesa.VencimentoDespesa = Datevalue( venc.DateOnly )
+					Despesa.Descricao = Baixa.Descricao(0)
+					Despesa.TotTot = Round(icm(scan), 2)
+					Despesa.Saida_0 = Round(icm(scan), 2)
+					Despesa.Sit = "OK"
+					Despesa.Sit_1 = "OK"
+					Call Despesa.Save ( True, True )
+					MudouDespesa = True
+				End If
+			Else
+				Set novaDespesa = New ccDespesa ( Baixa )
+				novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + Cstr(y)
+				novaDespesa.Codigo = negocio(scan)
+				novaDespesa.Sit = "OK"
+				novaDespesa.Classificacao = "Imposto - ICMS"
+				novaDespesa.Area = Baixa.Area(0)
+				novaDespesa.Responsavel = Baixa.Responsavel(0)
+				novaDespesa.Data = Baixa.DataEntrega(0)
+				novaDespesa.Vencimento = Datevalue( venc.DateOnly )
+				novaDespesa.Descricao = Baixa.Descricao(0)
+				novaDespesa.Valor = Round(icm(scan), 2)
+				novaDespesa.Adianta = True
+				novaDespesa.TipoCompra = Baixa.Tipos(scan)
+				novaDespesa.TipoVenda = tipoVenda
+				novaDespesa.Areas = Baixa.Areas
+				novaDespesa.Overhead = Baixa.Overhead
+				Call novaDespesa.Save
+				MudouDespesa = True
+				'Atualiza Status das Despesas
+				Call viewOrigem.Refresh			
+				Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + Cstr(y), True )
+				Set Despesa = dc.GetFirstDocument
+				Do Until Despesa Is Nothing
+					If Despesa.ClassificacaoDespesa(0) = "Imposto - ICMS" Then
+						Despesa.Sit = "OK"
+						Despesa.Sit_1 = "OK"
+						Call Despesa.Save ( True, True )
+					End If
+					Set Despesa = dc.GetNextDocument(Despesa)
+				Loop
+				MudouDespesa = True
+			End If
+		End If
+		'ICMS Outros Estados - LMO 25/08/22
+		If CStr(Baixa.ICMSOE(0)) <> "0" And CStr(Baixa.ICMSOE(0)) <> "" Then
+			Set dc = viewOrigem.GetAllDocumentsByKey("Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + CStr(y), True )
+			Set Despesa = dc.GetFirstDocument ( )
+			Achou = False
+			'Procura por despesas que não estejam canceladas		
+			Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+				If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - ICMS OUTROS ESTADOS" _
+				And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+					Achou = True
+				Else	
+					Set Despesa = dc.GetNextDocument ( Despesa )
+				End If
+			Loop
+			
+			If ( Not ( Despesa Is Nothing ) ) Then
+				If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - ICMS OUTROS ESTADOS" ) _
+				Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+				Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+				Or ( Despesa.DataDespesa(0) <> Baixa.DataEmissaoNF(0) ) _
+				Or ( Despesa.TotTot(0) <> Round(icmOE(scan), 2) ) _
+				Then
+					Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + CStr(y)
+					Despesa.ClassificacaoDespesa = "Imposto - ICMS OUTROS ESTADOS"
+					Despesa.AreaDespesa = Baixa.Area(0)
+					Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+					Despesa.Areas = Baixa.Areas
+					Despesa.Overhead = Baixa.Overhead
+					If ( Despesa.Sit(0) = "Pendente" And Despesa.NCheque(0) = "" ) Then
+						Despesa.DataDespesa = Baixa.DataEmissaoNF(0)
+						Despesa.DataNF = Baixa.DataEmissaoNF(0)
+						Despesa.VencimentoDespesa = DateValue( vencICMSOE.DateOnly )
+						Despesa.Descricao = "ICMS antecipado ref. Compra de Fora de SP"
+						Despesa.TotTot = Round(icmOE(scan), 2) * -1
+						MudouDespesa = True
+					End If
+					Call Despesa.save ( True, True )
+				End If
+			Else
+				Set novaDespesa = New ccDespesa ( Baixa )
+				novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + CStr(y)
+				novaDespesa.Codigo = negocio(scan)
+				novaDespesa.Sit = "Pendente" 
+				novaDespesa.Classificacao = "Imposto - ICMS OUTROS ESTADOS"
+				novaDespesa.Area = Baixa.Area(0)
+				novaDespesa.Responsavel = Baixa.Responsavel(0)
+				novaDespesa.Data = Baixa.DataEmissaoNF(0)
+				novaDespesa.Vencimento = DateValue( vencICMSOE.DateOnly )
+				novaDespesa.Adianta = True
+				novaDespesa.Descricao = "ICMS antecipado ref. Compra de Fora de SP"
+				novaDespesa.Valor = Round(icmOE(scan), 2) * -1
+				novaDespesa.TipoCompra = Baixa.Tipos(scan)
+				novaDespesa.TipoVenda = tipoVenda
+				novaDespesa.Areas = Baixa.Areas
+				novaDespesa.Overhead = Baixa.Overhead
+				Call novaDespesa.Save
+				'Atualiza Status das Despesas
+				Call viewOrigem.Refresh
+				Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + CStr(y), True )
+				Set Despesa = dc.GetFirstDocument
+				Do Until Despesa Is Nothing
+					If Despesa.ClassificacaoDespesa(0) = "Imposto - ICMS OUTROS ESTADOS" Then
+						Despesa.Sit = "OK"
+						Despesa.Sit_1 = "OK"
+						Call Despesa.Save ( True, True )
+					End If
+					Set Despesa = dc.GetNextDocument(Despesa)
+				Loop
+				MudouDespesa = True
+			End If
+		End If
+		'Geração de Crédito de PIS
+		If Cstr(Baixa.CreditoPIS(0)) <> "0" And Cstr(Baixa.CreditoPIS(0)) <> "" Then
+			Set dc = viewOrigem.GetAllDocumentsByKey ( "Pedido " + Baixa.PO(0) + "/" + negocio(scan) + "-" + Cstr(y), True )
+			Set Despesa = dc.GetFirstDocument ( )
+			Achou = False
+			'Procura por despesas que não estejam canceladas		
+			Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+				If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - PIS" _
+				And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+					Achou = True
+				Else	
+					Set Despesa = dc.GetNextDocument ( Despesa )
+				End If
+			Loop
+			If ( Not ( Despesa Is Nothing ) ) Then
+				If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - PIS" ) _
+				Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+				Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+				Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+				Or ( Despesa.TotTot(0) <> Round(pis(scan),2) ) _
+				Or ( Despesa.Sit(0) <> "OK" ) _
+				Then
+					Despesa.Codigo = negocio(scan)
+					Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + Cstr(y)
+					Despesa.ClassificacaoDespesa = "Imposto - PIS"
+					Despesa.TipoCompra = Baixa.Tipos(scan)
+					Despesa.TipoVenda = tipoVenda
+					Despesa.AreaDespesa = Baixa.Area(0)
+					Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+					Despesa.Areas = Baixa.Areas
+					Despesa.Overhead = Baixa.Overhead
+					Despesa.DataDespesa = Baixa.DataEntrega(0)
+					Despesa.VencimentoDespesa = Datevalue( vencPis.DateOnly )
+					Despesa.Descricao = Baixa.Descricao(0)
+					Despesa.TotTot = Round(pis(scan),2)
+					Despesa.Saida_0 = Round(pis(scan),2)
+					Despesa.Sit = "OK"
+					Despesa.Sit_1 = "OK"
+					Call Despesa.Save ( True, True )
+					MudouDespesa = True
+				End If
+			Else
+				Set novaDespesa = New ccDespesa ( Baixa )
+				novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + Cstr(y)
+				novaDespesa.Codigo = negocio(scan)
+				novaDespesa.Sit = "OK"
+				novaDespesa.Classificacao = "Imposto - PIS"
+				novaDespesa.Area = Baixa.Area(0)
+				novaDespesa.Responsavel = Baixa.Responsavel(0)
+				novaDespesa.Data = Baixa.DataEntrega(0)
+				novaDespesa.Vencimento = Datevalue( vencPis.DateOnly )
+				novaDespesa.Descricao = Baixa.Descricao(0)
+				novaDespesa.Valor = Round(pis(scan),2)
+				novaDespesa.Adianta = True
+				novaDespesa.TipoCompra = Baixa.Tipos(scan)
+				novaDespesa.TipoVenda = tipoVenda
+				novaDespesa.Areas = Baixa.Areas
+				novaDespesa.Overhead = Baixa.Overhead
+				Call novaDespesa.Save
+				'Atualiza Status das Despesas
+				Call viewOrigem.Refresh			
+				Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + Cstr(y), True )
+				Set Despesa = dc.GetFirstDocument
+				Do Until Despesa Is Nothing
+					If Despesa.ClassificacaoDespesa(0) = "Imposto - PIS" Then
+						Despesa.Sit = "OK"
+						Despesa.Sit_1 = "OK"
+						Call Despesa.Save ( True, True )
+					End If
+					Set Despesa = dc.GetNextDocument(Despesa)
+				Loop
+				MudouDespesa = True
+			End If
+		End If
+		'Geração de Crédito de COFINS
+		If Cstr(Baixa.CreditoCOFINS(0)) <> "0" And Cstr(Baixa.CreditoCOFINS(0)) <> "" Then
+			Set dc = viewOrigem.GetAllDocumentsByKey ( "Pedido " + Baixa.PO(0) + "/" + negocio(scan) + "-" + Cstr(y), True )
+			Set Despesa = dc.GetFirstDocument ( )
+			Achou = False
+			'Procura por despesas que não estejam canceladas		
+			Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+				If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - FINSOCIAL" _
+				And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+					Achou = True
+				Else	
+					Set Despesa = dc.GetNextDocument ( Despesa )
+				End If
+			Loop
+			If ( Not ( Despesa Is Nothing ) ) Then
+				If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - FINSOCIAL" ) _
+				Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+				Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+				Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+				Or ( Despesa.TotTot(0) <> Round(cofins(scan),2) ) _
+				Or ( Despesa.Sit(0) <> "OK" ) _
+				Then
+					Despesa.Codigo = negocio(scan)
+					Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + Cstr(y)
+					Despesa.ClassificacaoDespesa = "Imposto - FINSOCIAL"
+					Despesa.TipoCompra = Baixa.Tipos(scan)
+					Despesa.TipoVenda = tipoVenda
+					Despesa.AreaDespesa = Baixa.Area(0)
+					Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+					Despesa.Areas = Baixa.Areas
+					Despesa.Overhead = Baixa.Overhead
+					Despesa.DataDespesa = Baixa.DataEntrega(0)
+					Despesa.VencimentoDespesa = Datevalue( vencCofins.DateOnly )
+					Despesa.Descricao = Baixa.Descricao(0)
+					Despesa.TotTot = Round(cofins(scan),2)
+					Despesa.Saida_0 = Round(cofins(scan),2)
+					Despesa.Sit = "OK"
+					Despesa.Sit_1 = "OK"
+					Call Despesa.Save ( True, True )
+					MudouDespesa = True
+				End If
+			Else
+				Set novaDespesa = New ccDespesa ( Baixa )
+				novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + Cstr(y)
+				novaDespesa.Codigo = negocio(scan)
+				novaDespesa.Sit = "OK"
+				novaDespesa.Classificacao = "Imposto - FINSOCIAL"
+				novaDespesa.Area = Baixa.Area(0)
+				novaDespesa.Responsavel = Baixa.Responsavel(0)
+				novaDespesa.Data = Baixa.DataEntrega(0)
+				novaDespesa.Vencimento = Datevalue( vencCofins.DateOnly )
+				novaDespesa.Descricao = Baixa.Descricao(0)
+				novaDespesa.Valor = Round(cofins(scan),2)
+				novaDespesa.Adianta = True
+				novaDespesa.TipoCompra = Baixa.Tipos(scan)
+				novaDespesa.TipoVenda = tipoVenda
+				novaDespesa.Areas = Baixa.Areas
+				novaDespesa.Overhead = Baixa.Overhead
+				Call novaDespesa.Save
+				'Atualiza Status das Despesas
+				Call viewOrigem.Refresh			
+				Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + Cstr(y), True )
+				Set Despesa = dc.GetFirstDocument
+				Do Until Despesa Is Nothing
+					If Despesa.ClassificacaoDespesa(0) = "Imposto - FINSOCIAL" Then
+						Despesa.Sit = "OK"
+						Despesa.Sit_1 = "OK"
+						Call Despesa.Save ( True, True )
+					End If
+					Set Despesa = dc.GetNextDocument(Despesa)
+				Loop
+				MudouDespesa = True
+			End If
+		End If		
+		'Geração de Crédito de IPI
+		If Baixa.TipoBaixa(0) = "Troca de Importação" Then
+			If CStr(Baixa.CreditoIPI(0)) <> "0" And CStr(Baixa.CreditoIPI(0)) <> "" Then
+				Set dc = viewOrigem.GetAllDocumentsByKey ( "Pedido " + Baixa.PO(0) + "/" + negocio(scan) + "-" + CStr(y), True )
+				Set Despesa = dc.GetFirstDocument ( )
+				Achou = False
+				'Procura por despesas que não estejam canceladas		
+				Do While ( Not ( Despesa Is Nothing ) And Not Achou )
+					If ( Despesa.Sit (0) <> "Cancelada" ) And Despesa.ClassificacaoDespesa(0) = "Imposto - IPI" _
+					And Baixa.IDOrigem(0) = despesa.IDOrigem(0) Then
+						Achou = True
+					Else	
+						Set Despesa = dc.GetNextDocument ( Despesa )
+					End If
+				Loop
+				If ( Not ( Despesa Is Nothing ) ) Then
+					If ( Despesa.ClassificacaoDespesa(0) <> "Imposto - IPI" ) _
+					Or ( Despesa.AreaDespesa(0) <> Baixa.Area(0) )  _
+					Or ( Despesa.ResponsavelDespesa(0) <> Baixa.Responsavel(0) ) _
+					Or ( Despesa.DataDespesa(0) <> Baixa.DataEntrega(0) ) _
+					Or ( Despesa.TotTot(0) <> Round(ipi(scan),2) ) _
+					Or ( Despesa.Sit(0) <> "OK" ) _
+					Then
+						Despesa.Codigo = negocio(scan)
+						Despesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + CStr(y)
+						Despesa.ClassificacaoDespesa = "Imposto - IPI"
+						Despesa.TipoCompra = Baixa.Tipos(scan)
+						Despesa.TipoVenda = tipoVenda
+						Despesa.AreaDespesa = Baixa.Area(0)
+						Despesa.ResponsavelDespesa = Baixa.Responsavel(0)
+						Despesa.Areas = Baixa.Areas
+						Despesa.Overhead = Baixa.Overhead
+						Despesa.DataDespesa = Baixa.DataEntrega(0)
+						Despesa.VencimentoDespesa = DateValue( vencIPI.DateOnly )
+						Despesa.Descricao = Baixa.Descricao(0)
+						Despesa.TotTot = Round(ipi(scan),2)
+						Despesa.Saida_0 = Round(ipi(scan),2)
+						Despesa.Sit = "OK"
+						Despesa.Sit_1 = "OK"
+						Call Despesa.Save ( True, True )
+						MudouDespesa = True
+					End If
+				Else
+					Set novaDespesa = New ccDespesa ( Baixa )
+					novaDespesa.Origem = "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + CStr(y)
+					novaDespesa.Codigo = negocio(scan)
+					novaDespesa.Sit = "OK"
+					novaDespesa.Classificacao = "Imposto - IPI"
+					novaDespesa.Area = Baixa.Area(0)
+					novaDespesa.Responsavel = Baixa.Responsavel(0)
+					novaDespesa.Data = Baixa.DataEntrega(0)
+					novaDespesa.Vencimento = DateValue( vencIPI.DateOnly )
+					novaDespesa.Descricao = Baixa.Descricao(0)
+					novaDespesa.Valor = Round(ipi(scan),2)
+					novaDespesa.Adianta = True
+					novaDespesa.TipoCompra = Baixa.Tipos(scan)
+					novaDespesa.TipoVenda = tipoVenda
+					novaDespesa.Areas = Baixa.Areas
+					novaDespesa.Overhead = Baixa.Overhead
+					Call novaDespesa.Save
+					'Atualiza Status das Despesas
+					Call viewOrigem.Refresh			
+					Set dc = viewOrigem.GetAllDocumentsByKey( "Pedido " & Baixa.PO(0) & "/" & negocio(scan) + "-" + CStr(y), True )
+					Set Despesa = dc.GetFirstDocument
+					Do Until Despesa Is Nothing
+						If Despesa.ClassificacaoDespesa(0) = "Imposto - IPI" Then
+							Despesa.Sit = "OK"
+							Despesa.Sit_1 = "OK"
+							Call Despesa.Save ( True, True )
+						End If
+						Set Despesa = dc.GetNextDocument(Despesa)
+					Loop
+					MudouDespesa = True
+				End If
+			End If
+		End If		
+		y = y + 1
+	Next
+	If ( MudouDespesa ) Then
+		Msgbox "Despesas Geradas/Alteradas ", 64, "Aviso"
+	End If
+	
+End Sub

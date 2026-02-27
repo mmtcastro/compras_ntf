@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="72e" sequence="110" unid="8B66ADC059FB5D6F83257AEC004BCFE4">
+<created><datetime dst="true">20130107T114804,20-02</datetime></created>
+<modified><datetime>20230919T123115,98-03</datetime></modified>
+<revised><datetime dst="true">20141129T102327,33-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,97-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,97-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$TITLE" sign="true"><text>RessarcimentoICMSST</text></item>
+<item name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
+
+</note>

@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='6a2' unid='2A5794DDF9B1DC1F83257F17006A8CE7' sequence='7'>
+<created><datetime dst='true'>20151210T172348,87-02</datetime></created>
+<modified><datetime>20230919T123115,67-03</datetime></modified>
+<revised><datetime dst='true'>20151217T131425,96-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,66-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,66-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>7. Licencas\Vencimento</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+mAAFAEYAQgAHAAoABgAGAAYABwAJAAQAVmVuY2ltZW50b0NvZGlnb1BhcnROb05TZXJpZVByb2R1
+dG8kQ29uZmxpY3QkUkVGBAAEAAAANgAFAAQARm9ybQEABwBMaWNlbmNhAAoCBQAEAEZvcm0BAAkA
+UmVub3ZhY2FvAAoCHQIDAAcAFgAQAAlMMVMyUzNTNFM1UzZTN1M=
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+PwAEAABEAWYAAAAKAAFmAAoABgABZgAQAAYAAWYAFgAHAFZlbmNpbWVudG9Db2RpZ29QYXJ0Tm9Q
+cm9kdXRv
+</rawitemdata></item>
+<item name='$Collation1' summary='true'>
+<rawitemdata type='2'>
+EwABAABEAGYAAAAGAENvZGlnbw==
+</rawitemdata></item>
+<item name='$Collation2' summary='true'>
+<rawitemdata type='2'>
+EwABAABEAGYAAAAGAFBhcnRObw==
+</rawitemdata></item>
+<item name='$Collation3' summary='true'>
+<rawitemdata type='2'>
+EwABAABEAGYAAAAGAE5TZXJpZQ==
+</rawitemdata></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQAFAAEACAAAAFZDBQQKAAoAAAAAAFAABQAACQAAAAAAAAAAAAICAAAAVkMFBQYABwAAAAAAhAAG
+AAAJAAAAAAAAAAAAAgIAAABWQwUFBgAGAAAAAAB0AAcAAAkAAAAAAAAAAAACAgAAAFZDAAUGAAgA
+AAAAANYACAAACQAAAAAAAAAAAAICAAAAVkMFBAcACQAAAAAA1gAJAAAJAAAAAAAAAAAAAgIAAABW
+ZW5jaW1lbnRvVmVuY2ltZW50b0NvZGlnb05lZ6JjaW9QYXJ0Tm9QYXJ0Tm9OU2VyaWVOLiBTgnJp
+ZVByb2R1dG9EZXNjcmljYW8mAAEAAAABAQAJAQAACgEBDgoAAAEArSsBAAEAAQAAAAAAAAAAAFdD
+CgEACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABXQwsBAAgAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAV0MMAQAIAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAA//8AAAAAAAAAAAAAAAAAAFdDDQEACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAA
+AAAAAAAAAAAAAABXQw4BAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAA
+QgAAAAAAAQD///8ABQD///8AAQAAAAAAAAAAAAAAAAABAP///wABAP///wAAAAEAAAAAAAEAAAAA
+AAEAAAAAAAAACAAAAAAAAQA=
+</rawitemdata></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text><text>6</text><text>38</text><text>Arial</text><text>7</text><text
+>38</text><text>Arial</text><text>8</text><text>38</text><text>Arial</text><text
+>9</text><text>38</text><text>Arial</text><text>10</text><text>38</text><text
+>Arial</text><text>11</text><text>38</text><text>Arial</text><text>12</text><text
+>38</text><text>Arial</text><text>13</text><text>38</text><text>Arial</text><text
+>14</text><text>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text>PY</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item></note>
+

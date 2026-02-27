@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='62a' unid='B59822F06485A637032566C6006BF3AD' sequence='20'>
+<created><datetime>19981124T163907,33-03</datetime></created>
+<modified><datetime>20250505T094550,28-03</datetime></modified>
+<revised><datetime>20250425T174837,36-03</datetime></revised>
+<lastaccessed><datetime>20250505T094550,27-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,36-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>1. Pedidos\PO</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+FAMCAJwAAwAkMTMABQAEAEZvcm0BAAUAQmFpeGEACgKvAHoATgAFAAkAVGlwb0JhaXhhAAEABAAg
+Pj4gIgIFAA0ARGF0YUVtaXNzYW9ORgBWASICAQAGACAtIFIkICICBQAFAFZhbG9yAFYBIgKuACwA
+BQAEAEZvcm0BAAQAID4+ICICBQAHAENyaWFjYW8ABABWASICrgAEALUDAwACAEoAAgAkOQUABABG
+b3JtAQAFAEJhaXhhAAoCrwAqABgABQANAERhdGFFbWlzc2FvTkYArgASAAUABgBDb2RpZ2+uAAQA
+tQMDAAIAQAACACQwBQAEAEZvcm0BAAUAQmFpeGEACgKvACAACgABAAAArgAWAAUACQBEZXNjcmlj
+YW8ArgAEALUDAwAFADoANgAIAAMAAgAGAAIAAgAGAAkABAAkMTNQT1N0YXR1cyQ5JDBUb3RUb3Qk
+Q29uZmxpY3QkUkVGBAAEAAAAOgEFAAQARm9ybQEADwBQZWRpZG8gTmFjaW9uYWwACgIFAAQAZm9y
+bQEABgBQZWRpZG8KAh0CBQAEAEZvcm0BAAUAQmFpeGEACgIdAgUABABGb3JtAQAJAERldm9sdYfG
+bwAKAh0CBQAEAEZvcm0BAAwAQ2FuY2VsYW1lbnRvCgIdAgUABABGb3JtAQADAFJNQQAKAh0CBQAE
+AEZvcm0BAAcAUmVtZXNzYQAKAh0CBQAEAEZvcm0BAAwAVHJvY2FSZXNlcnZhCgIdAgUAFABDbGFz
+c2lmaWNhY2FvRGVzcGVzYQEAFwBJbnRlcm1lZGlhh8ZvIGRlIFZlbmRhcwALAgUADQBDbGFzc2lm
+aWNhY2FvAAEAFwBJbnRlcm1lZGlhh8ZvIGRlIFZlbmRhcwALAhwCBAAcAgMABwB0AG4ACUwxUzJT
+M1M0UzVTNlM3UzhTOVMxMFMxMVMxMlMxM1MxNFMxNVMxNlMxN1MxOFMxOVMyMFMyMVMyMlMyM1My
+NFMyNVMyNlMyN1MyOFMyOVMzMFMzMVMzMlMzM1MzNVMzNlMzN1MzOFMzOVM0MFM=
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+JQADAABEAGYAAAACAABmAAIABgAAZgAIAAIAUE9TdGF0dXMkOQ==
+</rawitemdata></item>
+<item name='$Totals' sign='true'><textlist><text>0</text><text>0</text><text
+>0</text><text>0</text><text>0</text><text>1</text></textlist></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQAGAAAAiQAAAFZDkAQDAAAA0gAAAA0ABQAECAAAAAAAAAAAAAICAAAwVkMBBAIABAAAAAAAWQAG
+AQoIAAAAAAAAAAAAAgIAACBWQwEABgAAAAAAAAAzAAcBCAhCAAAAAAAAAAACAAAAIFZDAQACAAAA
+WgAAAGkACAALCEAAAAAAAAAAAAIAAAAgVkMAAAIACQBOAAAAgAAJAAAIAAAAAAAAAAAAAgIAACBW
+QwAABgAFAAAAAAAyAAoBAAhFAAIBAQAAAAACAgAAICQxM9IAAgCcAAMAJDEzAAUABABGb3JtAQAF
+AEJhaXhhAAoCrwB6AE4ABQAJAFRpcG9CYWl4YQABAAQAID4+ICICBQANAERhdGFFbWlzc2FvTkYA
+VgEiAgEABgAgLSBSJCAiAgUABQBWYWxvcgBWASICrgAsAAUABABGb3JtAQAEACA+PiAiAgUABwBD
+cmlhY2FvAAQAVgEiAq4ABAC1AwMABwA0AC4ACTNTNFM2UzdTOFM5UzEwUzE0UzE1UzE2UzE3UzE5
+UzIwUzIzUzI1UzI2UzMxU1BPUE8gI1N0YXR1cyQ5WgACAEoAAgAkOQUABABGb3JtAQAFAEJhaXhh
+AAoCrwAqABgABQANAERhdGFFbWlzc2FvTkYArgASAAUABgBDb2RpZ2+uAAQAtQMDAAcADgAHAAkz
+UzRTNlMAJDBEZXNjcmljYW9OAAIAQAACACQwBQAEAEZvcm0BAAUAQmFpeGEACgKvACAACgABAAAA
+rgAWAAUACQBEZXNjcmljYW8ArgAEALUDAwAHAAwABQAJM1M0UwBUb3RUb3RWYWxvciYAAQAAAAEB
+AAkBAAAKAQECCgAAGACtKwEAAQABAAAAAAAAAAAAV0MBAQAJAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAA//8AAAAAAAAAAAAAAAAAAFdDCwAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAA
+AAAAAAAAAABXQwwAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAV0MN
+AAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAFdDDgAACAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABXQw8AAAgAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAD//wAAAAAAAAAAAAAAAAAAQgAAAAAAAQD///8AAQDg8f8AAQAAAAAAAAAAAAAAAAABAP//
+/wABAP///wAAAAEAAAAAAAEA/wAAAAEAAAAAAAAACAAAAAAAAQA=
+</rawitemdata></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text><text>6</text><text>38</text><text>Arial</text><text>7</text><text
+>38</text><text>Arial</text><text>8</text><text>38</text><text>Arial</text><text
+>9</text><text>38</text><text>Arial</text><text>10</text><text>38</text><text
+>Arial</text><text>11</text><text>38</text><text>Arial</text><text>12</text><text
+>38</text><text>Arial</text><text>13</text><text>38</text><text>Arial</text><text
+>14</text><text>38</text><text>Arial</text><text>15</text><text>38</text><text
+>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text/></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item></note>
+

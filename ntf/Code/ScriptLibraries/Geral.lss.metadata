@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="542" sequence="9" unid="E7894512646B8EBC032568A900665A9E">
+<created><datetime>20000321T153758,70-03</datetime></created>
+<modified><datetime>20230919T123114,82-03</datetime></modified>
+<revised><datetime dst="true">20141129T102326,71-02</datetime></revised>
+<lastaccessed><datetime>20230919T123114,81-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123114,81-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Rodrigo Trida/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name><name>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name="$TITLE" sign="true"><text>Geral</text></item>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess"><text>1</text></item>
+
+</note>

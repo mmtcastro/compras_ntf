@@ -1,0 +1,1273 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='form' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='67a' unid='B85DD9C13216ECD703256663004118A2' sequence='77'>
+<created><datetime>19980817T085101,46-03</datetime></created>
+<modified><datetime>20230919T123115,57-03</datetime></modified>
+<revised><datetime dst='true'>20141129T102326,97-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,56-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,56-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name='ttPr' summary='false' sign='true'><number>0</number></item>
+<item name='TotTot' summary='false' sign='true'><number>0</number></item>
+<item name='$TITLE'><text>MateriaisRevenda</text></item>
+<item name='$Info' sign='true'>
+<rawitemdata type='1'>
+hhgBAIAAAAAAgAAAAQABAP///wAAAAAA
+</rawitemdata></item>
+<item name='$Flags'><text>CUA3</text></item>
+<item name='$Fonts'>
+<rawitemdata type='1'>
+i/8oAAEABSZBcmlhbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+</rawitemdata></item>
+<item name='$$Script_O' sign='true'>
+<rawitemdata type='14'>
+AQAABExTT0IDABQAZW4AAAQAAAADAAAAAAAEAIgAAAAAAAAAAAAAAAAAAAAkAP//GAA4AP//AABU
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAEABABMb3R1cyBQcm9kdWN0AAAAVjAuMAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAwAAAAAAAAAEAAAAiAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABJAE4AQwBFAE4ARAAAAE9CSkVDVABURQAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAABEACoLRgAqCwAAAABEACoLRgAqC0IAKgtGACoLRAAqCwIAAgABAAAD
+BgYEAwIHGgABAAAAAAAAAAAAAAAAAAEAAAAAAAAAAADwBtEDDgAAAAAAAAAAAAAAAAAAAAAAAACg
+/wAAEAAAAAEAAAABAAAAAAAAAAAAAAAAAAAA//////////////////8AAAAAAAA8ACwLFAAsC0w1
+/gUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAADAIwAAAAAAP//CAAqADMAMAA5ADAAQwA1AEUAAAAAAGwAAwBOAEUAVwAAAIAABgBEAEUATABF
+AFQARQAAAAAA//8KAEkATgBJAFQASQBBAEwASQBaAEUAAAAAAP//CQBUAEUAUgBNAEkATgBBAFQA
+RQAAAP//BgBPAEIASgBFAEMAVAAAAAAA//8AAAAAAAAFAAgAAAAAABF43osEAAcAAAAAAB0AAAIA
+AAA=
+</rawitemdata></item>
+<item name='$$ScriptName' summary='false' sign='true'><text>MateriaisRevenda</text></item>
+<item name='$$FormScript' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Queryopen(Source As Notesuidocument, Mode As Integer, Isnewdoc As Variant, Continue As Variant)
+Declare Sub Querymodechange(Source As Notesuidocument, Continue As Variant)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:BindEvents:1:129
+Private Sub BindEvents(Byval Objectname_ As String)
+     Static Source As NOTESUIDOCUMENT
+     Set Source = Bind(Objectname_)
+     On Event Queryopen From Source Call Queryopen
+     On Event Querymodechange From Source Call Querymodechange
+End Sub
+
+'++LotusScript Development Environment:2:2:Queryopen:1:12
+Sub Queryopen(Source As Notesuidocument, Mode As Integer, Isnewdoc As Variant, Continue As Variant)
+     If source.isnewdoc Then
+          Goto depoisCheckSaldos
+     End If
+     Dim workspace As New NotesUIWorkspace
+     Dim session As New NotesSession
+     Dim uidoc As NotesDocument
+     Set uidoc = Source.Document
+     Dim db As NotesDatabase
+     Set db = session.CurrentDatabase
+     Dim doc As NotesDocument
+     
+     ' Inserindo saldos a baixar nos campos de Saldos caso o pedido esteja pendente ou parcial
+     ' Restaurando valores para a descrição dos ítens que já foram entregues para os pedidos parciais ou pendentes
+     
+     If uidoc.Sit(0) &lt;&gt; "OK" Then
+          Dim viewCompras As NotesView
+          Set viewCompras = db.GetView("(ComprasPONItem)")
+          Dim dc As NotesDocumentCollection
+          scan% = 0
+          Do While scan% &lt; 15
+               Set dc = viewCompras.getAllDocumentsByKey(uidoc.PO(0) &amp; "/" &amp; Cstr(scan%+1))
+               If Not(dc Is Nothing) Then
+                    array = uidoc.GetItemValue("Q_" &amp; Cstr(scan%))
+                    Set doc = dc.GetFirstDocument
+                    saldo% = array(0) - dc.Count
+                    Set item = uidoc.ReplaceItemValue("S_" &amp; Cstr(scan%),saldo%)                                        
+                    If saldo% &lt;&gt; Int(array(0)) Then
+                         Msgbox("Você alterou um produto no pedido, porém este produto já foi recebido. O dado foi restaurado")
+                         Set item = uidoc.ReplaceItemValue("Produto_" &amp; Cstr(scan%), doc.Produto(0))           
+                    End If
+                    
+               End If
+               scan% = scan% + 1               
+          Loop
+     End If
+     
+depoisCheckSaldos:
+     
+End Sub
+'++LotusScript Development Environment:2:2:Querymodechange:1:12
+Sub Querymodechange(Source As Notesuidocument, Continue As Variant)
+     
+End Sub<break/></text></item>
+<item name='$$$FormScript_O' sign='true'>
+<rawitemdata type='14'>
+AQAsAUxTT0IDABQAZW4AAAQANACjAQQAAACECsQFAAAAAAAAIASwCQAAAAAkAFABGAAAAOwAbAFU
+AAAAAAAAAAMAAACgADACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAA
+oAB4AXgBMAIwAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAgAAAAQALAJEAD8BAAAAABQA9gHAAAAAMAFwAUAAAAAAAAAAAAAAAAAAAAA
+AAAAACwECAewCbAJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAMAyAUAAAAAOAAIACoAQQA1ADYAQQA3ADMAMAAAACOlbAADAE4A
+RQBXAAAAgAAGAEQARQBMAEUAVABFAAAAfey0AAoASQBOAEkAVABJAEEATABJAFoARQAAAAUaOAIJ
+AFQARQBSAE0ASQBOAEEAVABFAAAA2AAGAE8AQgBKAEUAQwBUAAAAYAWIAAAAAAClGqAACQBRAFUA
+RQBSAFkATwBQAEUATgAAAPwABgBTAE8AVQBSAEMARQAAAGAFFAEPAE4ATwBUAEUAUwBVAEkARABP
+AEMAVQBNAEUATgBUAAAALAEGACUATABTAFgAVQBJAAAACYSsAgQATQBPAEQARQAAAH2EZAMIAEkA
+UwBOAEUAVwBEAE8AQwAAAAgAsAEIAEMATwBOAFQASQBOAFUARQAAAAgA3AIPAFEAVQBFAFIAWQBN
+AE8ARABFAEMASABBAE4ARwBFAAAAiAEKAEIASQBOAEQARQBWAEUATgBUAFMAAABUAMgBCwBPAEIA
+SgBFAEMAVABOAEEATQBFAF8AAAD0AhEARABFAFAATwBJAFMAQwBIAEUAQwBLAFMAQQBMAEQATwBT
+AAAA8AEJAFcATwBSAEsAUwBQAEEAQwBFAAAABAIQAE4ATwBUAEUAUwBVAEkAVwBPAFIASwBTAFAA
+QQBDAEUAAABMACQCBwBTAEUAUwBTAEkATwBOAAAAiAIMAE4ATwBUAEUAUwBTAEUAUwBTAEkATwBO
+AAAAUwDoAgYAJQBMAFMAWABCAEUAAABUAEgCBQBVAEkARABPAEMAAABoAg0ATgBPAFQARQBTAEQA
+TwBDAFUATQBFAE4AVAAAAKACDQBOAE8AVABFAFMARABBAFQAQQBCAEEAUwBFAAAAKAMIAEQATwBD
+AFUATQBFAE4AVAAAAEUA0AICAEQAQgAAAB0BcAMPAEMAVQBSAFIARQBOAFQARABBAFQAQQBCAEEA
+UwBFAAAAEAMDAEQATwBDAAAApAMDAFMASQBUAAAA//8CAE8ASwAAAA0A5AMLAFYASQBFAFcAQwBP
+AE0AUABSAEEAUwAAALQDCQBOAE8AVABFAFMAVgBJAEUAVwAAADwDBwBHAEUAVABWAEkARQBXAAAA
+8AMQACgAQwBvAG0AcAByAGEAcwBQAE8ATgBJAHQAZQBtACkAAABNADQEAgBEAEMAAAAPAHwEFwBO
+AE8AVABFAFMARABPAEMAVQBNAEUATgBUAEMATwBMAEwARQBDAFQASQBPAE4AAAAIBAQAUwBDAEEA
+TgAAAAAAmAUUAEcARQBUAEEATABMAEQATwBDAFUATQBFAE4AVABTAEIAWQBLAEUAWQAAAAAAKAQC
+AFAATwAAAAAA+AMBAC8AAACMBAUAQQBSAFIAQQBZAAAAbAQMAEcARQBUAEkAVABFAE0AVgBBAEwA
+VQBFAAAAAADYBAIAUQBfAAAATgBcBBAARwBFAFQARgBJAFIAUwBUAEQATwBDAFUATQBFAE4AVAAA
+AAwA//8FAFMAQQBMAEQATwAAALAFBQBDAE8AVQBOAFQAAADMBAQASQBUAEUATQAAAFgAtAQQAFIA
+RQBQAEwAQQBDAEUASQBUAEUATQBWAEEATABVAEUAAAB0AP//CQBOAE8AVABFAFMASQBUAEUATQAA
+AP//AgBTAF8AAAADAP//XABWAG8AYwDqACAAYQBsAHQAZQByAG8AdQAgAHUAbQAgAHAAcgBvAGQA
+dQB0AG8AIABuAG8AIABwAGUAZABpAGQAbwAsACAAcABvAHIA6QBtACAAZQBzAHQAZQAgAHAAcgBv
+AGQAdQB0AG8AIABqAOEAIABmAG8AaQAgAHIAZQBjAGUAYgBpAGQAbwAuACAATwAgAGQAYQBkAG8A
+IABmAG8AaQAgAHIAZQBzAHQAYQB1AHIAYQBkAG8AAAClGv//CABQAHIAbwBkAHUAdABvAF8AAABR
+6P//BwBQAFIATwBEAFUAVABPAAAABQCICgAAAAAp+DdKGgAAANwAAAAAAAAAEAAAAFAD/AS4AAAA
+AAAAAAIAAAAcA5QGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcAxwDAAAAAAAAAACU
+BpQGAAAAAAQVEyntLmkQv10A3QERhrcAAAAAAAAAAAAAAAAAAAAAZAAAAIBJwAAAAAAAAAAAAAIA
+BAAAAAQDAAAAAAoAAQAAAAAACAAAAHgBAACMAAAAAAAAAA8AAAA4AWwJAAAAADgJOAkAAAAAbAls
+CcgIyAgAAAAA7AbsBmgBuAZYAWgIAAAAADgBmAdIAXgIAAAAAAQAAAAVAAAALgAAAEgAAAABAAAA
+QANAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAA0ADAAAAAAAAAAAAAAAAAAAAAAAAAAAD
+AAEASAGYB6QACQIAABAAAwABAFgBEATwAAEAAQAAAAMAAQBoAewEAAEAAAIAAAADAAEAEASEBhgB
+AAADAAAACAAAADACAAAwAQAAAAAAAAIAAAAQAiACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ACACIAIAAAAAAAAAABACEAIAAAAAAAAAAAIAAAAAAAAAnwEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAEAIAIAAKQACQIA
+ABAAAwABAAAAAAAYAQAAAQAAAAgAAAAAAAAAVAEAAAAAAAACAAAAyALYAgAAAAAAAAAAAAAAAAAA
+AADIAsgCAAAAAAAAAAAAAAAAAAAAAAAAAADYAtgCAAAAAAAAAAABAAAAAgAAAAMAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AwABANgCAABwAQYIAAAAAAMAIAAAAAAApAAJAgAAEAATAAAAjAAAAMoAAAADAAAAAwAAAAAAAQgA
+CAAAEwDoAjABAADNAAAAAQAAAAEAAAAAAAAAEQAQBZQGAAAAAQAArgYAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAADQAAAAAAAACMARQAmAEZABAAAAAsBNgHzAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACFRMp7S5pEL9dAN0BEYa3
+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
+NQAaNwAaOQAdGj0AHQIAAAA=
+</rawitemdata></item>
+<item name='Q_0' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_0' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_0' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_0' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_0' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_0' summary='false' sign='true'><number>0</number></item>
+<item name='IC_0' summary='false' sign='true'><number>0</number></item>
+<item name='IP_0' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_0' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_0' summary='false' sign='true'><number>0</number></item>
+<item name='B_0' summary='false' sign='true'><number>0</number></item>
+<item name='Q_1' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_1' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_1' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_1' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_1' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_1' summary='false' sign='true'><number>0</number></item>
+<item name='IC_1' summary='false' sign='true'><number>0</number></item>
+<item name='IP_1' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_1' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_1' summary='false' sign='true'><number>0</number></item>
+<item name='B_1' summary='false' sign='true'><number>0</number></item>
+<item name='Q_2' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_2' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_2' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_2' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_2' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_2' summary='false' sign='true'><number>0</number></item>
+<item name='IC_2' summary='false' sign='true'><number>0</number></item>
+<item name='IP_2' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_2' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_2' summary='false' sign='true'><number>0</number></item>
+<item name='B_2' summary='false' sign='true'><number>0</number></item>
+<item name='Q_3' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_3' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_3' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_3' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_3' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_3' summary='false' sign='true'><number>0</number></item>
+<item name='IC_3' summary='false' sign='true'><number>0</number></item>
+<item name='IP_3' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_3' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_3' summary='false' sign='true'><number>0</number></item>
+<item name='B_3' summary='false' sign='true'><number>0</number></item>
+<item name='Q_4' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_4' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_4' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_4' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_4' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_4' summary='false' sign='true'><number>0</number></item>
+<item name='IC_4' summary='false' sign='true'><number>0</number></item>
+<item name='IP_4' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_4' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_4' summary='false' sign='true'><number>0</number></item>
+<item name='B_4' summary='false' sign='true'><number>0</number></item>
+<item name='Q_5' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_5' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_5' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_5' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_5' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_5' summary='false' sign='true'><number>0</number></item>
+<item name='IC_5' summary='false' sign='true'><number>0</number></item>
+<item name='IP_5' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_5' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_5' summary='false' sign='true'><number>0</number></item>
+<item name='B_5' summary='false' sign='true'><number>0</number></item>
+<item name='Q_6' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_6' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_6' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_6' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_6' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_6' summary='false' sign='true'><number>0</number></item>
+<item name='IC_6' summary='false' sign='true'><number>0</number></item>
+<item name='IP_6' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_6' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_6' summary='false' sign='true'><number>0</number></item>
+<item name='B_6' summary='false' sign='true'><number>0</number></item>
+<item name='Q_7' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_7' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_7' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_7' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_7' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_7' summary='false' sign='true'><number>0</number></item>
+<item name='IC_7' summary='false' sign='true'><number>0</number></item>
+<item name='IP_7' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_7' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_7' summary='false' sign='true'><number>0</number></item>
+<item name='B_7' summary='false' sign='true'><number>0</number></item>
+<item name='Q_8' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_8' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_8' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_8' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_8' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_8' summary='false' sign='true'><number>0</number></item>
+<item name='IC_8' summary='false' sign='true'><number>0</number></item>
+<item name='IP_8' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_8' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_8' summary='false' sign='true'><number>0</number></item>
+<item name='B_8' summary='false' sign='true'><number>0</number></item>
+<item name='Q_9' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_9' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_9' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_9' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_9' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_9' summary='false' sign='true'><number>0</number></item>
+<item name='IC_9' summary='false' sign='true'><number>0</number></item>
+<item name='IP_9' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_9' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_9' summary='false' sign='true'><number>0</number></item>
+<item name='B_9' summary='false' sign='true'><number>0</number></item>
+<item name='Q_10' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_10' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_10' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_10' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_10' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_10' summary='false' sign='true'><number>0</number></item>
+<item name='IC_10' summary='false' sign='true'><number>0</number></item>
+<item name='IP_10' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_10' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_10' summary='false' sign='true'><number>0</number></item>
+<item name='B_10' summary='false' sign='true'><number>0</number></item>
+<item name='Q_11' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_11' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_11' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_11' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_11' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_11' summary='false' sign='true'><number>0</number></item>
+<item name='IC_11' summary='false' sign='true'><number>0</number></item>
+<item name='IP_11' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_11' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_11' summary='false' sign='true'><number>0</number></item>
+<item name='B_11' summary='false' sign='true'><number>0</number></item>
+<item name='Q_12' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_12' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_12' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_12' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_12' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_12' summary='false' sign='true'><number>0</number></item>
+<item name='IC_12' summary='false' sign='true'><number>0</number></item>
+<item name='IP_12' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_12' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_12' summary='false' sign='true'><number>0</number></item>
+<item name='B_12' summary='false' sign='true'><number>0</number></item>
+<item name='Q_13' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_13' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_13' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_13' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_13' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_13' summary='false' sign='true'><number>0</number></item>
+<item name='IC_13' summary='false' sign='true'><number>0</number></item>
+<item name='IP_13' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_13' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_13' summary='false' sign='true'><number>0</number></item>
+<item name='B_13' summary='false' sign='true'><number>0</number></item>
+<item name='Q_14' summary='false' sign='true'><number>0</number></item>
+<item name='PartNo_14' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Produto_14' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='us_14' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CustoUnit_14' summary='false' sign='true'><number>0</number></item>
+<item name='CusTot_14' summary='false' sign='true'><number>0</number></item>
+<item name='IC_14' summary='false' sign='true'><number>0</number></item>
+<item name='IP_14' summary='false' sign='true'><number>0</number></item>
+<item name='NSerie_14' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='S_14' summary='false' sign='true'><number>0</number></item>
+<item name='B_14' summary='false' sign='true'><number>0</number></item>
+<item name='$Fields'><textlist><text>B_14</text><text>S_14</text><text>NSerie_14</text><text
+>IP_14</text><text>IC_14</text><text>CusTot_14</text><text>CustoUnit_14</text><text
+>us_14</text><text>Produto_14</text><text>PartNo_14</text><text>Q_14</text><text
+>B_13</text><text>S_13</text><text>NSerie_13</text><text>IP_13</text><text
+>IC_13</text><text>CusTot_13</text><text>CustoUnit_13</text><text>us_13</text><text
+>Produto_13</text><text>PartNo_13</text><text>Q_13</text><text>B_12</text><text
+>S_12</text><text>NSerie_12</text><text>IP_12</text><text>IC_12</text><text
+>CusTot_12</text><text>CustoUnit_12</text><text>us_12</text><text>Produto_12</text><text
+>PartNo_12</text><text>Q_12</text><text>B_11</text><text>S_11</text><text
+>NSerie_11</text><text>IP_11</text><text>IC_11</text><text>CusTot_11</text><text
+>CustoUnit_11</text><text>us_11</text><text>Produto_11</text><text>PartNo_11</text><text
+>Q_11</text><text>B_10</text><text>S_10</text><text>NSerie_10</text><text
+>IP_10</text><text>IC_10</text><text>CusTot_10</text><text>CustoUnit_10</text><text
+>us_10</text><text>Produto_10</text><text>PartNo_10</text><text>Q_10</text><text
+>B_9</text><text>S_9</text><text>NSerie_9</text><text>IP_9</text><text>IC_9</text><text
+>CusTot_9</text><text>CustoUnit_9</text><text>us_9</text><text>Produto_9</text><text
+>PartNo_9</text><text>Q_9</text><text>B_8</text><text>S_8</text><text>NSerie_8</text><text
+>IP_8</text><text>IC_8</text><text>CusTot_8</text><text>CustoUnit_8</text><text
+>us_8</text><text>Produto_8</text><text>PartNo_8</text><text>Q_8</text><text
+>B_7</text><text>S_7</text><text>NSerie_7</text><text>IP_7</text><text>IC_7</text><text
+>CusTot_7</text><text>CustoUnit_7</text><text>us_7</text><text>Produto_7</text><text
+>PartNo_7</text><text>Q_7</text><text>B_6</text><text>S_6</text><text>NSerie_6</text><text
+>IP_6</text><text>IC_6</text><text>CusTot_6</text><text>CustoUnit_6</text><text
+>us_6</text><text>Produto_6</text><text>PartNo_6</text><text>Q_6</text><text
+>B_5</text><text>S_5</text><text>NSerie_5</text><text>IP_5</text><text>IC_5</text><text
+>CusTot_5</text><text>CustoUnit_5</text><text>us_5</text><text>Produto_5</text><text
+>PartNo_5</text><text>Q_5</text><text>B_4</text><text>S_4</text><text>NSerie_4</text><text
+>IP_4</text><text>IC_4</text><text>CusTot_4</text><text>CustoUnit_4</text><text
+>us_4</text><text>Produto_4</text><text>PartNo_4</text><text>Q_4</text><text
+>B_3</text><text>S_3</text><text>NSerie_3</text><text>IP_3</text><text>IC_3</text><text
+>CusTot_3</text><text>CustoUnit_3</text><text>us_3</text><text>Produto_3</text><text
+>PartNo_3</text><text>Q_3</text><text>B_2</text><text>S_2</text><text>NSerie_2</text><text
+>IP_2</text><text>IC_2</text><text>CusTot_2</text><text>CustoUnit_2</text><text
+>us_2</text><text>Produto_2</text><text>PartNo_2</text><text>Q_2</text><text
+>B_1</text><text>S_1</text><text>NSerie_1</text><text>IP_1</text><text>IC_1</text><text
+>CusTot_1</text><text>CustoUnit_1</text><text>us_1</text><text>Produto_1</text><text
+>PartNo_1</text><text>Q_1</text><text>B_0</text><text>S_0</text><text>NSerie_0</text><text
+>IP_0</text><text>IC_0</text><text>CusTot_0</text><text>CustoUnit_0</text><text
+>us_0</text><text>Produto_0</text><text>PartNo_0</text><text>Q_0</text></textlist></item>
+<item name='$Body' sign='true'>
+<rawitemdata type='1'>
+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
+</rawitemdata></item></note>
+

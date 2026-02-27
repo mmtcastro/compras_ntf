@@ -1,0 +1,92 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub LinkDespesas( uidoc As NotesUiDocument )
+Declare Function geraCodigoPedido( uidoc)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Private uidoc
+
+'++LotusScript Development Environment:2:2:LinkDespesas:1:8
+Sub LinkDespesas( uidoc As NotesUiDocument )
+     
+     If Not( uidoc.Isnewdoc ) Then
+          Dim session As New NotesSession
+          Dim docAtual As NotesDocument
+          Set docAtual = uidoc.Document
+          Dim db As NotesDatabase
+          Dim view As NotesView 
+          Dim dc As NotesDocumentCollection
+          Dim doc As NotesDocument                    
+          Dim dbDesp As New NotesDatabase("TDec","caixa.nsf")
+          Set view = dbDesp.GetView( "Dados\IDOrigem" )               
+          Set dc = view.GetAllDocumentsByKey(docAtual.IDOrigem(0), False)
+          Set doc = dc.GetFirstDocument  
+          Dim rtitem As Variant     
+          If docAtual.HasItem( "LinkDespesas" ) Then
+               Set rtitem = docAtual.GetFirstItem( "LinkDespesas" )
+               Call rtitem.Remove
+          End If               
+          Dim richStyle As NotesRichTextStyle
+          Set richStyle = session.CreateRichTextStyle
+          richStyle.NotesFont = FONT_ROMAN
+          richStyle.FontSize = 8
+          richStyle.NotesColor = COLOR_BLUE
+          Set rtitem = docAtual.CreateRichTextItem( "LinkDespesas" )
+          Call rtitem.AppendStyle(richStyle)
+          If rtitem.Type = RICHTEXT Then
+               While Not ( doc Is Nothing )                         
+                    Call rtitem.AppendDocLink( doc, "Link com Despesa" )
+                    Call rtitem.AppendText( doc.VencimentoDespesa(0) )
+                    Call rtitem.AppendText( " " )
+                    Call rtitem.AppendText( doc.ClassificacaoDespesa(0) )
+                    Call rtitem.AppendText( " " )
+                    richStyle.NotesColor = COLOR_RED
+                    Call rtitem.AppendStyle(richStyle)
+                    Call rtitem.AppendText( doc.Sit(0) )
+                    If doc.Sit(0) = "OK" Then
+                         Call rtitem.AppendText( " em " )
+                         Call rtitem.AppendText( doc.Pagamento(0) )
+                         Call rtitem.AppendText( " Nº Cheque " )
+                         Call rtitem.AppendText( doc.NCheque(0) )                              
+                         Call rtitem.AppendText( " " )
+                         Call rtitem.AppendText( doc.Banco(0) )                               
+                    End If
+                    richStyle.NotesColor = COLOR_BLUE
+                    Call rtitem.AppendStyle(richStyle)
+                    Call rtitem.AppendText( " R$" )
+                    Call rtitem.AppendText( Str(doc.TotTot(0)) )        
+                    Call rtitem.AddNewLine( 1 )
+                    Set doc = dc.GetNextDocument( doc )
+               Wend                            
+          End If
+     End If
+     
+End Sub
+
+'++LotusScript Development Environment:2:1:geraCodigoPedido:1:8
+Function geraCodigoPedido( uidoc)
+     
+     Dim workspace As New NotesUiWorkspace
+     Dim session As New NotesSession
+     Dim db As notesdatabase
+     Set db = session.currentdatabase
+     Dim view As notesview
+     Set view = db.getView("(NacionaisCodigo)")
+     Dim ckCodigo As String, scan As Integer
+     ckCodigo$ = uidoc.CodCliente(0) + "-1"
+     Dim doc As notesdocument
+     Set doc = view.GetDocumentByKey( ckCodigo$ , True)
+     scan% = 1
+     Do Until doc Is Nothing
+          scan% = scan% + 1
+          ckCodigo$ = uidoc.CodCliente(0) + "-" + Cstr(scan%)
+          Set doc = view.GetDocumentByKey( ckCodigo$ , True)
+     Loop               
+     geraCodigoPedido = ckCodigo$
+     
+End Function

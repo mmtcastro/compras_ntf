@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="7b6" sequence="618" unid="0B3F92F71C2E9F76832578ED004BB4AE">
+<created><datetime dst="true">20110815T114654,54-02</datetime></created>
+<modified><datetime>20250505T094551,05-03</datetime></modified>
+<revised><datetime>20250430T163726,81-03</datetime></revised>
+<lastaccessed><datetime>20250505T094551,04-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123116,21-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$POID"><datetime dst="true">20041206T170309,83-02</datetime></item>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$TITLE" sign="true"><text>Cotacoes</text></item>
+<item name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
+
+</note>

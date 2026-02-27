@@ -1,0 +1,110 @@
+'++LotusScript Development Environment:2:5:(Options):0:66
+Option Public
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Function RemoverStringDepois ( Palavra As String, Separador As String ) As String
+Declare Function RemoverStringAntes ( Palavra As String, Separador As String ) As String
+Declare Function VerificaForm ( dc As NotesDocumentCollection, FormName As String ) As Variant
+Declare Sub LinkBaixas( uidoc As NotesUiDocument )
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:1:RemoverStringDepois:1:8
+Function RemoverStringDepois ( Palavra As String, Separador As String ) As String
+'Obtém uma string a partir do último Separador encontrado ( da direita p/ esquerda )	
+	Dim Encontrou As Variant
+	
+	Encontrou = False
+	
+	Do While ( Not Encontrou ) And ( Len ( Palavra ) >= 1 )
+		If ( Right ( Palavra, Len ( Separador) ) = Separador ) Then
+			Encontrou = True
+		End If
+		Palavra = Mid ( Palavra, 1, Len ( Palavra ) - 1 )
+	Loop
+	
+	If ( Not Encontrou ) Then
+		Palavra = ""
+	End If
+	
+	RemoverStringDepois = Palavra
+	
+End Function
+'++LotusScript Development Environment:2:1:RemoverStringAntes:1:8
+Function RemoverStringAntes ( Palavra As String, Separador As String ) As String
+	'Obtém uma string após o último Separador encontrado ( da direita p/ esquerda )
+	Dim Encontrou As Variant
+	Dim Posicao As Integer
+	
+	Posicao = Instr ( Palavra, Separador )
+	
+	If ( Posicao <> 0 ) Then
+		Encontrou = True
+	Else
+		Encontrou = False
+	End If
+	
+	If Encontrou Then
+		Palavra = Mid ( Palavra, Posicao + 1, Len ( Palavra ) )
+	Else
+		Palavra = ""
+	End If
+	
+	RemoverStringAntes = Palavra
+	
+End Function
+'++LotusScript Development Environment:2:1:VerificaForm:1:8
+Function VerificaForm ( dc As NotesDocumentCollection, FormName As String ) As Variant
+'Verifica se todos os documentos da Collection foi criado pelo mesmo form	
+	
+	Dim OK As Variant
+	Dim doc As NotesDocument
+	
+	OK = True
+	Set doc = dc.GetFirstDocument ( )
+	
+	Do While Not ( doc Is Nothing )
+		If doc.Form(0) <> FormName Then
+			OK = False
+		End If
+		Set doc = dc.GetNextDocument ( doc )
+	Loop
+	
+	VerificaForm = OK
+	
+End Function
+'++LotusScript Development Environment:2:2:LinkBaixas:1:8
+Sub LinkBaixas( uidoc As NotesUiDocument )
+	
+	On Error Goto DeletaramBaixa
+     'depois de diversas tentativas, o $REF não está funcionando devidamente, desenvolvi esta rotina.
+	
+	If Not( uidoc.Isnewdoc ) Then
+		
+		Dim session As New NotesSession
+		Dim db As NotesDatabase
+		Dim rtitem As Variant
+		Dim docBaixa As NotesDocument
+		Dim viewBaixas As NotesView
+		
+		Call uidoc.Document.RemoveItem( "LinkBaixa" )
+		Set rtitem = uidoc.Document.CreateRichTextItem( "LinkBaixa" )
+		
+		Set db = session.CurrentDatabase
+		Set viewBaixas = db.GetView ( "2. Baixas\DocID" ) 
+		Set docBaixa = viewBaixas.GetDocumentByKey ( "Baixa-" + RemoverStringAntes ( uidoc.document.DocID(0), "-" ), True ) 
+		
+		If rtitem.Type = RICHTEXT Then			
+			Call rtitem.AppendDocLink( docPedido, "Link com Baixa" )
+		End If
+		
+	End If
+	Exit Sub
+	
+DeletaramBaixa:
+	If Not ( uidoc.Isnewdoc ) Then
+		Call rtitem.AppendText( "Baixa foi Deletada" )
+	End If
+	Exit Sub
+	
+End Sub

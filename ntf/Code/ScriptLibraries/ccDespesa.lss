@@ -1,0 +1,322 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+Use "GeraJavaId"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Class ccDespesa
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Class ccDespesa
+	
+	Private docOrigem As NotesDocument
+	Private autor As String
+	Private criacao As Variant
+	Private codEmpresa As String
+	Private descricaoNegocio As String
+	Private cliente As String
+	Private docLink As NotesRichTextItem
+	Private tipocusto As String
+	Private server As String
+	Private dbOrigem As String
+	Private idOrigem As String
+		
+	Private origem_ As String
+	Private codigo_ As String
+	Private codigoAnterior_ As String
+	Private sit_ As String
+	Private classificacao_ As String
+	Private area_ As String
+	Private responsavel_ As String
+	Private data_ As Variant
+	Private vencimento_ As Variant
+	Private adianta_ As Variant
+	Private descricao_ As String
+	Private valor_ As Double
+	Private docID_ As String
+	Private tipoCompra_ As String
+	Private tipoVenda_ As String
+	Private tag_ As String
+	Private areas_ As Variant
+	Private overhead_ As Variant
+	
+	Private doc As NotesDocument
+	Private dbNegocios As NotesDatabase     
+	Private viewNegocios As NotesView
+	Private negocio As NotesDocument
+	Private link As NotesRichTextItem
+	Private dbDespesa As NotesDatabase
+	Private despesa As NotesDocument
+	Private session As NotesSession
+	Private venc As NotesDateTime
+	Private dt As NotesDateTime
+	Private dbFat As Notesdatabase
+	Private viewFat As NotesView
+	Private fatura As NotesDocument
+	Private dbAdm As NotesDatabase
+	Private viewAdm As NotesView
+	Private areaAdm As NotesDocument
+	Private dbBancos As NotesDatabase
+	Private viewConciliacao As NotesView
+	Private conciliacao As NotesDocument
+		
+	Sub New( doc As NotesDocument )
+		
+		Set docOrigem = doc
+		Dim session As New NotesSession
+		codEmpresa = doc.CodEmpresa(0)
+		autor$ = session.CommonUserName
+		criacao = Now
+		dbOrigem$ = doc.Parentdatabase.Filename     
+		idOrigem$ = doc.UniversalID     
+		server$ = doc.ParentDatabase.Server
+		adianta_ = False
+		sit_ = "Pendente"
+		codigo_ = doc.Codigo(0)
+		
+	End Sub
+	
+	Property Set Origem As String
+		origem_$ = Origem
+	End Property
+	Property Set DocID As String
+		docID_$ = DocID
+	End Property
+	Property Set Codigo As String
+		codigo_$ = Codigo
+	End Property
+	Property Set CodigoAnterior As String
+		codigoAnterior_$ = CodigoAnterior
+	End Property
+	Property Set Sit As String
+		sit_$ = Sit
+	End Property
+	Property Set Classificacao As String
+		classificacao_$ = Classificacao
+	End Property
+	Property Set Area As String
+		area_$ = Area
+	End Property
+	Property Set Responsavel As String
+		responsavel_$ = Responsavel
+	End Property
+	Property Set Data As Variant
+		Set dt = New NotesDateTime( Cstr( Data ) )
+		data_ = Datevalue( dt.DateOnly )
+	End Property
+	Property Set Vencimento As Variant
+		Set venc = New NotesDateTime( Cstr( Vencimento ) )
+		vencimento_ = Datevalue( ( venc.DateOnly ) )
+	End Property
+	Property Set Adianta As Variant
+		adianta_  = Adianta
+	End Property     
+	Property Set Descricao As String
+		descricao_$  = Descricao
+	End Property     
+	Property Set Valor As Double
+		valor_#  = Valor
+	End Property     	
+	Property Set TipoCompra As String
+		tipoCompra_$  = TipoCompra
+	End Property  
+	Property Set TipoVenda As String
+		tipoVenda_$  = TipoVenda
+	End Property  
+	Property Set Tag As String
+		tag_$  = Tag
+	End Property  
+	Property Set Areas As Variant
+		areas_  = Areas
+	End Property  
+	Property Set OverHead As Variant
+		overhead_ = OverHead
+	End Property  
+	
+    'Template para cópia para utilização em novas Rotinas
+	'desp.Origem = 
+	'desp.Codigo = Default igual ao Código da Origem (Sub New)
+	'desp.CodigoAnterior = 
+	'desp.Sit = Default igual a Pendente (Sub New) 
+	'desp.Classificacao = 
+	'desp.Area = 
+	'desp.Responsavel = 
+	'desp.Data = 
+	'desp.Vencimento = 
+	'desp.Adianta = Default igual a False (Sub New) 
+	'desp.Descricao = 
+	'desp.Valor = 
+	'desp.TipoCompra = 
+	'desp.TipoVenda = 
+	'desp.Tag = 
+	'desp.DocID = 
+	'desp.Areas = 
+	'desp.OverHead = 
+	
+	Sub Save
+		
+		Set dbDespesa = New NotesDatabase( server$, "caixa.nsf")
+		Dim despesa As New NotesDocument( dbDespesa )
+		Set link = despesa.CreateRichTextItem( "DocLink" )
+		Call link.AppendDocLink( Me.docOrigem, "Link com Origem da Despesa" )
+		
+		Set dbFat = New NotesDatabase( server$, "faturas.nsf" )
+		Set viewFat = dbFat.GetView( "ClassificacaoDespesas" )
+		Set fatura = viewFat.GetDocumentByKey( Me.classificacao_, True )
+		If  fatura Is Nothing Then 
+			Msgbox( "Você entrou com uma classificacao inválida para esta despesa" )
+			Exit Sub
+		End If
+		
+		'Nome do Cliente e descricao do Negocio
+		If codigo_ = "TDECIR" Or codigo_ = "TDECINSS" Or codigo_ = "TDECPIS" Or codigo_ = "TDECCOFINS" Or codigo_ = "TDECCSLL" Or codigo_ = "TDECISS" Then
+			'Retenções
+			descricaoNegocio$ = "Código Utilizado para Retenção: " & classificacao_
+			cliente = codigo_
+			
+		ElseIf codigo_ = "TDECREDES" Then
+			'Sem Negócio
+			descricaoNegocio$ = "Código Utilizado para Capital de Giro: " & classificacao_
+			cliente = codigo_
+				
+		ElseIf tipoCompra_ = "Revenda" Or tipoCompra_ = "Projeto" Or (tipoCompra_ = "Ativo" And tipoVenda_ = "Contrato") Then
+			Set dbNegocios = New NotesDatabase( server$ ,"sales.nsf")
+			'Set viewNegocios = dbNegocios.GetView( "(CodigoNegocio)" )
+			Set viewNegocios = dbNegocios.GetView("(NegociosCodigo)")
+			Set negocio = viewNegocios.getDocumentByKey(codigo_, True)
+			If negocio Is Nothing Then
+				MsgBox("Erro - Não existe um Negócio cadastrado nas base de dados de Vendas referente a esta despesa")
+				Exit Sub
+			End If
+			descricaoNegocio$ = negocio.Descricao(0)
+			cliente = negocio.Cliente(0)   
+			   
+		ElseIf LCase(dbOrigem) = "pessoal.nsf" Then
+			Set dbNegocios = New NotesDatabase( server$ ,"pessoal.nsf")
+			Set viewNegocios = dbNegocios.GetView( "(RequisiçõesCodigo)" )
+			Set negocio = viewNegocios.getDocumentByKey(codigo_, True)
+			If negocio Is Nothing Then
+				MsgBox("Erro - Não existe um Negócio cadastrado nas base de dados de Administração referente a esta despesa")
+				Exit Sub
+			End If
+			descricaoNegocio$ = negocio.Descricao(0)
+			cliente = "TDec"
+			
+		Else
+			Set dbNegocios = New NotesDatabase( server$ ,"adm.nsf")
+			Set viewNegocios = dbNegocios.GetView("(RequisiçõesCodigo)")
+			Set negocio = viewNegocios.getDocumentByKey(codigo_, True)
+			If negocio Is Nothing Then
+				MsgBox("Erro - Não existe um Negócio cadastrado nas base de dados de Administração referente a esta despesa")
+				Exit Sub
+			End If
+			descricaoNegocio$ = negocio.Descricao(0)
+			cliente = "TDec"
+			
+		End If
+		
+		'Código do Cliente e do Grupo Econômico
+		If tipoCompra_ = "Revenda" Or tipoCompra_ = "Projeto" Or (tipoCompra_ = "Ativo" And tipoVenda_ = "Contrato") Then
+			If Not negocio Is Nothing Then
+				despesa.CodCliente = negocio.CodCliente(0)
+				despesa.CodigoGrupoEconomico = negocio.CodigoGrupoEconomico(0)
+			End If
+		End If
+		
+		'Dados Bancários
+		If LCase(dbOrigem) = "pessoal.nsf" Or LCase(dbOrigem) = "adm.nsf" Then
+			If Not negocio Is Nothing Then
+				despesa.Nome = negocio.Nome(0)
+				despesa.TipoInscricao = negocio.TipoInscricao(0)
+				despesa.CNPJ = negocio.CNPJ(0)
+				despesa.CPF = negocio.CPF(0)
+				despesa.RG = negocio.RG(0)
+				despesa.Banco = negocio.Banco(0)
+				despesa.Banco_1 = negocio.Banco_1(0)
+				despesa.Agencia = negocio.Agencia(0)
+				despesa.DV = negocio.DV(0)
+				despesa.Conta = negocio.Conta(0)
+				despesa.Digito = negocio.Digito(0)
+				despesa.ContaFavorecido = negocio.ContaFavorecido(0)
+				despesa.ChavePix = negocio.ChavePix(0)
+			End If
+		End If
+		
+		'No caso de não definição de Overhead, estes dados serão os mesmos que o da área com 100% de overhead
+		If Isempty( Me.Areas_ ) Or  Isempty( Me.Overhead_ )  Then 
+			Set dbAdm = New NotesDatabase( server$ ,"adm.nsf")
+			Set viewAdm = dbAdm.GetView( "Adm\Areas" )
+			Set areaAdm = viewAdm.GetDocumentByKey( Me.Area_, True)
+			If areaAdm Is Nothing Then	
+				Msgbox( "Erro de Sistema. Chamar Área de Desenvolvimento. Existe uma área dentro do código que usou uma área não cadastrada")
+				Me.Areas_ = Me.Area_
+				Me.Overhead_ = 1
+			Else
+				Me.Areas_ = areaAdm.Areas
+				Me.Overhead = areaAdm.Overhead		
+			End If
+		End If
+		
+		despesa.Form = "Despesa"
+		despesa.Id = geraJavaId(despesa)
+		despesa.TipoCusto = fatura.TipoDespesa
+		despesa.ClassContabil = fatura.ClassContabil
+		despesa.TipoCompra = tipoCompra_
+		despesa.Tag = tag_
+		despesa.Autor = Me.autor
+		despesa.Criacao = Me.criacao
+		despesa.Origem = Me.Origem_
+		despesa.CodigoNegocio = codigo_
+		despesa.CodigoAnterior = codigoAnterior_
+		despesa.CodEmpresa = codEmpresa
+		despesa.DBOrigem = Me.dbOrigem
+		despesa.IDOrigem = Me.idOrigem
+		despesa.ClassificacaoDespesa = Me.classificacao_
+		despesa.AreaDespesa = Me.Area_$
+		despesa.ResponsavelDespesa = Me.Responsavel_
+		despesa.DataDespesa = Me.data_
+		despesa.VencimentoDespesa = AjustaVencimento( Me.vencimento_ )
+		despesa.VencimentoHistorico = Me.vencimento_
+		despesa.TipoPagto = "Cheque"
+		despesa.TotTot = Me.valor_
+		despesa.Saida_0 = Me.valor_
+		despesa.Saldo_0 = Me.valor_
+		despesa.Saldo_14 = Me.valor_
+		despesa.DocID = docID_
+		despesa.Sit = Me.sit_
+		despesa.Cliente = cliente
+		despesa.DescricaoNegocio = descricaoNegocio
+		despesa.Descricao = Me.Descricao_$
+		despesa.Areas = Me.areas_ 
+		despesa.Overhead = Me.overhead_		
+		Call despesa.ComputeWithForm(False, False)
+		Call despesa.Save(True,True)
+		
+	End Sub
+	
+	Function AjustaVencimento( diavenc As Variant )
+		
+		'Verifica se o vencimento está em um final de semana ou feriado, adiantando ou atrasando o vencimento
+		Dim db As notesdatabase
+		Set db =  New NotesDatabase( server$ ,"adm.nsf")
+		Dim view As notesview
+		Set view = db.GetView( "Adm\Feriados" )
+		Dim chave As String
+		Dim dia As New NotesDateTime( Cstr(Day(diavenc))&"/"&Cstr(Month(diavenc))&"/"&Cstr(Year(diavenc)))
+		Dim doc As notesdocument
+		chave$ = Cstr(Day(diavenc) )  &"/"&Cstr(Month(diavenc))&"/"&Cstr(Year(diavenc))
+		Set doc = view.GetDocumentByKey(chave$, True )
+		Do While Not( doc Is Nothing ) Or Weekday(Datevalue(dia.dateonly))=1 Or Weekday(Datevalue(dia.dateonly))=7		
+			If adianta_  Then
+				Call dia.AdjustDay( -1)
+			Else
+				Call dia.AdjustDay( 1 ) 
+			End If
+			chave$ = Cstr(Day(Datevalue(dia.dateonly)))  &"/"&Cstr(Month(Datevalue(dia.Dateonly)))&"/"&Cstr(Year(Datevalue(dia.dateonly)))
+			Set doc = view.GetDocumentByKey(chave$, True )
+		Loop
+		AjustaVencimento = Datevalue( dia.DateOnly )
+		
+	End Function
+	
+End Class

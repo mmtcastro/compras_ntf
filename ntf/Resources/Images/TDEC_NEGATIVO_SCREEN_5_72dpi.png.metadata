@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="form" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="6f2" sequence="1" unid="7B5AD8E6687CB03383257E0D0080C563">
+<created><datetime dst="true">20150319T212631,39-02</datetime></created>
+<modified><datetime>20230919T123115,87-03</datetime></modified>
+<revised><datetime dst="true">20150319T212633,84-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,86-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,86-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name><name>CN=Melissa Lobo/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name="$TITLE"><text>TDEC_NEGATIVO_SCREEN_5_72dpi.png</text></item>
+<item name="$Flags"><text>34CiQ</text></item>
+<item name="$FlagsExt"><text>D</text></item>
+<item name="$ImagesWide" sign="true"><number>1</number></item>
+<item name="$ImagesHigh" sign="true"><number>1</number></item>
+<item name="$ImagesColorize" sign="true"><number>0</number></item>
+
+
+<item name="$FileModDT" sign="true"><datetime dst="true">20101019T105317,38-02</datetime></item>
+<item name="$ImageNames" sign="true"><text>TDEC_NEGATIVO_SCREEN_5_72dpi.png</text></item>
+<item name="$DesignerVersion"><text>8.5.3</text></item></note>

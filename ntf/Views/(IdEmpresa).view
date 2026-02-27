@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='6b2' unid='FA598E44D8CFE7C083258248005DC818' sequence='9'>
+<created><datetime dst='true'>20180306T150420,72-02</datetime></created>
+<modified><datetime>20230919T123115,71-03</datetime></modified>
+<revised><datetime dst='true'>20180306T153326,83-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,70-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,70-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>(IdEmpresa)</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+bAACAAwAAgAkMWkAAwAFADIALgAGAAkABAACAAIACQAEAElkRW1wcmVzYUZvcm0kMUlkJENvbmZs
+aWN0JFJFRgQABAAAABoABQAEAEZvcm0BAAYAUGVkaWRvCgIDAAcADgAIAAlMMVMyUzNT
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+IQACAABEAGYAAAAJAABmAAkABABJZEVtcHJlc2FGb3Jt
+</rawitemdata></item>
+<item name='$Collation1' summary='true'>
+<rawitemdata type='2'>
+FgABAABEAGYAAAAJAElkRW1wcmVzYQ==
+</rawitemdata></item>
+<item name='$Collation2' summary='true'>
+<rawitemdata type='2'>
+EQABAABEAGYAAAAEAEZvcm0=
+</rawitemdata></item>
+<item name='$Collation3' summary='true'>
+<rawitemdata type='2'>
+DwABAABEgGYAAAACACQx
+</rawitemdata></item>
+<item name='$Collation4' summary='true'>
+<rawitemdata type='2'>
+DwABAABEgGYAAAACAElk
+</rawitemdata></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQAEAAcAiQAAAFZDAQEJAAkAAAAAAFIABQAACAAAAAAAAAAAAAIAAAAgVkMBAQQABAAAAAAAUAAG
+AAAIAAAAAAAAAAAAAgIAAABWQwABAgAHAA4AAABQAAcAAAgAAAAAAAAAAAACAgAAAFZDAAECAAIA
+AAAAAEABCAAACAAAAAAAAAAAAAICAAAASWRFbXByZXNhSWRFbXByZXNhRm9ybUZvcm0kMUNyaWGH
+xm8OAAIADAACACQxaQADAElkSWQmAAEAAAABAQAJAQAACgEBCAoAAAEArSsBAAEAAQAAAAAAAAAA
+AFdDCQAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABXQwoAAAgAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAV0MLAAAIAAAAAAAAAAAAAAAAAAAA
+AAAABAAAAAAA//8AAAAAAAAAAAAAAAAAAFdDDAAACAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAP//
+AAAAAAAAAAAAAAAAAABCABAAAAABAP///wABAP///wABAAAAAAAAAAAAAAAAAAEA9/f3AAEA9/f3
+AAAAAQAAAAAAAQCAAAAAAQAAAAAAAAAIAAAAAAABAA==
+</rawitemdata></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text><text>6</text><text>38</text><text>Arial</text><text>7</text><text
+>38</text><text>Arial</text><text>8</text><text>38</text><text>Arial</text><text
+>9</text><text>38</text><text>Arial</text><text>10</text><text>38</text><text
+>Arial</text><text>11</text><text>38</text><text>Arial</text><text>12</text><text
+>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text>Usado pelo Empresas para ver se o fornecedor pode ser deletado</text></item>
+<item name='$Flags'><text/></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$V5ACTIONS' sign='true'>
+<rawitemdata type='1'>
+vRw/AAAAAQABAAAAAQAAAAAAAAAAAAAACAACAHn/bAABAPDw8AABAAAAAAAJAAAAAAABAPDw8AAA
+AB8AAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAPz/OgAAAAAAAQAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAEAAAAAAAAAAAAAAAAAAAC+/yYAAAAFAAAAnQEAAAsAAAAAAAAAQ2F0ZWdvcmlfemUA
+AQBOfL7/KAAAAAUAAACdAQAADgAAAAAAAABfRWRpdCBEb2N1bWVudAIAAgq+/ygAAAAFAAAAnQEA
+AA4AAAAAAAAAX1NlbmQgRG9jdW1lbnQDAAMKvv8iAAAABQAAAJ0BAAAIAAAAAAAAAF9Gb3J3YXJk
+BAAECr7/LAAAAAUAAACdAQAAEgAAAAAAAABfTW92ZSBUbyBGb2xkZXIuLi4FAD18vv8uAAAABQAA
+AJ0BAAATAAAAAAAAAF9SZW1vdmUgRnJvbSBGb2xkZXIABgA+fL7/IAAAAAUAAACdAQAABQAAAAAA
+AABfUmVhZAAHAF58vv8iAAAABQAAAJ0BAAAHAAAAAAAAAF9VbnJlYWRTCABufL7/LgAAAAUAAACd
+AQAAEwAAAAAAAABfT3BlbiBpbiBOZXcgV2luZG93AAkAfny+/yQAAAAFAAAAnQEAAAkAAAAAAAAA
+X1ByaW50Li4uAAoAjny+/yIAAAAFAAAAnQEAAAcAAAAAAAAAX0RlbGV0ZQALAJ58vv8uAAAABQAA
+AJ0BAAAUAAAAAAAAAF9Eb2N1bWVudCBQcm9wZXJ0aWVzDACufL7/HgAAAAUAAACdAQAABAAAAAAA
+AABDX3V0DQC+fL7/IAAAAAUAAACdAQAABQAAAAAAAABfQ29weQAOAM58vv8wAAAABQAAAJ0BAAAW
+AAAAAAAAAENvcHkgYXMgRG9jdW1lbnQgX0xpbmsPAN58vv8oAAAABQAAAJ0BAAAOAAAAAAAAAENv
+cHkgYXMgX1RhYmxlEADufL7/IAAAAAUAAACdAQAABgAAAAAAAABQX2FzdGURAP58vv8gAAAABQAA
+AJ0BAAAFAAAAAAAAAF9PcGVufxIADn2+/yIAAAAFAAAAnQEAAAgAAAAAAAAAQm9va21hcmsTAB59
+</rawitemdata></item></note>
+

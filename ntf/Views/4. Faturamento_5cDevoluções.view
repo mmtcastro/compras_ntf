@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='602' unid='7E92C7BFD8C58EFA03256710004A4095' sequence='4'>
+<created><datetime>19990206T103101,97-03</datetime></created>
+<modified><datetime>20230919T123115,27-03</datetime></modified>
+<revised><datetime dst='true'>20141129T102326,07-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,26-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,26-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name='$TITLE' sign='true'><text>4. Faturamento\Devoluções</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+WgECACAACgBDb2RDbGllbnRlBQAKAENvZENsaWVudGUDAAIAEAACAFBPBQACAFBPAwACABwABwBD
+cmlhY2FvAAUABwBDcmlhY2FvAAMAAgBKAAIAJDkFAAQARm9ybQEABQBCYWl4YQAKAq8AKgAYAAUA
+DQBEYXRhRW1pc3Nhb05GAK4AEgAFAAYAQ29kaWdvrgAEALUDAwAHAAwABQAJM1M0UwACAEYAAgAk
+MAUABABGb3JtAQAFAEJhaXhhAAoCrwAmABAABQAFAFZhbG9yAK4AFgAFAAkARGVzY3JpY2FvAK4A
+BAC1AwMABwAMAAUACTNTNFMABQA0ADAABgAKAAIABwACAAIACQBDb2RDbGllbnRlUE9DcmlhY2Fv
+JDkkMCRDb25mbGljdAQABAAAAB4ABQAEAEZvcm0BAAkARGV2b2x1h8ZvAAoCAwAHAA4ACAAJTDFT
+MlMzUw==
+</formula></item>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+IAACAABEAGYHAAAKAABmAAoAAgBDb2RDbGllbnRlUE8=
+</rawitemdata></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQAFAAoAiwAAAFZDAwQKAAAAIgAAABcABQEKCYAAAAAAAAAAAAIAAAAgVkMBBAIABAASAAAAWQAF
+AQAIgAAAAAAAAAAAAgAAACBWQwAABwAHAB4AAABdAAUACAiCAAAAAAAAAAAAAgAAIFZDAAACAAAA
+WAAAAGcABQAACAAAAAAAAAAAAAACAAAgVkMAAAIACQBUAAAANAEFAAAIgAAAAAAAAAAAAgIAACBD
+b2RDbGllbnRlIgACACAACgBDb2RDbGllbnRlBQAKAENvZENsaWVudGUDAFBPUE8gIxIAAgAQAAIA
+UE8FAAIAUE8DAENyaWFjYW9DcmlhY2FvHgACABwABwBDcmlhY2FvAAUABwBDcmlhY2FvAAMAJDlY
+AAIASgACACQ5BQAEAEZvcm0BAAUAQmFpeGEACgKvACoAGAAFAA0ARGF0YUVtaXNzYW9ORgCuABIA
+BQAGAENvZGlnb64ABAC1AwMABwAMAAUACTNTNFMAJDBEZXNjcmljYW9UAAIARgACACQwBQAEAEZv
+cm0BAAUAQmFpeGEACgKvACYAEAAFAAUAVmFsb3IArgAWAAUACQBEZXNjcmljYW8ArgAEALUDAwAH
+AAwABQAJM1M0UwAmAAEAAAABAQAJAQAACgEBCAoAABkArSsBAC8AAQAAAAAAAAAAAFdDBQAACAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABXQwUAAAgAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAV0MFAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAFdDBQAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAABXQwUAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+</rawitemdata></item>
+<item name='$Fonts'><textlist><text>5</text><text>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text/></item></note>
+

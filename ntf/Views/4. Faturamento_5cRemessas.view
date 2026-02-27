@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='5ba' unid='AD147170EEA00D5603256B75005F2B43' sequence='4'>
+<created><datetime>20020307T141929,95-03</datetime></created>
+<modified><datetime>20230919T123115,09-03</datetime></modified>
+<revised><datetime dst='true'>20141129T102326,09-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,08-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,08-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name='$TITLE' sign='true'><text>4. Faturamento\Remessas</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+1AACABAAAgBQTwUAAgBQTwMAAgAgAAoAQ29kQ2xpZW50ZQUACgBDb2RDbGllbnRlAwACABwABwBD
+cmlhY2FvAAUABwBDcmlhY2FvAAMAAgAYAAYAQ29kaWdvBQAGAENvZGlnbwMABQBAADsABgACAAoA
+BwAGAAkACQBQT0NvZENsaWVudGVDcmlhY2FvQ29kaWdvRGVzY3JpY2FvJENvbmZsaWN0AAQABAAA
+ABwABQAEAEZvcm0BAAcAUmVtZXNzYQAKAgMABwAOAAgACUwxUzJTM1M=
+</formula></item>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+IAACAABECGYHAAACAABmAAIACgBQT0NvZENsaWVudGU=
+</rawitemdata></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQAFAAoAiwAAAFZDAwQCAAQAEgAAACAABQEKCIABAAAAAAAAAAIAAAAgVkMBBAoADwAiAAAAZAAF
+AQAJgAAAAAAAAAAAAgAAACBWQwAABwAHAB4AAABdAAUACAiCAAAAAAAAAAAAAgAAIFZDAAAGAAAA
+GgAAAGcABQAACAAAAAAAAAAAAAACAAAgVkMAAAkACQAAAAAANAEFAAAIgAAAAAAAAAAAAgIAACBQ
+T1BPICMSAAIAEAACAFBPBQACAFBPAwBDb2RDbGllbnRlRW1wcmVzYSBEZXN0aW5vIgACACAACgBD
+b2RDbGllbnRlBQAKAENvZENsaWVudGUDAENyaWFjYW9DcmlhY2FvHgACABwABwBDcmlhY2FvAAUA
+BwBDcmlhY2FvAAMAQ29kaWdvGgACABgABgBDb2RpZ28FAAYAQ29kaWdvAwBEZXNjcmljYW9EZXNj
+cmljYW8mAAEAAAABAQAJAQAACgEBCAoAABkArSsBAC8AAQAAAAAAAAAAAFdDBQAACAAAAAAAAAAA
+AAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABXQwUAAAgAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAV0MFAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAFdDBQAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABX
+QwUAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQgAAAAAAAQD39/cA
+AQDg4P8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+</rawitemdata></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text/></item>
+<item name='$DesignerVersion'><text>5</text></item></note>
+

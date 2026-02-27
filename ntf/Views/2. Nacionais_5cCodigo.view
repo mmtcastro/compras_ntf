@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='5b6' unid='78D352AD122C19920325665D0045BAD9' sequence='5'>
+<created><datetime>19980811T094138,17-03</datetime></created>
+<modified><datetime>20230919T123115,08-03</datetime></modified>
+<revised><datetime dst='true'>20170719T105730,95-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,07-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,07-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>2. Nacionais\Codigo</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+9AACAGgAAgAkMAUABABGb3JtAQAVAFNoaXBwaW5nIEluc3RydWN0aW9ucwAKAq8AOAAiAAEAGAAq
+KiBTaGlwcGluZyBJbnN0cnVjdGlvbnOuABYABQAJAERlc2NyaWNhbwCuAAQAtQMDAAUAVABQAAoA
+AgAGAAYABgACAAYACgAFAAkABABQT1N0YXR1c0NvZGlnb0RhdGFQbyQwVG90VG90Rm9ybmVjZWRv
+ckZyZXRlJENvbmZsaWN0JFJFRgQABAAAACQABQAEAEZvcm0BAA8AUGVkaWRvIE5hY2lvbmFsAAoC
+AwAHAA4ACAAJTDFTMlMzUw==
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+OgAEAABEAGYAAAACAABmAAIABgAAZgAIAAYAAGYADgAKAFBPU3RhdHVzQ29kaWdvRm9ybmVjZWRv
+cg==
+</rawitemdata></item>
+<item name='$Collation1' summary='true'>
+<rawitemdata type='2'>
+DwABAABEAGYAAAACAFBP
+</rawitemdata></item>
+<item name='$Collation2' summary='true'>
+<rawitemdata type='2'>
+EwABAABEAGYAAAAGAFN0YXR1cw==
+</rawitemdata></item>
+<item name='$Totals' sign='true'><textlist><text>0</text><text>0</text><text
+>0</text><text>0</text><text>0</text><text>1</text><text>0</text><text>1</text></textlist></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQAIAAAAiQAAAFZDAQUCAAQAAAAAAFkABQEKCAAAAAAAAAAAAAICAAAgVkMBAQYAAAAAAAAAMwAF
+AQgIQgAAAAAAAAAAAgAAACBWQwEABgAAAAAAAABpAAUACwhAAAAAAAAAAAACAAAAIFZDAAAGAAQA
+AAAAADsABQACCIIAAAAAAAAAAAACAAAgVkMAAAIACQB6AAAAgAAFAAAIAAAAAAAAAAAAAgIAACBW
+QwAABgAFAAAAAAAyAAUBAAhFAAIBAQAAAAACAgAAIFZDAQAKAAAAAAAAAI0ABQAJCEAAAAAAAAAA
+AAIAAAAgVkMAAAUABQAAAAAAKwAFAQoIRQACAQAAAAAAAgIAACBQT1BPICNTdGF0dXNDb2RpZ29E
+YXRhUG9EYXRhJDBEZXNjcmljYW96AAIAaAACACQwBQAEAEZvcm0BABUAU2hpcHBpbmcgSW5zdHJ1
+Y3Rpb25zAAoCrwA4ACIAAQAYACoqIFNoaXBwaW5nIEluc3RydWN0aW9uc64AFgAFAAkARGVzY3Jp
+Y2FvAK4ABAC1AwMABwAQAAkACTNTNFM2UzhTAFRvdFRvdFZhbG9yRm9ybmVjZWRvckZyZXRlRnJl
+dGUmAAEAAAABAQAJAQAACgEBAgoAABgArSsBAAEAAQAAAAAAAAAAAFdDBQAACAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABXQwUAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAD//wAAAAAAAAAAAAAAAAAAV0MFAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAA
+AAAAAAAAAFdDBQAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAABXQwUA
+AAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAV0MFAAAIAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAFdDBQAACAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAP//AAAAAAAAAAAAAAAAAABXQwUAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAA
+AAAAAAAAAAAAQgAQAAAAAQD///8AAQDg8f8AAQAAAAAAAAAAAAAAAAABAP///wABAP///wAAAAEA
+AAAAAAEA/wAAAAEAAAAAAAAACAAAAAAAAQA=
+</rawitemdata></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$Flags'><text/></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text></textlist></item></note>
+

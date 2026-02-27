@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="form" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="622" sequence="3" unid="0FA1663FD80D1B8083256759005312FF">
+<created><datetime dst="true">19990420T130723,51-02</datetime></created>
+<modified><datetime>20230919T123115,35-03</datetime></modified>
+<revised><datetime dst="true">20141129T102326,67-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,34-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,34-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Marcelo Castro/O=TDec</name></wassignedby>
+<item name="$TITLE"><text>faxcinza.gif</text></item>
+<item name="$Flags"><text>34CiQP</text></item>
+<item name="$ImagesWide" sign="true"><number>1</number></item>
+<item name="$ImagesHigh" sign="true"><number>1</number></item>
+<item name="$ImagesColorize" sign="true"><number>0</number></item>
+
+<item name="$ImageNames" sign="true"><text>faxcinza.gif</text></item></note>

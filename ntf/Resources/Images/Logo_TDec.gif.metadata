@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><note xmlns="http://www.lotus.com/dxl" class="form" maintenanceversion="1.0" replicaid="032566520063B93A" version="14.5">
+<noteinfo noteid="6ba" sequence="1" unid="B8CDA73B63E7D72583257E0D0080C55D">
+<created><datetime dst="true">20150319T212631,33-02</datetime></created>
+<modified><datetime>20230919T123115,73-03</datetime></modified>
+<revised><datetime dst="true">20150319T212633,17-02</datetime></revised>
+<lastaccessed><datetime>20230919T123115,72-03</datetime></lastaccessed>
+<addedtofile><datetime>20230919T123115,72-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name><name>CN=Marcelo Castro/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name="$TITLE"><text>Logo_TDec.gif</text></item>
+<item name="$FlagsExt"><text>D</text></item>
+<item name="$ImagesWide" sign="true"><number>1</number></item>
+<item name="$ImagesHigh" sign="true"><number>1</number></item>
+<item name="$ImagesColorize" sign="true"><number>0</number></item>
+
+
+<item name="$MimeType" sign="true"><text>image/gif</text></item>
+<item name="$FileModDT" sign="true"><datetime>20030818T103441,45-03</datetime></item>
+<item name="$ImageNames" sign="true"><text>Logo_TDec.gif</text></item>
+<item name="$DesignerVersion"><text>7</text></item>
+<item name="$EditFilePath"><text>C:\Users\LUDOLI~1\AppData\Local\Temp\notesFCBCEE\~Logo_TDec.gif</text></item>
+<item name="$Flags"><text>34CiQ$</text></item></note>

@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='14.5' maintenanceversion='1.0'
+ replicaid='032566520063B93A'>
+<noteinfo noteid='291a' unid='A8E2D681ECBBCB5D03258C9700591F41' sequence='4'>
+<created><datetime>20250527T131327,05-03</datetime></created>
+<modified><datetime>20250603T111020,73-03</datetime></modified>
+<revised><datetime>20250527T131653,83-03</datetime></revised>
+<lastaccessed><datetime>20250603T111020,72-03</datetime></lastaccessed>
+<addedtofile><datetime>20250603T111020,72-03</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Ludimila Oliveira/O=TDec</name></updatedby>
+<wassignedby><name>CN=Ludimila Oliveira/O=TDec</name></wassignedby>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>(Baixas/CodEspelhoEntrada)</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+egAFACYAIgACABEACQBDb2RFc3BlbGhvRW50cmFkYSRDb25mbGljdAQABAAAADgABQAEAEZvcm0B
+AAUAQmFpeGEACgIFABEAQ29kRXNwZWxob0VudHJhZGEAAQAAAAsCHAIDAAcAFgAQAAlMMVMyUzNT
+NFM1UzZTN1M=
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+HgABAABECGYAAAARAENvZEVzcGVsaG9FbnRyYWRh
+</rawitemdata></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQABAAAAiwAAAFZDAQARABEAAAAAAFAABQEKCQABAAAAAAAAAAICAAAgQ29kRXNwZWxob0VudHJh
+ZGFDb2RFc3BlbGhvRW50cmFkYSYAAQAAAAEBAAkBAAQKAQEACgAAFwCtKwEAAQABAAAAAAAAAAAA
+V0MGAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAEIAAAAAAAEA////
+AAEAwu//AAEAAAAAAAAAAAAAAAAAAQD///8AAQD///8AAAABAAAA/wABAAAAAAABAAAAAAAAAAgA
+AAAAAAEA
+</rawitemdata></item>
+<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
+>Arial</text><text>6</text><text>38</text><text>Arial</text></textlist></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text/></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item></note>
+
